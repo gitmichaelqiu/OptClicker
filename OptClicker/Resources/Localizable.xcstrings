@@ -5,10 +5,24 @@
 
     },
     "© %@ Michael Yicheng Qiu" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "© %@ Michael Yicheng Qiu"
+          }
+        }
+      }
     },
     "Chrome %@" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chrome %@"
+          }
+        }
+      }
     },
     "Common.Button.Cancel" : {
       "extractionState" : "manual",
@@ -79,7 +93,14 @@
       }
     },
     "CrossOver %@" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CrossOver %@"
+          }
+        }
+      }
     },
     "Menu.About" : {
       "extractionState" : "manual",
@@ -337,7 +358,14 @@
       }
     },
     "Safari %@" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safari %@"
+          }
+        }
+      }
     },
     "Settings.About" : {
       "extractionState" : "manual",
@@ -1394,10 +1422,24 @@
       }
     },
     "Steam %@" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steam %@"
+          }
+        }
+      }
     },
     "v%@" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "v%@"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
