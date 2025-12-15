@@ -174,6 +174,8 @@ class InputManager: ObservableObject {
             }
             isAutoToggling = false
         }
+        
+        objectWillChange.send()
     }
     
     func refreshAutoToggleState() {
@@ -255,5 +257,13 @@ class InputManager: ObservableObject {
                             mouseCursorPosition: location,
                             mouseButton: .right)
         event?.post(tap: .cghidEventTap)
+    }
+    
+    static func isRuleDuplicated(newRule: String) -> Bool {
+        let rules = UserDefaults.standard.stringArray(forKey: "AutoToggleAppBundleIds") ?? []
+        let isDuplicate = rules.contains { rule in
+            rule.hasPrefix("proc:") && rule.lowercased() == newRule.lowercased()
+        }
+        return isDuplicate
     }
 }

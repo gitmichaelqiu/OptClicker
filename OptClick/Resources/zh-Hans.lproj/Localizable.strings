@@ -43,6 +43,12 @@
 "Settings.General.AutoToggle.Process.Add.Placeholder" = "进程";
 "Settings.General.AutoToggle.Process.Add.Add" = "添加";
 "Settings.General.AutoToggle.Process.Add.Cancel" = "取消";
+"Settings.General.AutoToggle.Add.App.Failed.Msg" = "文件夹未找到";
+"Settings.General.AutoToggle.Add.App.Failed.Info" = "OptClick 无法找到 %@ App 文件夹";
+"Settings.General.AutoToggle.RemoveAll.Msg" = "移除所有目标 App";
+"Settings.General.AutoToggle.RemoveAll.Info" = "确认移除所有目标 App?";
+"Settings.General.AutoToggle.Add.Duplicated.Msg" = "重复进程";
+"Settings.General.AutoToggle.Add.Duplicated.Info" = "进程 %@ 已存在";
 
 // Update
 "Settings.General.Update" = "更新";
@@ -86,3 +92,7 @@
 "Settings.About.Version" = "版本 %@";
 "Settings.About.Description" = "用 Option 键模拟鼠标右键。";
 "Settings.About.Repo" = "GitHub 仓库";
+
+// MARK: - Common
+"Common.Button.OK" = "确认";
+"Common.Button.Cancel" = "取消";

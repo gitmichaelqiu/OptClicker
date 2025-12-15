@@ -45,22 +45,36 @@ struct AutoToggleView: View {
 
         if isExpandedLocal {
             VStack(alignment: .leading, spacing: 0) {
-                let sortedApps = rules.map { rule -> (id: String, name: String, icon: NSImage?) in
-                    if rule.hasPrefix("proc:") {
-                        let kw = String(rule.dropFirst(5))
-                        let procStr = String(format: NSLocalizedString("Settings.General.AutoToggle.Process", comment: "Process: "), kw)
-                        return (rule, procStr, nil)
-                    } else {
-                        if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: rule),
-                           let bundle = Bundle(url: url) {
-                            let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? rule
-                            let icon = NSWorkspace.shared.icon(forFile: url.path)
-                            return (rule, name, icon)
+                let sortedApps: [(id: String, name: String, icon: NSImage?)] = {
+                    let categorized = rules.compactMap { rule -> (id: String, name: String, icon: NSImage?, typeOrder: Int)? in
+                        if rule.hasPrefix("proc:") {
+                            // Exact proc
+                            let kw = String(rule.dropFirst(5)).trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard !kw.isEmpty else { return nil }
+                            let displayName = String(format: NSLocalizedString("Settings.General.AutoToggle.Process", comment: ""), kw)
+                            return (rule, displayName, nil, 0)
                         } else {
-                            return (rule, rule, nil)
+                            // Bundle ID fallback
+                            if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: rule),
+                               let bundle = Bundle(url: url) {
+                                let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? rule
+                                let icon = NSWorkspace.shared.icon(forFile: url.path)
+                                return (rule, name, icon, 1)
+                            } else {
+                                return (rule, rule, nil, 1)
+                            }
                         }
                     }
-                }.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+                    
+                    let sorted = categorized.sorted { lhs, rhs in
+                        if lhs.typeOrder != rhs.typeOrder {
+                            return lhs.typeOrder < rhs.typeOrder
+                        }
+                        return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+                    }
+
+                    return sorted.map { ($0.id, $0.name, $0.icon) }
+                }()
 
                 List(selection: $selection) {
                     ForEach(sortedApps, id: \.id) { item in
@@ -86,10 +100,26 @@ struct AutoToggleView: View {
 
                 HStack {
                     // Add App (by bundle ID)
-                    addButton(
+                    addButton( // Cannot convert value of type '@Sendable (URL?) -> ()' to expected argument type '() -> Void'
                         systemImage: "plus",
-                        action: addAppByBundleID
+                        action: { addAppByBundleID() },
+                        frameWidth: 12
                     )
+                    
+                    // Extra add
+                    Menu {
+                        Button("Steam games") { addSteamApp() }
+                        Button("Chrome apps") { addChromeApp() }
+                        Button("CrossOver apps") { addCrossOverApp() }
+                        Button("Safari apps")  { addSafariApp() }
+                        Button(
+                            String(format: "Minecraft (%@)", String(format: NSLocalizedString("Settings.General.AutoToggle.Process", comment: ""), "java"))
+                        ) { addMinecraftJavaApp() }
+                            .disabled(InputManager.isRuleDuplicated(newRule: "proc:java"))
+                    } label: {
+                    }
+                    .frame(width: 8, height: 14)
+                    .buttonStyle(.borderless)
 
                     Divider().frame(height: 16)
 
@@ -107,6 +137,15 @@ struct AutoToggleView: View {
                         action: removeSelectedRule,
                         disabled: selection == nil
                     )
+                    
+                    Divider().frame(height: 16)
+                    
+                    // Remove All
+                    addButton(
+                        systemImage: "trash",
+                        action: removeAllRules,
+                        disabled: rules.isEmpty
+                    )
                 }
                 .padding(.horizontal, 4)
                 .padding(.top, 4)
@@ -120,26 +159,163 @@ struct AutoToggleView: View {
     private func addButton(
         systemImage: String,
         action: @escaping () -> Void,
-        disabled: Bool = false
+        disabled: Bool = false,
+        frameWidth: CGFloat = 24
     ) -> some View {
         Button(action: action) {
             Image(systemName: systemImage)
-                .frame(width: 24, height: 14)
+                .frame(width: frameWidth, height: 14)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.borderless)
+        .buttonStyle(.plain)
         .disabled(disabled)
     }
+    
+    private func addSteamApp() {
+        guard let appSupportURL = FileManager.default.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first else {
+            print("Failed to get Application Support directory")
+            return
+        }
 
-    private func addAppByBundleID() {
+        let steamCommonPath = appSupportURL
+            .appendingPathComponent("Steam")
+            .appendingPathComponent("steamapps")
+            .appendingPathComponent("common")
+        
+        if !FileManager.default.fileExists(atPath: steamCommonPath.path) {
+            let alert = NSAlert()
+            alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Msg", comment: "")
+            alert.informativeText =  String(format: NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Info", comment: ""), "Steam")
+            alert.alertStyle = .warning
+            
+            Task {
+                if let targetWindow = NSApp.suitableSheetWindow(nil) {
+                    _ = await alert.beginSheetModal(for: targetWindow)
+                } else {
+                    alert.runModal()
+                }
+            }
+            
+            return
+        }
+
+        addAppByBundleID(path: steamCommonPath)
+    }
+    
+    private func addChromeApp() {
+        let userHomeURL = FileManager.default.homeDirectoryForCurrentUser
+        
+        let appFolderPath = userHomeURL
+            .appendingPathComponent("Applications")
+            .appendingPathComponent("Chrome Apps.localized")
+        
+        if !FileManager.default.fileExists(atPath: appFolderPath.path) {
+            let alert = NSAlert()
+            alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Msg", comment: "")
+            alert.informativeText =  String(format: NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Info", comment: ""), "Chrome Apps")
+            alert.alertStyle = .warning
+            
+            Task {
+                if let targetWindow = NSApp.suitableSheetWindow(nil) {
+                    _ = await alert.beginSheetModal(for: targetWindow)
+                } else {
+                    alert.runModal()
+                }
+            }
+            
+            return
+        }
+        
+        addAppByBundleID(path: appFolderPath)
+    }
+    
+    private func addCrossOverApp() {
+        let userHomeURL = FileManager.default.homeDirectoryForCurrentUser
+        
+        let appFolderPath = userHomeURL
+            .appendingPathComponent("Applications")
+            .appendingPathComponent("CrossOver")
+        
+        if !FileManager.default.fileExists(atPath: appFolderPath.path) {
+            let alert = NSAlert()
+            alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Msg", comment: "")
+            alert.informativeText =  String(format: NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Info", comment: ""), "CrossOver")
+            alert.alertStyle = .warning
+            
+            Task {
+                if let targetWindow = NSApp.suitableSheetWindow(nil) {
+                    _ = await alert.beginSheetModal(for: targetWindow)
+                } else {
+                    alert.runModal()
+                }
+            }
+            
+            return
+        }
+        
+        addAppByBundleID(path: appFolderPath)
+    }
+    
+    private func addSafariApp() {
+        let userHomeURL = FileManager.default.homeDirectoryForCurrentUser
+        
+        let appFolderPath = userHomeURL
+            .appendingPathComponent("Applications")
+        
+        if !FileManager.default.fileExists(atPath: appFolderPath.path) {
+            let alert = NSAlert()
+            alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Msg", comment: "")
+            alert.informativeText =  String(format: NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Info", comment: ""), "Safari Apps")
+            alert.alertStyle = .warning
+            
+            Task {
+                if let targetWindow = NSApp.suitableSheetWindow(nil) {
+                    _ = await alert.beginSheetModal(for: targetWindow)
+                } else {
+                    alert.runModal()
+                }
+            }
+            
+            return
+        }
+        
+        addAppByBundleID(path: appFolderPath)
+    }
+    
+    private func addMinecraftJavaApp() {
+        let rule = "proc:java"
+        if !InputManager.isRuleDuplicated(newRule: rule) {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                rules.append(rule)
+                onRuleChange()
+            }
+        }
+    }
+
+    private func addAppByBundleID(path: URL? = nil) {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.application]
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.title = "Choose Application"
         
-        let hostWindow = NSApp.suitableSheetWindow(nil)!
+        var targetURL = path
+        if let path = path, !path.hasDirectoryPath {
+            targetURL = nil
+        }
+        if let url = targetURL, !FileManager.default.fileExists(atPath: url.path) {
+            targetURL = nil
+        }
 
+        if let url = targetURL, url.startAccessingSecurityScopedResource() {
+            defer { url.stopAccessingSecurityScopedResource() }
+            panel.directoryURL = url
+        }
+        
+        let hostWindow = NSApp.suitableSheetWindow(nil)!
         panel.beginSheetModal(for: hostWindow) { response in
             if response == .OK, let url = panel.url {
                 self.handleSelectedApp(url)
@@ -181,10 +357,24 @@ struct AutoToggleView: View {
         let keyword = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if !keyword.isEmpty {
             let rule = "proc:\(keyword)"
-            if !rules.contains(rule) {
+            if !InputManager.isRuleDuplicated(newRule: rule) {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     rules.append(rule)
                     onRuleChange()
+                }
+            } else {
+                let alert = NSAlert()
+                alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Msg", comment: "")
+                alert.informativeText = String(format: NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Info", comment: ""), "\(rule.dropFirst(5))")
+                alert.addButton(withTitle: NSLocalizedString("Common.Button.OK", comment: ""))
+                alert.alertStyle = .informational
+                
+                Task {
+                    if let targetWindow = NSApp.suitableSheetWindow(nil) {
+                        _ = await alert.beginSheetModal(for: targetWindow)
+                    } else {
+                        alert.runModal()
+                    }
                 }
             }
         }
@@ -197,6 +387,28 @@ struct AutoToggleView: View {
                 rules.remove(at: idx)
                 selection = nil
                 onRuleChange()
+            }
+        }
+    }
+    
+    private func removeAllRules() {
+        let alert = NSAlert()
+        alert.messageText = NSLocalizedString("Settings.General.AutoToggle.RemoveAll.Msg", comment: "")
+        alert.informativeText =  NSLocalizedString("Settings.General.AutoToggle.RemoveAll.Info", comment: "")
+        alert.addButton(withTitle: NSLocalizedString("Common.Button.OK", comment: ""))
+        alert.addButton(withTitle: NSLocalizedString("Common.Button.Cancel", comment: ""))
+        alert.alertStyle = .informational
+        
+        Task {
+            if let targetWindow = NSApp.suitableSheetWindow(nil) {
+                let response = await alert.beginSheetModal(for: targetWindow)
+                if response == .alertFirstButtonReturn {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        rules.removeAll()
+                        selection = nil
+                        onRuleChange()
+                    }
+                }
             }
         }
     }

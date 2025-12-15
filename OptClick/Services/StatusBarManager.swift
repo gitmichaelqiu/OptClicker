@@ -192,7 +192,9 @@ class StatusBarManager: ObservableObject {
               let bundleId = frontmostApp.bundleIdentifier else {
             return String(format: NSLocalizedString("Menu.Reason.Unknown", comment: ""), stateStr)
         }
+        
         let appName = frontmostApp.localizedName ?? bundleId
+        var matchedProcName: String? = nil
         
         var isMatch = false
         if autoToggleAppBundleIds.contains(bundleId) {
@@ -202,6 +204,7 @@ class StatusBarManager: ObservableObject {
                 if rule.hasPrefix("proc:"), let expected = rule.split(separator: ":").last {
                     if procName.lowercased() == String(expected).lowercased() {
                         isMatch = true
+                        matchedProcName = String(expected)
                         break
                     }
                 }
@@ -216,18 +219,41 @@ class StatusBarManager: ObservableObject {
             let lastState = UserDefaults.standard.bool(forKey: InputManager.lastStateKey)
             
             if isMatch {
-                return state
-                    ? String(format: NSLocalizedString("Menu.Reason.IsFrontmost", comment: ""), stateStr, appName)
-                    : String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
+                let displayName = matchedProcName.map {
+                        String(format: NSLocalizedString("Settings.General.AutoToggle.Process", comment: ""), $0)
+                    } ?? appName
+                
+                if state {
+                    return String(format: NSLocalizedString("Menu.Reason.IsFrontmost", comment: ""), stateStr, displayName)
+                } else {
+                    return String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
+                }
             } else {
-                let isManual = (state && behavior == .disable) || (state != lastState)
-                return isManual
-                    ? String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
-                    : String(format: NSLocalizedString("Menu.Reason.FollowLast", comment: ""), stateStr)
+                if state {
+                    if behavior == .followLast {
+                        if state == lastState {
+                            return String(format: NSLocalizedString("Menu.Reason.FollowLast", comment: ""), stateStr)
+                        } else {
+                            return String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
+                        }
+                    } else if behavior == .disable {
+                        return String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
+                    }
+                } else {
+                    if behavior == .followLast {
+                        if state == lastState {
+                            return String(format: NSLocalizedString("Menu.Reason.FollowLast", comment: ""), stateStr)
+                        } else {
+                            return String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
+                        }
+                    } else if behavior == .disable {
+                        return String(format: NSLocalizedString("Menu.Reason.NoFrontmost", comment: ""), stateStr)
+                    }
+                }
             }
-        } else {
-            return String(format: NSLocalizedString("Menu.Reason.Manual", comment: ""), stateStr)
         }
+        
+        return String(format: NSLocalizedString("Menu.Reason.Manual", comment: ""), stateStr)
     }
 }
 

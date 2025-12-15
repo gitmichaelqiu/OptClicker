@@ -12,7 +12,7 @@
 "Menu.Reason.TmpManual" = "%@: Temporary manual setting";
 "Menu.Reason.IsFrontmost" = "%@: %@ is frontmost";
 "Menu.Reason.NoFrontmost" = "%@: No target app is frontmost";
-"Menu.Reason.FollowLast" = "%@: No target app, follow last setting";
+"Menu.Reason.FollowLast" = "%@: No target apps, follow last setting";
 "Menu.Reason.Auto" = "%@: Auto setting";
 
 // MARK: - Settings/General
@@ -43,6 +43,12 @@
 "Settings.General.AutoToggle.Process.Add.Placeholder" = "Process";
 "Settings.General.AutoToggle.Process.Add.Add" = "Add";
 "Settings.General.AutoToggle.Process.Add.Cancel" = "Cancel";
+"Settings.General.AutoToggle.Add.App.Failed.Msg" = "Folder Not Found";
+"Settings.General.AutoToggle.Add.App.Failed.Info" = "OptClick cannot find %@ app folder";
+"Settings.General.AutoToggle.RemoveAll.Msg" = "Remove All Target Apps";
+"Settings.General.AutoToggle.RemoveAll.Info" = "Are you sure to remove all target apps?";
+"Settings.General.AutoToggle.Add.Duplicated.Msg" = "Duplicated Process";
+"Settings.General.AutoToggle.Add.Duplicated.Info" = "Process %@ already exists";
 
 // Update
 "Settings.General.Update" = "Update";
@@ -86,3 +92,7 @@
 "Settings.About.Version" = "Version %@";
 "Settings.About.Description" = "OptClick lets you simulate right-clicks by pressing the Option (⌥) key.";
 "Settings.About.Repo" = "GitHub Repository";
+
+// MARK: - Common
+"Common.Button.OK" = "OK";
+"Common.Button.Cancel" = "Cancel";
