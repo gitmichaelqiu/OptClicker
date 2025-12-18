@@ -77,6 +77,7 @@ class StatusBarManager: ObservableObject {
             action: #selector(handleToggleItemClick),
             keyEquivalent: ""
         )
+        toggleItem.image = NSImage(systemSymbolName: "pointer.arrow.rays", accessibilityDescription: nil)
         toggleItem.target = self
         toggleItem.state = inputManager.isEnabled ? .on : .off
         menu.addItem(toggleItem)
@@ -109,6 +110,7 @@ class StatusBarManager: ObservableObject {
             action: #selector(handleSettingsItemClick),
             keyEquivalent: ","
         )
+        settingsItem.image = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
         settingsItem.target = self
         menu.addItem(settingsItem)
 
@@ -120,6 +122,7 @@ class StatusBarManager: ObservableObject {
             action: #selector(handleQuitItemClick),
             keyEquivalent: "q"
         )
+        quitItem.image = NSImage(systemSymbolName: "xmark.circle", accessibilityDescription: nil)
         quitItem.target = self
         menu.addItem(quitItem)
         
