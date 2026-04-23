@@ -49,9 +49,21 @@ You are not able to modify *launch behavior* when Auto Toggle is on, for when ap
 
 Requires **macOS 13.0 Ventura** or above.
 
+### Direct Download
+
 1. Download the package from [Releases](https://github.com/gitmichaelqiu/OptClicker/releases/)
 2. Drag the app to the *Applications* folder
 3. All set!
+
+### Homebrew
+
+You can also choose to download it from Homebrew:
+
+```bash
+brew install --cask gitmichaelqiu/tap/optclicker
+```
+
+### Open App
 
 Because I do **NOT** have an Apple developer account for the app releases ~~(Apple charges an annual fee for this)~~, you may receive alerts such as "App is broken".
 
