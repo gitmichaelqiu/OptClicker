@@ -19,16 +19,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # 1. Determine the Tag
-          # Priority: Manual Input > Release Event > Fetch Latest via CLI
-          TAG="${{ github.event.inputs.tag_name }}"
+          # Check manual input first, then release event
+          TAG="${{ github.event.inputs.tag_name }}${{ github.event.release.tag_name }}"
           
+          # If both are empty, fetch the latest from GitHub API
           if [ -z "$TAG" ]; then
-            TAG="${{ github.event.release.tag_name }}"
-          fi
-
-          if [ -z "$TAG" ]; then
-            echo "No tag provided. Fetching latest release tag..."
-            TAG=$(gh release view --json tagName --jq .tagName)
+            echo "No tag provided. Fetching latest release tag from GitHub..."
+            # Added --repo flag so it doesn't need a local .git folder
+            TAG=$(gh release view --repo ${{ github.repository }} --json tagName --jq .tagName)
           fi
 
           echo "Using Tag: $TAG"
@@ -38,7 +36,8 @@ jobs:
           URL="https://github.com/gitmichaelqiu/OptClicker/releases/download/$TAG/OptClicker.$VERSION.dmg"
           
           # 3. Download and Hash
-          curl -L -o release.dmg "$URL"
+          # -f makes curl fail on 404 so the workflow stops if the URL is wrong
+          curl -Lf -o release.dmg "$URL"
           SHA=$(shasum -a 256 release.dmg | awk '{print $1}')
           
           # 4. Export variables
