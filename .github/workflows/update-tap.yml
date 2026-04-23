@@ -14,7 +14,7 @@ jobs:
           TAG="${{ github.event.release.tag_name }}"
           VERSION=$(echo $TAG | sed 's/^v//')
           
-          # 2. Construct the URL based on your specific format
+          # 2. Construct the URL
           URL="https://github.com/gitmichaelqiu/OptClicker/releases/download/$TAG/OptClicker.$VERSION.dmg"
           
           # 3. Download and Hash
