@@ -46,10 +46,14 @@ class InputManager: ObservableObject {
             if isAutoToggleEnabled {
                 // Re-evaluate current frontmost app
                 refreshAutoToggleState()
+                startRefreshTimer()
+            } else {
+                stopRefreshTimer()
             }
         }
     }
     
+    private var refreshTimer: Timer?
     private var frontmostAppMonitor: Any?
     private var lastManualState: Bool = false
     private var autoToggleAppBundleIds: [String] {
@@ -141,7 +145,40 @@ class InputManager: ObservableObject {
                let procName = self?.getFrontmostProcessName() {
                 self?.lastNonSelfProcessName = procName
             }
+            
+            // Start/Stop timer based on frontmost app
+            self?.updateRefreshTimerState()
         }
+    }
+
+    private func updateRefreshTimerState() {
+        guard isAutoToggleEnabled else {
+            stopRefreshTimer()
+            return
+        }
+
+        if let frontmost = NSWorkspace.shared.frontmostApplication,
+           let bundleId = frontmost.bundleIdentifier,
+           bundleId != selfBundleID {
+            // We'll try to start the timer for any app that isn't ourselves, 
+            // and let getFrontmostBrowserURL handle the actual check.
+            // This is more generic.
+            startRefreshTimer()
+        } else {
+            stopRefreshTimer()
+        }
+    }
+
+    private func startRefreshTimer() {
+        guard refreshTimer == nil else { return }
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.refreshAutoToggleState()
+        }
+    }
+
+    private func stopRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
     }
     
     func getFrontmostProcessName() -> String? {
@@ -169,6 +206,33 @@ class InputManager: ObservableObject {
         }
         return lastNonSelfProcessName
     }
+
+    func getFrontmostBrowserURL() -> String? {
+        guard let app = NSWorkspace.shared.frontmostApplication,
+              let bundleId = app.bundleIdentifier else { return nil }
+
+        let scriptSource: String
+        if bundleId == "com.apple.Safari" {
+            scriptSource = "tell application \"Safari\" to return URL of front document"
+        } else {
+            let appName = app.localizedName ?? "Google Chrome"
+            scriptSource = "tell application \"\(appName)\" to return URL of active tab of front window"
+        }
+
+        var error: NSDictionary?
+        if let script = NSAppleScript(source: scriptSource) {
+            let result = script.executeAndReturnError(&error)
+            if let err = error {
+                print("OptClicker: AppleScript Error: \(err)")
+            }
+            if error == nil {
+                return result.stringValue
+            }
+        } else {
+            print("OptClicker: Failed to initialize AppleScript with source: \(scriptSource)")
+        }
+        return nil
+    }
     
     func getIsMatch() -> Bool {
         guard let app = NSWorkspace.shared.frontmostApplication else { return false }
@@ -185,17 +249,25 @@ class InputManager: ObservableObject {
         }
         
         // Process name match (exact & partial)
-        guard let procName = getFrontmostProcessName() else { return false }
+        let procName = getFrontmostProcessName()
+        
+        // Website match
+        lazy var currentURL: String? = getFrontmostBrowserURL()
         
         for rule in rules {
             if rule.hasPrefix("proc:") {
                 let expected = String(rule.dropFirst(5))
-                if !expected.isEmpty && procName.lowercased() == expected.lowercased() {
+                if let procName = procName, !expected.isEmpty && procName.lowercased() == expected.lowercased() {
                     return true
                 }
             } else if rule.hasPrefix("proc~") {
                 let substring = String(rule.dropFirst(5))
-                if !substring.isEmpty && procName.lowercased().contains(substring.lowercased()) {
+                if let procName = procName, !substring.isEmpty && procName.lowercased().contains(substring.lowercased()) {
+                    return true
+                }
+            } else if rule.hasPrefix("web:") {
+                let pattern = String(rule.dropFirst(4)).lowercased()
+                if let url = currentURL?.lowercased(), !pattern.isEmpty && url.contains(pattern) {
                     return true
                 }
             }
@@ -318,14 +390,24 @@ class InputManager: ObservableObject {
     static func isRuleDuplicated(newRule: String) -> Bool {
         let rules = UserDefaults.standard.stringArray(forKey: "AutoToggleAppBundleIds") ?? []
         
-        let newKey = newRule.hasPrefix("proc:") || newRule.hasPrefix("proc~")
-            ? String(newRule.dropFirst(5)).lowercased()
-            : newRule.lowercased()
+        let newKey: String
+        if newRule.hasPrefix("proc:") || newRule.hasPrefix("proc~") {
+            newKey = String(newRule.dropFirst(5)).lowercased()
+        } else if newRule.hasPrefix("web:") {
+            newKey = String(newRule.dropFirst(4)).lowercased()
+        } else {
+            newKey = newRule.lowercased()
+        }
         
         let isDuplicate = rules.contains { rule in
-            let existingKey = rule.hasPrefix("proc:") || rule.hasPrefix("proc~")
-                ? String(rule.dropFirst(5)).lowercased()
-                : rule.lowercased()
+            let existingKey: String
+            if rule.hasPrefix("proc:") || rule.hasPrefix("proc~") {
+                existingKey = String(rule.dropFirst(5)).lowercased()
+            } else if rule.hasPrefix("web:") {
+                existingKey = String(rule.dropFirst(4)).lowercased()
+            } else {
+                existingKey = rule.lowercased()
+            }
             return existingKey == newKey
         }
         return isDuplicate

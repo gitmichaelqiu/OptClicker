@@ -59,15 +59,21 @@ struct AutoToggleView: View {
                             guard !kw.isEmpty else { return nil }
                             let displayName = String(format: NSLocalizedString("Settings.General.AutoToggle.Process.Partial.Proc", comment: ""), kw)
                             return (rule, displayName, nil, 1)
+                        } else if rule.hasPrefix("web:") {
+                            // Website
+                            let kw = String(rule.dropFirst(4)).trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard !kw.isEmpty else { return nil }
+                            let displayName = String(format: NSLocalizedString("Settings.General.AutoToggle.Website", comment: ""), kw)
+                            return (rule, displayName, NSImage(systemSymbolName: "network", accessibilityDescription: nil), 2)
                         } else {
                             // Bundle ID fallback
                             if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: rule),
                                let bundle = Bundle(url: url) {
                                 let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? rule
                                 let icon = NSWorkspace.shared.icon(forFile: url.path)
-                                return (rule, name, icon, 2)
+                                return (rule, name, icon, 3)
                             } else {
-                                return (rule, rule, nil, 2)
+                                return (rule, rule, nil, 3)
                             }
                         }
                     }
@@ -143,6 +149,15 @@ struct AutoToggleView: View {
                     }
                     .frame(width: 8, height: 14)
                     .buttonStyle(.borderless)
+
+                    Divider().frame(height: 16)
+
+                    // Add Website
+                    addButton(
+                        systemImage: "network",
+                        action: addWebsiteRule,
+                        frameWidth: 20
+                    )
 
                     Divider().frame(height: 16)
 
@@ -417,6 +432,51 @@ struct AutoToggleView: View {
         let keyword = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if !keyword.isEmpty {
             let rule = "proc~\(keyword)"
+            if !InputManager.isRuleDuplicated(newRule: rule) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    rules.append(rule)
+                    onRuleChange()
+                }
+            } else {
+                let alert = NSAlert()
+                alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Msg", comment: "Duplicate rule")
+                alert.informativeText = String(format: NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Info", comment: ""), keyword)
+                alert.addButton(withTitle: NSLocalizedString("Common.Button.OK", comment: "OK"))
+                alert.alertStyle = .informational
+                
+                Task {
+                    if let targetWindow = NSApp.suitableSheetWindow(nil) {
+                        _ = await alert.beginSheetModal(for: targetWindow)
+                    } else {
+                        alert.runModal()
+                    }
+                }
+            }
+        }
+    }
+
+    private func addWebsiteRule() {
+        let alert = NSAlert()
+        alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Website.Add.Msg", comment: "Add website rule")
+        alert.informativeText = NSLocalizedString("Settings.General.AutoToggle.Website.Add.Info", comment: "Enter a domain or URL")
+        let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        textField.placeholderString = NSLocalizedString("Settings.General.AutoToggle.Website.Add.Placeholder", comment: "example.com")
+        alert.accessoryView = textField
+        alert.addButton(withTitle: NSLocalizedString("Settings.General.AutoToggle.Process.Add.Add", comment: "Add"))
+        alert.addButton(withTitle: NSLocalizedString("Settings.General.AutoToggle.Process.Add.Cancel", comment: "Cancel"))
+
+        let hostWindow = NSApp.suitableSheetWindow(nil)!
+        alert.beginSheetModal(for: hostWindow) { response in
+            if response == .alertFirstButtonReturn {
+                self.processWebsiteKeyword(textField.stringValue)
+            }
+        }
+    }
+
+    private func processWebsiteKeyword(_ raw: String) {
+        let keyword = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !keyword.isEmpty {
+            let rule = "web:\(keyword)"
             if !InputManager.isRuleDuplicated(newRule: rule) {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     rules.append(rule)
