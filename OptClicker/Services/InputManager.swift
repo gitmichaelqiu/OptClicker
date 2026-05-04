@@ -58,7 +58,7 @@ class InputManager: ObservableObject {
             if isAutoToggleEnabled {
                 // Re-evaluate current frontmost app
                 refreshAutoToggleState()
-                startRefreshTimer()
+                updateRefreshTimerState()
             } else {
                 stopRefreshTimer()
             }
@@ -153,6 +153,7 @@ class InputManager: ObservableObject {
 
         startFrontmostAppMonitor()
         startSpaceMonitor()
+        startPermissionMonitor()
         
         if isAutoToggleEnabled {
             refreshAutoToggleState()
@@ -206,18 +207,32 @@ class InputManager: ObservableObject {
             }
     }
 
+    private var permissionCancellable: AnyCancellable?
+    private func startPermissionMonitor() {
+        permissionCancellable = PermissionManager.shared.$authorizedBrowsers
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateRefreshTimerState()
+            }
+    }
+
     private func updateRefreshTimerState() {
         guard isAutoToggleEnabled else {
             stopRefreshTimer()
             return
         }
 
-        if let frontmost = NSWorkspace.shared.frontmostApplication,
+        // We only need the refresh timer if:
+        // 1. Based on Apps is enabled
+        // 2. There is at least one website rule (web:...)
+        // 3. The frontmost application is a supported browser
+        let hasWebsiteRule = autoToggleAppBundleIds.contains { $0.hasPrefix("web:") }
+
+        if isBasedOnApps,
+           hasWebsiteRule,
+           let frontmost = NSWorkspace.shared.frontmostApplication,
            let bundleId = frontmost.bundleIdentifier,
-           bundleId != selfBundleID {
-            // We'll try to start the timer for any app that isn't ourselves, 
-            // and let getFrontmostBrowserURL handle the actual check.
-            // This is more generic.
+           PermissionManager.shared.authorizedBrowsers.contains(bundleId) {
             startRefreshTimer()
         } else {
             stopRefreshTimer()
@@ -420,6 +435,7 @@ class InputManager: ObservableObject {
         )
         
         handleFrontmostAppChange(notification: notification)
+        updateRefreshTimerState()
     }
     
     private func getCGMouseLocation() -> CGPoint {
