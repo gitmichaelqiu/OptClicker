@@ -15,8 +15,13 @@ class PermissionManager: ObservableObject {
     @Published var authorizedBrowsers: Set<String> = []
 
     private init() {
-        self.knownBrowsers = UserDefaults.standard.dictionary(forKey: knownBrowsersKey) as? [String: String] ?? [:]
-        self.authorizedBrowsers = Set(UserDefaults.standard.stringArray(forKey: authorizedBrowsersKey) ?? [])
+        let savedKnown = UserDefaults.standard.dictionary(forKey: knownBrowsersKey) as? [String: String] ?? [:]
+        self.knownBrowsers = savedKnown
+        
+        let savedAuthorized = UserDefaults.standard.stringArray(forKey: authorizedBrowsersKey) ?? []
+        self.authorizedBrowsers = Set(savedAuthorized)
+        
+        print("OptClicker: PermissionManager init. Known: \(savedKnown.count), Authorized: \(savedAuthorized.count)")
         
         checkPermissions()
         // Re-verify permissions when the application returns to the foreground.
@@ -62,8 +67,10 @@ class PermissionManager: ObservableObject {
     func removeBrowser(bundleId: String) {
         knownBrowsers.removeValue(forKey: bundleId)
         authorizedBrowsers.remove(bundleId)
+        
         UserDefaults.standard.set(knownBrowsers, forKey: knownBrowsersKey)
         UserDefaults.standard.set(Array(authorizedBrowsers), forKey: authorizedBrowsersKey)
+        
         checkPermissions()
     }
 

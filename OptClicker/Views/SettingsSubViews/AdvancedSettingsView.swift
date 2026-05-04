@@ -106,12 +106,14 @@ struct AdvancedSettingsView: View {
                                     )
                                     .padding(.horizontal, 10)
                                     
-                                    // Button bar similar to AutoToggleView
+                                    // Button bar exactly like AutoToggleView
                                     HStack(spacing: 12) {
                                         Button(action: {
                                             if let sel = selection {
-                                                permissionManager.removeBrowser(bundleId: sel)
-                                                selection = nil
+                                                withAnimation(.easeInOut(duration: 0.2)) {
+                                                    permissionManager.removeBrowser(bundleId: sel)
+                                                    selection = nil
+                                                }
                                             }
                                         }) {
                                             Image(systemName: "minus")
@@ -162,12 +164,10 @@ struct AdvancedSettingsView: View {
             if response == .OK, let url = panel.url {
                 if let bundle = Bundle(url: url), let bundleId = bundle.bundleIdentifier {
                     let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent
-                    permissionManager.addBrowser(bundleId: bundleId, name: name)
-                    permissionManager.requestAutomationPermission(for: bundleId, appName: name)
                     
-                    // Refresh selection to help user
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        permissionManager.checkPermissions()
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        permissionManager.addBrowser(bundleId: bundleId, name: name)
+                        permissionManager.requestAutomationPermission(for: bundleId, appName: name)
                     }
                 }
             }
