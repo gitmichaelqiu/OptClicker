@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import Sparkle
 
 class StatusBarManager: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
@@ -43,6 +44,8 @@ class StatusBarManager: ObservableObject {
     }
     
     func refresh() {
+        cachedEnabledIcon = nil
+        cachedDisabledIcon = nil
         updateIcon()
         updateMenu()
     }
@@ -73,7 +76,7 @@ class StatusBarManager: ObservableObject {
         
         // Toggle item
         let toggleItem = NSMenuItem(
-            title: NSLocalizedString("Menu.Toggle", comment: "Option → Right Click"),
+            title: NSLocalizedString("Option → Right Click", comment: ""),
             action: #selector(handleToggleItemClick),
             keyEquivalent: ""
         )
@@ -81,6 +84,17 @@ class StatusBarManager: ObservableObject {
         toggleItem.target = self
         toggleItem.state = inputManager.isEnabled ? .on : .off
         menu.addItem(toggleItem)
+
+        // Auto Toggle item
+        let autoToggleItem = NSMenuItem(
+            title: NSLocalizedString("Auto Toggle", comment: ""),
+            action: #selector(handleAutoToggleItemClick),
+            keyEquivalent: ""
+        )
+        autoToggleItem.image = NSImage(systemSymbolName: "switch.2", accessibilityDescription: nil)
+        autoToggleItem.target = self
+        autoToggleItem.state = inputManager.isAutoToggleEnabled ? .on : .off
+        menu.addItem(autoToggleItem)
 
         // Status reason (non-clickable)
         if let statusReason = getStatusReason() {
@@ -93,7 +107,7 @@ class StatusBarManager: ObservableObject {
         if showProc {
             if let procName = inputManager.getFrontmostProcessNameExcludingSelf() {
                 let title = String(
-                    format: NSLocalizedString("Menu.Proc", comment: ""),
+                    format: NSLocalizedString("Frontmost Process: %@", comment: ""),
                     procName
                 )
                 let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
@@ -106,7 +120,7 @@ class StatusBarManager: ObservableObject {
 
         // Settings
         let settingsItem = NSMenuItem(
-            title: NSLocalizedString("Menu.Settings", comment: "Settings"),
+            title: NSLocalizedString("Settings...", comment: ""),
             action: #selector(handleSettingsItemClick),
             keyEquivalent: ","
         )
@@ -118,7 +132,7 @@ class StatusBarManager: ObservableObject {
 
         // Quit
         let quitItem = NSMenuItem(
-            title: NSLocalizedString("Menu.Quit", comment: "Quit"),
+            title: NSLocalizedString("Quit", comment: ""),
             action: #selector(handleQuitItemClick),
             keyEquivalent: "q"
         )
@@ -132,6 +146,10 @@ class StatusBarManager: ObservableObject {
     @objc private func handleToggleItemClick() {
         toggleHandler()
     }
+
+    @objc private func handleAutoToggleItemClick() {
+        inputManager.toggleAutoToggle()
+    }
     
     @objc private func handleSettingsItemClick() {
         NotificationCenter.default.post(name: .openSettingsWindow, object: nil)
@@ -142,10 +160,19 @@ class StatusBarManager: ObservableObject {
     }
     
     private func makeOptionIcon() -> NSImage {
-        let image = NSImage(systemSymbolName: "option", accessibilityDescription: "Option")!
-        let resized = resizeImage(image, to: iconSize)
-        resized.isTemplate = true
-        return resized
+        let combinedImage = NSImage(size: iconSize)
+        combinedImage.lockFocus()
+
+        if let image = NSImage(systemSymbolName: "option", accessibilityDescription: NSLocalizedString("Option", comment: "")) {
+            let resized = resizeImage(image, to: iconSize)
+            resized.draw(in: NSRect(origin: .zero, size: iconSize))
+        }
+
+        drawAutoToggleIndicator(in: iconSize)
+
+        combinedImage.unlockFocus()
+        combinedImage.isTemplate = true
+        return combinedImage
     }
 
     private func makeOptionWithSlashIcon() -> NSImage {
@@ -181,9 +208,34 @@ class StatusBarManager: ObservableObject {
         path.lineCapStyle = .round
         path.stroke()
 
+        drawAutoToggleIndicator(in: iconSize)
+
         combinedImage.unlockFocus()
         combinedImage.isTemplate = true
         return combinedImage
+    }
+
+    private func drawAutoToggleIndicator(in size: NSSize) {
+        guard inputManager.isAutoToggleEnabled else { return }
+        
+        let text = "A"
+        let fontSize: CGFloat = 7.5
+        let font = NSFont.systemFont(ofSize: fontSize, weight: .semibold)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: NSColor.black
+        ]
+        
+        let textSize = text.size(withAttributes: attributes)
+        // Position at bottom right with slight offset
+        let rect = NSRect(
+            x: size.width - textSize.width + 0.5,
+            y: 1.5,
+            width: textSize.width,
+            height: textSize.height
+        )
+        
+        text.draw(in: rect, withAttributes: attributes)
     }
 
     private func resizeImage(_ image: NSImage, to size: NSSize) -> NSImage {
@@ -198,84 +250,10 @@ class StatusBarManager: ObservableObject {
         let show = UserDefaults.standard.bool(forKey: InputManager.showStatusReasonKey)
         guard show else { return nil }
         
-        let state = inputManager.isEnabled
-        let stateStr = state
-            ? NSLocalizedString("Menu.Reason.StateStr.Enabled", comment: "Enabled")
-            : NSLocalizedString("Menu.Reason.StateStr.Disabled", comment: "Disabled")
+        let reasonKey = inputManager.statusReason
+        if reasonKey.isEmpty { return nil }
         
-        let autoToggleAppBundleIds = UserDefaults.standard.stringArray(forKey: "AutoToggleAppBundleIds") ?? []
-        if autoToggleAppBundleIds.isEmpty {
-            return String(format: NSLocalizedString("Menu.Reason.Manual", comment: "Manual setting"), stateStr)
-        }
-        
-        guard let frontmostApp = NSWorkspace.shared.frontmostApplication,
-              let bundleId = frontmostApp.bundleIdentifier else {
-            return String(format: NSLocalizedString("Menu.Reason.Unknown", comment: ""), stateStr)
-        }
-        
-        let appName = frontmostApp.localizedName ?? bundleId
-        
-        let isMatch = inputManager.getIsMatch()
-        let matchedProcName: String? = {
-            guard let procName = inputManager.getFrontmostProcessName() else { return nil }
-            for rule in autoToggleAppBundleIds {
-                if rule.hasPrefix("proc:") || rule.hasPrefix("proc~") {
-                    let kw = String(rule.dropFirst(5))
-                    if !kw.isEmpty && procName.lowercased().contains(kw.lowercased()) {
-                        var ret = kw
-                        if rule.hasPrefix("proc~") {
-                            ret = procName + " (\(kw))"
-                        }
-                        return ret
-                    }
-                }
-            }
-            return nil
-        }()
-        
-        let autoToggleEnabled = inputManager.isAutoToggleEnabled
-        if autoToggleEnabled {
-            let behavior = AutoToggleBehavior(
-                rawValue: UserDefaults.standard.string(forKey: "AutoToggleBehavior") ?? "disable"
-            ) ?? .disable
-            let lastState = UserDefaults.standard.bool(forKey: InputManager.lastStateKey)
-            
-            if isMatch {
-                let displayName = matchedProcName.map {
-                        String(format: NSLocalizedString("Menu.Reason.Process", comment: ""), $0)
-                    } ?? appName
-                
-                if state {
-                    return String(format: NSLocalizedString("Menu.Reason.IsFrontmost", comment: ""), stateStr, displayName)
-                } else {
-                    return String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
-                }
-            } else {
-                if state {
-                    if behavior == .followLast {
-                        if state == lastState {
-                            return String(format: NSLocalizedString("Menu.Reason.FollowLast", comment: ""), stateStr)
-                        } else {
-                            return String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
-                        }
-                    } else if behavior == .disable {
-                        return String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
-                    }
-                } else {
-                    if behavior == .followLast {
-                        if state == lastState {
-                            return String(format: NSLocalizedString("Menu.Reason.FollowLast", comment: ""), stateStr)
-                        } else {
-                            return String(format: NSLocalizedString("Menu.Reason.TmpManual", comment: ""), stateStr)
-                        }
-                    } else if behavior == .disable {
-                        return String(format: NSLocalizedString("Menu.Reason.NoFrontmost", comment: ""), stateStr)
-                    }
-                }
-            }
-        }
-        
-        return String(format: NSLocalizedString("Menu.Reason.Manual", comment: ""), stateStr)
+        return reasonKey
     }
 }
 

@@ -11,9 +11,9 @@ enum AutoToggleBehavior: String, CaseIterable {
     var localizedDescription: String {
         switch self {
         case .disable:
-            return NSLocalizedString("Settings.General.AutoToggle.NotFrontmost.Disable", comment: "Disable")
+            return NSLocalizedString("Disable OptClicker", comment: "")
         case .followLast:
-            return NSLocalizedString("Settings.General.AutoToggle.NotFrontmost.FollowLast", comment: "Follow last setting")
+            return NSLocalizedString("Follow last setting", comment: "")
         }
     }
 }
@@ -26,11 +26,23 @@ enum LaunchBehavior: String, CaseIterable {
     var localizedDescription: String {
         switch self {
         case .enabled:
-            return NSLocalizedString("Settings.General.LaunchBehavior.Enabled", comment: "Enabled")
+            return NSLocalizedString("Enable OptClicker", comment: "")
         case .disabled:
-            return NSLocalizedString("Settings.General.LaunchBehavior.Disabled", comment: "Disabled")
+            return NSLocalizedString("Disable OptClicker", comment: "")
         case .lastState:
-            return NSLocalizedString("Settings.General.LaunchBehavior.LastState", comment: "Last State")
+            return NSLocalizedString("Follow last setting", comment: "")
+        }
+    }
+}
+
+enum MatchCondition: String, CaseIterable {
+    case and = "and"
+    case or = "or"
+
+    var localizedDescription: String {
+        switch self {
+        case .and: return NSLocalizedString("And", comment: "")
+        case .or: return NSLocalizedString("Or", comment: "")
         }
     }
 }
@@ -46,10 +58,41 @@ class InputManager: ObservableObject {
             if isAutoToggleEnabled {
                 // Re-evaluate current frontmost app
                 refreshAutoToggleState()
+                updateRefreshTimerState()
+            } else {
+                stopRefreshTimer()
             }
         }
     }
     
+    static let isBasedOnAppsKey = "isBasedOnApps"
+    static let isBasedOnSpacesKey = "isBasedOnSpaces"
+    static let matchConditionKey = "autoToggleMatchCondition"
+    
+    @Published var isBasedOnApps: Bool {
+        didSet {
+            UserDefaults.standard.set(isBasedOnApps, forKey: Self.isBasedOnAppsKey)
+            refreshAutoToggleState()
+        }
+    }
+    
+    @Published var isBasedOnSpaces: Bool {
+        didSet {
+            UserDefaults.standard.set(isBasedOnSpaces, forKey: Self.isBasedOnSpacesKey)
+            refreshAutoToggleState()
+        }
+    }
+    
+    @Published var matchCondition: MatchCondition {
+        didSet {
+            UserDefaults.standard.set(matchCondition.rawValue, forKey: Self.matchConditionKey)
+            refreshAutoToggleState()
+        }
+    }
+    
+    @Published var statusReason: String = ""
+    
+    private var refreshTimer: Timer?
     private var frontmostAppMonitor: Any?
     private var lastManualState: Bool = false
     private var autoToggleAppBundleIds: [String] {
@@ -96,6 +139,12 @@ class InputManager: ObservableObject {
         }
         
         isAutoToggleEnabled = UserDefaults.standard.bool(forKey: Self.autoToggleEnabledKey)
+        isBasedOnApps = UserDefaults.standard.object(forKey: Self.isBasedOnAppsKey) == nil ? true : UserDefaults.standard.bool(forKey: Self.isBasedOnAppsKey)
+        isBasedOnSpaces = UserDefaults.standard.bool(forKey: Self.isBasedOnSpacesKey)
+        
+        let matchRaw = UserDefaults.standard.string(forKey: Self.matchConditionKey) ?? MatchCondition.or.rawValue
+        matchCondition = MatchCondition(rawValue: matchRaw) ?? .or
+        
         lastManualState = isEnabled
 
         if isEnabled {
@@ -103,8 +152,10 @@ class InputManager: ObservableObject {
         }
 
         startFrontmostAppMonitor()
+        startSpaceMonitor()
+        startPermissionMonitor()
         
-        if isAutoToggleEnabled && !autoToggleAppBundleIds.isEmpty {
+        if isAutoToggleEnabled {
             refreshAutoToggleState()
         }
         
@@ -118,6 +169,18 @@ class InputManager: ObservableObject {
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }
+
+        NotificationCenter.default.addObserver(
+            forName: .autoToggleHotkeyTriggered,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.toggleAutoToggle()
+        }
+    }
+
+    func toggleAutoToggle() {
+        isAutoToggleEnabled.toggle()
     }
 
     private func startFrontmostAppMonitor() {
@@ -141,7 +204,63 @@ class InputManager: ObservableObject {
                let procName = self?.getFrontmostProcessName() {
                 self?.lastNonSelfProcessName = procName
             }
+            
+            // Start/Stop timer based on frontmost app
+            self?.updateRefreshTimerState()
         }
+    }
+    
+    private var spaceCancellable: AnyCancellable?
+    private func startSpaceMonitor() {
+        spaceCancellable = SpaceManager.shared.$currentSpaceID
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshAutoToggleState()
+            }
+    }
+
+    private var permissionCancellable: AnyCancellable?
+    private func startPermissionMonitor() {
+        permissionCancellable = PermissionManager.shared.$authorizedBrowsers
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateRefreshTimerState()
+            }
+    }
+
+    private func updateRefreshTimerState() {
+        guard isAutoToggleEnabled else {
+            stopRefreshTimer()
+            return
+        }
+
+        // We only need the refresh timer if:
+        // 1. Based on Apps is enabled
+        // 2. There is at least one website rule (web:...)
+        // 3. The frontmost application is a supported browser
+        let hasWebsiteRule = autoToggleAppBundleIds.contains { $0.hasPrefix("web:") }
+
+        if isBasedOnApps,
+           hasWebsiteRule,
+           let frontmost = NSWorkspace.shared.frontmostApplication,
+           let bundleId = frontmost.bundleIdentifier,
+           PermissionManager.shared.authorizedBrowsers.contains(bundleId) {
+            startRefreshTimer()
+        } else {
+            stopRefreshTimer()
+        }
+    }
+
+    private func startRefreshTimer() {
+        guard refreshTimer == nil else { return }
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.refreshAutoToggleState()
+        }
+    }
+
+    private func stopRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
     }
     
     func getFrontmostProcessName() -> String? {
@@ -169,39 +288,116 @@ class InputManager: ObservableObject {
         }
         return lastNonSelfProcessName
     }
+
+    func getFrontmostBrowserURL() -> String? {
+        guard let app = NSWorkspace.shared.frontmostApplication,
+              let bundleId = app.bundleIdentifier else { return nil }
+
+        let scriptSource: String
+        if bundleId == "com.apple.Safari" {
+            scriptSource = "tell application \"Safari\" to return URL of front document"
+        } else {
+            let appName = app.localizedName ?? "Google Chrome"
+            scriptSource = "tell application \"\(appName)\" to return URL of active tab of front window"
+        }
+
+        var error: NSDictionary?
+        if let script = NSAppleScript(source: scriptSource) {
+            let result = script.executeAndReturnError(&error)
+            if let err = error {
+                print("OptClicker: AppleScript Error: \(err)")
+            }
+            if error == nil {
+                return result.stringValue
+            }
+        } else {
+            print("OptClicker: Failed to initialize AppleScript with source: \(scriptSource)")
+        }
+        return nil
+    }
     
-    func getIsMatch() -> Bool {
+    func getIsAppMatch() -> Bool {
         guard let app = NSWorkspace.shared.frontmostApplication else { return false }
-        
-        // Skip self
         if app.bundleIdentifier == selfBundleID { return false }
         
         let rules = autoToggleAppBundleIds
-        guard !rules.isEmpty else { return false }
+        if rules.isEmpty { return false }
         
-        // Bundle ID match
         if let bundleId = app.bundleIdentifier, rules.contains(bundleId) {
             return true
         }
         
-        // Process name match (exact & partial)
-        guard let procName = getFrontmostProcessName() else { return false }
+        let procName = getFrontmostProcessName()
+        lazy var currentURL: String? = getFrontmostBrowserURL()
         
         for rule in rules {
             if rule.hasPrefix("proc:") {
                 let expected = String(rule.dropFirst(5))
-                if !expected.isEmpty && procName.lowercased() == expected.lowercased() {
+                if let procName = procName, !expected.isEmpty && procName.lowercased() == expected.lowercased() {
                     return true
                 }
             } else if rule.hasPrefix("proc~") {
                 let substring = String(rule.dropFirst(5))
-                if !substring.isEmpty && procName.lowercased().contains(substring.lowercased()) {
+                if let procName = procName, !substring.isEmpty && procName.lowercased().contains(substring.lowercased()) {
+                    return true
+                }
+            } else if rule.hasPrefix("web:") {
+                let pattern = String(rule.dropFirst(4)).lowercased()
+                if let url = currentURL?.lowercased(), !pattern.isEmpty && url.contains(pattern) {
                     return true
                 }
             }
         }
+        return false
+    }
+
+    func getIsSpaceMatch() -> Bool {
+        let rules = UserDefaults.standard.stringArray(forKey: "autoToggleSpaces") ?? []
+        if rules.isEmpty { return true } // Default to all spaces if list is empty
+        
+        guard SpaceManager.shared.isAPIEnabled, let currentSpaceID = SpaceManager.shared.currentSpaceID else {
+            // If we don't know the space or API is off, we assume it's NOT a match unless rules are empty
+            return false
+        }
+        
+        if rules.contains(currentSpaceID) { return true }
+        
+        // Check Fullscreen
+        if rules.contains("fullscreen") {
+            // Fullscreen apps are in their own Space.
+            // If currentSpaceID is NOT in availableSpaces, it's likely a fullscreen app space.
+            let isKnownDesktop = SpaceManager.shared.availableSpaces.contains { $0.id == currentSpaceID }
+            if !isKnownDesktop {
+                return true
+            }
+        }
         
         return false
+    }
+
+    func getIsMatch() -> (Bool, String) {
+        let appMatch = isBasedOnApps ? getIsAppMatch() : nil
+        let spaceMatch = isBasedOnSpaces ? getIsSpaceMatch() : nil
+        
+        if let am = appMatch, let sm = spaceMatch {
+            if matchCondition == .and {
+                let result = am && sm
+                let reason = result ? NSLocalizedString("Enabled by both apps and spaces", comment: "") : NSLocalizedString("Disabled (does not match both conditions)", comment: "")
+                return (result, reason)
+            } else {
+                let result = am || sm
+                let reason = result ? NSLocalizedString("Enabled by app or space match", comment: "") : NSLocalizedString("Disabled (no app or space match)", comment: "")
+                return (result, reason)
+            }
+        } else if let am = appMatch {
+            let reason = am ? NSLocalizedString("Enabled by app match", comment: "") : NSLocalizedString("Disabled by app mismatch", comment: "")
+            return (am, reason)
+        } else if let sm = spaceMatch {
+            let reason = sm ? NSLocalizedString("Enabled by space match", comment: "") : NSLocalizedString("Disabled by space mismatch", comment: "")
+            return (sm, reason)
+        }
+        
+        return (false, NSLocalizedString("Disabled (no auto-toggle conditions enabled)", comment: ""))
     }
 
     private func handleFrontmostAppChange(notification: Notification) {
@@ -213,9 +409,13 @@ class InputManager: ObservableObject {
 
         objectWillChange.send()
 
-        guard isAutoToggleEnabled else { return }
+        guard isAutoToggleEnabled else {
+            self.statusReason = NSLocalizedString("Auto-toggle is disabled", comment: "")
+            return
+        }
 
-        let isMatch = getIsMatch()
+        let (isMatch, reason) = getIsMatch()
+        self.statusReason = reason
 
         isAutoToggling = true
         defer { isAutoToggling = false }
@@ -247,6 +447,7 @@ class InputManager: ObservableObject {
         )
         
         handleFrontmostAppChange(notification: notification)
+        updateRefreshTimerState()
     }
     
     private func getCGMouseLocation() -> CGPoint {
@@ -318,14 +519,24 @@ class InputManager: ObservableObject {
     static func isRuleDuplicated(newRule: String) -> Bool {
         let rules = UserDefaults.standard.stringArray(forKey: "AutoToggleAppBundleIds") ?? []
         
-        let newKey = newRule.hasPrefix("proc:") || newRule.hasPrefix("proc~")
-            ? String(newRule.dropFirst(5)).lowercased()
-            : newRule.lowercased()
+        let newKey: String
+        if newRule.hasPrefix("proc:") || newRule.hasPrefix("proc~") {
+            newKey = String(newRule.dropFirst(5)).lowercased()
+        } else if newRule.hasPrefix("web:") {
+            newKey = String(newRule.dropFirst(4)).lowercased()
+        } else {
+            newKey = newRule.lowercased()
+        }
         
         let isDuplicate = rules.contains { rule in
-            let existingKey = rule.hasPrefix("proc:") || rule.hasPrefix("proc~")
-                ? String(rule.dropFirst(5)).lowercased()
-                : rule.lowercased()
+            let existingKey: String
+            if rule.hasPrefix("proc:") || rule.hasPrefix("proc~") {
+                existingKey = String(rule.dropFirst(5)).lowercased()
+            } else if rule.hasPrefix("web:") {
+                existingKey = String(rule.dropFirst(4)).lowercased()
+            } else {
+                existingKey = rule.lowercased()
+            }
             return existingKey == newKey
         }
         return isDuplicate
