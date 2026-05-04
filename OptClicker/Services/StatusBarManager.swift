@@ -43,6 +43,8 @@ class StatusBarManager: ObservableObject {
     }
     
     func refresh() {
+        cachedEnabledIcon = nil
+        cachedDisabledIcon = nil
         updateIcon()
         updateMenu()
     }
@@ -157,10 +159,19 @@ class StatusBarManager: ObservableObject {
     }
     
     private func makeOptionIcon() -> NSImage {
-        let image = NSImage(systemSymbolName: "option", accessibilityDescription: "Option")!
-        let resized = resizeImage(image, to: iconSize)
-        resized.isTemplate = true
-        return resized
+        let combinedImage = NSImage(size: iconSize)
+        combinedImage.lockFocus()
+
+        if let image = NSImage(systemSymbolName: "option", accessibilityDescription: "Option") {
+            let resized = resizeImage(image, to: iconSize)
+            resized.draw(in: NSRect(origin: .zero, size: iconSize))
+        }
+
+        drawAutoToggleIndicator(in: iconSize)
+
+        combinedImage.unlockFocus()
+        combinedImage.isTemplate = true
+        return combinedImage
     }
 
     private func makeOptionWithSlashIcon() -> NSImage {
@@ -196,9 +207,34 @@ class StatusBarManager: ObservableObject {
         path.lineCapStyle = .round
         path.stroke()
 
+        drawAutoToggleIndicator(in: iconSize)
+
         combinedImage.unlockFocus()
         combinedImage.isTemplate = true
         return combinedImage
+    }
+
+    private func drawAutoToggleIndicator(in size: NSSize) {
+        guard inputManager.isAutoToggleEnabled else { return }
+        
+        let text = "A"
+        let fontSize: CGFloat = 7.5
+        let font = NSFont.systemFont(ofSize: fontSize, weight: .semibold)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: NSColor.black
+        ]
+        
+        let textSize = text.size(withAttributes: attributes)
+        // Position at bottom right with slight offset
+        let rect = NSRect(
+            x: size.width - textSize.width + 0.5,
+            y: 1.5,
+            width: textSize.width,
+            height: textSize.height
+        )
+        
+        text.draw(in: rect, withAttributes: attributes)
     }
 
     private func resizeImage(_ image: NSImage, to size: NSSize) -> NSImage {
