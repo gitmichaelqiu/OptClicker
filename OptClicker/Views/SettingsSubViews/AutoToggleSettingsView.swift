@@ -67,10 +67,10 @@ struct AutoToggleSettingsView: View {
                                 rules: $autoToggleRules, isExpanded: $isAutoToggleExpanded,
                                 onRuleChange: saveAndRefresh
                             )
+                            Divider()
                         }
                         
                         if inputManager.isBasedOnSpaces {
-                            Divider()
                             AutoToggleSpacesView(
                                 rules: $autoToggleSpaces, isExpanded: $isAutoToggleSpacesExpanded,
                                 onRuleChange: saveAndRefresh
