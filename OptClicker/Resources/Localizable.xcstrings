@@ -1,4 +1,174 @@
 {
+  "Settings.Status.Reason.Disabled" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Auto-toggle is disabled"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "自动切换已禁用"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.Match.App" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Enabled by app match"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "由于应用匹配而启用"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.Match.Both" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Enabled by both apps and spaces"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "由于应用和桌面均匹配而启用"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.Match.Either" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Enabled by app or space match"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "由于应用或桌面匹配而启用"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.Match.Space" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Enabled by space match"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "由于桌面匹配而启用"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.NoCondition" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Disabled (no auto-toggle conditions enabled)"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "禁用 (未启用任何自动切换条件)"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.NoMatch.App" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Disabled by app mismatch"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "由于应用不匹配而禁用"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.NoMatch.Both" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Disabled (does not match both conditions)"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "禁用 (不同时满足两个条件)"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.NoMatch.Either" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Disabled (no app or space match)"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "禁用 (应用和桌面均不匹配)"
+        }
+      }
+    }
+  },
+  "Settings.Status.Reason.NoMatch.Space" : {
+    "extractionState" : "manual",
+    "localizations" : {
+      "en" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "Disabled by space mismatch"
+        }
+      },
+      "zh-Hans" : {
+        "stringUnit" : {
+          "state" : "translated",
+          "value" : "由于桌面不匹配而禁用"
+        }
+      }
+    }
+  },
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
@@ -560,23 +730,6 @@
         }
       }
     },
-    "Settings.Advanced.Permissions.SelectBrowser" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select Browser from Applications"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从应用程序中选择浏览器"
-          }
-        }
-      }
-    },
     "Settings.Advanced.Permissions.Description" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -607,6 +760,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "授权"
+          }
+        }
+      }
+    },
+    "Settings.Advanced.Permissions.SelectBrowser" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Browser from Applications"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从应用程序中选择浏览器"
           }
         }
       }
@@ -658,142 +828,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自动开关"
-          }
-        }
-      }
-    },
-    "Settings.General.AutoToggle.BasedOnApps" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Based on apps"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "基于应用程序"
-          }
-        }
-      }
-    },
-    "Settings.General.AutoToggle.BasedOnSpaces" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Based on spaces"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "基于桌面 (Spaces)"
-          }
-        }
-      }
-    },
-    "Settings.General.AutoToggle.MatchCondition" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Match Condition"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "匹配条件"
-          }
-        }
-      }
-    },
-    "Settings.General.AutoToggle.MatchCondition.And" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "And"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "且 (AND)"
-          }
-        }
-      }
-    },
-    "Settings.General.AutoToggle.MatchCondition.Or" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Or"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "或 (OR)"
-          }
-        }
-      }
-    },
-    "Settings.General.AutoToggle.TargetSpaces" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Targeted Spaces"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "目标桌面"
-          }
-        }
-      }
-    },
-    "Settings.General.AutoToggle.Space.Fullscreen" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fullscreen"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "全屏"
-          }
-        }
-      }
-    },
-    "Settings.General.AutoToggle.Space.NoAPI" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Spaces available (DesktopRenamer not running?)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有可用桌面 (DesktopRenamer 未运行?)"
           }
         }
       }
@@ -862,6 +896,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重复进程"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.BasedOnApps" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Based on apps"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "基于应用程序"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.BasedOnSpaces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Based on spaces"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "基于桌面 (Spaces)"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.MatchCondition" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match condition"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "匹配条件"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.MatchCondition.And" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "And"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "且 (AND)"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.MatchCondition.Or" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "或 (OR)"
           }
         }
       }
@@ -1121,6 +1240,40 @@
         }
       }
     },
+    "Settings.General.AutoToggle.Space.Fullscreen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fullscreen"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全屏"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.Space.NoAPI" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Spaces available (DesktopRenamer not running?)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有可用桌面 (DesktopRenamer 未运行?)"
+          }
+        }
+      }
+    },
     "Settings.General.AutoToggle.TargetApps" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1134,6 +1287,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目标 App"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.TargetSpaces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Targeted spaces"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "目标桌面"
           }
         }
       }
@@ -1839,175 +2009,5 @@
       }
     }
   },
-    "Settings.Status.Reason.Disabled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auto-toggle is disabled"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自动切换已禁用"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.Match.App" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enabled by app match"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "由于应用匹配而启用"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.Match.Both" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enabled by both apps and spaces"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "由于应用和桌面均匹配而启用"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.Match.Either" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enabled by app or space match"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "由于应用或桌面匹配而启用"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.Match.Space" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enabled by space match"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "由于桌面匹配而启用"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.NoCondition" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Disabled (no auto-toggle conditions enabled)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "禁用 (未启用任何自动切换条件)"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.NoMatch.App" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Disabled by app mismatch"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "由于应用不匹配而禁用"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.NoMatch.Both" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Disabled (does not match both conditions)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "禁用 (不同时满足两个条件)"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.NoMatch.Either" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Disabled (no app or space match)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "禁用 (应用和桌面均不匹配)"
-          }
-        }
-      }
-    },
-    "Settings.Status.Reason.NoMatch.Space" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Disabled by space mismatch"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "由于桌面不匹配而禁用"
-          }
-        }
-      }
-    },
-    "version" : "1.1"
+  "version" : "1.1"
 }

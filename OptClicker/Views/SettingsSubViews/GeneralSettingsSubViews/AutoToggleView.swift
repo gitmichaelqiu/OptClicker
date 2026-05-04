@@ -31,7 +31,7 @@ struct AutoToggleView: View {
                     }
                 }) {
                     Image(systemName: "chevron.right")
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .rotationEffect(.degrees(isExpandedLocal ? 90 : 0))
                         .frame(width: 20, height: 16)
                 }
             }

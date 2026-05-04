@@ -7,23 +7,42 @@ struct AutoToggleSpacesView: View {
 
     @State private var selection: String? = nil
     @StateObject private var spaceManager = SpaceManager.shared
+    @State var isExpandedLocal: Bool = false
+    
+    init(
+        rules: Binding<[String]>,
+        isExpanded: Binding<Bool>,
+        onRuleChange: @escaping () -> Void
+    ) {
+        self._rules = rules
+        self._isExpanded = isExpanded
+        self.onRuleChange = onRuleChange
+        self._isExpandedLocal = State(initialValue: isExpanded.wrappedValue)
+    }
     
     var body: some View {
         SettingsRow("Settings.General.AutoToggle.TargetSpaces") {
             HStack(spacing: 8) {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.16)) {
-                        isExpanded.toggle()
+                        isExpandedLocal.toggle()
+                        isExpanded = isExpandedLocal
                     }
                 }) {
                     Image(systemName: "chevron.right")
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .rotationEffect(.degrees(isExpandedLocal ? 90 : 0))
                         .frame(width: 20, height: 16)
                 }
             }
         }
+        .onChange(of: isExpanded) { newExternalValue in
+            guard newExternalValue != isExpandedLocal else { return }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isExpandedLocal = newExternalValue
+            }
+        }
 
-        if isExpanded {
+        if isExpandedLocal {
             VStack(alignment: .leading, spacing: 0) {
                 let displayRules: [(id: String, name: String, icon: String)] = rules.map { rule in
                     if rule == "fullscreen" {
@@ -39,14 +58,17 @@ struct AutoToggleSpacesView: View {
                     ForEach(displayRules, id: \.id) { item in
                         HStack {
                             Image(systemName: item.icon)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
                                 .frame(width: 16, height: 16)
+                                .foregroundColor(.secondary)
                             Text(item.name)
                             Spacer()
                         }
                         .tag(item.id)
                     }
                 }
-                .frame(height: min(120, CGFloat(displayRules.count) * 28 + 28))
+                .frame(height: min(160, CGFloat(displayRules.count) * 28 + 28))
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -75,17 +97,15 @@ struct AutoToggleSpacesView: View {
                     } label: {
                         Image(systemName: "plus")
                             .frame(width: 24, height: 14)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-
-                    Divider().frame(height: 16)
-
-                    Button(action: removeSelectedRule) {
-                        Image(systemName: "minus")
-                            .frame(width: 24, height: 14)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(selection == nil)
+                    
+                    addButton(
+                        systemImage: "minus",
+                        action: removeSelectedRule,
+                        disabled: selection == nil
+                    )
                     
                     Spacer()
                 }
@@ -96,6 +116,21 @@ struct AutoToggleSpacesView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 2)
         }
+    }
+
+    private func addButton(
+        systemImage: String,
+        action: @escaping () -> Void,
+        disabled: Bool = false,
+        frameWidth: CGFloat = 24
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .frame(width: frameWidth, height: 14)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(disabled)
     }
 
     private func addRule(_ rule: String) {
