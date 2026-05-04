@@ -46,10 +46,14 @@ class InputManager: ObservableObject {
             if isAutoToggleEnabled {
                 // Re-evaluate current frontmost app
                 refreshAutoToggleState()
+                startRefreshTimer()
+            } else {
+                stopRefreshTimer()
             }
         }
     }
     
+    private var refreshTimer: Timer?
     private var frontmostAppMonitor: Any?
     private var lastManualState: Bool = false
     private var autoToggleAppBundleIds: [String] {
@@ -141,7 +145,46 @@ class InputManager: ObservableObject {
                let procName = self?.getFrontmostProcessName() {
                 self?.lastNonSelfProcessName = procName
             }
+            
+            // Start/Stop timer based on frontmost app
+            self?.updateRefreshTimerState()
         }
+    }
+
+    private func updateRefreshTimerState() {
+        guard isAutoToggleEnabled else {
+            stopRefreshTimer()
+            return
+        }
+
+        let chromiumStyle = [
+            "com.google.Chrome",
+            "com.microsoft.edgemac",
+            "com.brave.Browser",
+            "com.operasoftware.Opera",
+            "com.vivaldi.Vivaldi",
+            "company.thebrowser.Browser"
+        ]
+
+        if let frontmost = NSWorkspace.shared.frontmostApplication,
+           let bundleId = frontmost.bundleIdentifier,
+           (bundleId == "com.apple.Safari" || chromiumStyle.contains(bundleId)) {
+            startRefreshTimer()
+        } else {
+            stopRefreshTimer()
+        }
+    }
+
+    private func startRefreshTimer() {
+        guard refreshTimer == nil else { return }
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.refreshAutoToggleState()
+        }
+    }
+
+    private func stopRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
     }
     
     func getFrontmostProcessName() -> String? {
