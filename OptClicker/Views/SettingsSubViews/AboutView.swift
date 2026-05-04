@@ -84,9 +84,25 @@ struct AboutView: View {
                         )
                     }
                 }
+
+                // Acknowledgements Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Acknowledgements")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    AboutButtonRow(title: "Acknowledgements.pdf", action: openAcknowledgements)
+                }
             }
             .padding(30)
             .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func openAcknowledgements() {
+        if let path = Bundle.main.path(forResource: "Acknowledgements", ofType: "pdf") {
+            let url = URL(fileURLWithPath: path)
+            NSWorkspace.shared.open(url)
         }
     }
 }
@@ -187,6 +203,39 @@ struct OtherAppRow: View {
         .buttonStyle(.plain)
         .onHover { hovering in
             withAnimation(.easeInOut(duration: 0.2)) {
+                isHovering = hovering
+            }
+            if hovering {
+                NSCursor.pointingHand.push()
+            } else {
+                NSCursor.pop()
+            }
+        }
+    }
+}
+
+struct AboutButtonRow: View {
+    let title: String
+    let action: () -> Void
+    
+    @State private var isHovering = false
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                Text(title)
+                    .foregroundColor(isHovering ? .accentColor : .secondary)
+                Spacer()
+                Image(systemName: "doc.fill")
+                    .font(.caption2)
+                    .foregroundColor(.secondary.opacity(0.5))
+            }
+            .padding(.vertical, 2)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.1)) {
                 isHovering = hovering
             }
             if hovering {
