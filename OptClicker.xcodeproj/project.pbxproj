@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		467A1DCE2FA8989B00F72DC1 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 467A1DCD2FA8989B00F72DC1 /* Sparkle */; };
 		46A32F572E7D536B00FBD8D7 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 46A32F562E7D536B00FBD8D7 /* HotKey */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				46A32F572E7D536B00FBD8D7 /* HotKey in Frameworks */,
+				467A1DCE2FA8989B00F72DC1 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +73,7 @@
 			name = OptClicker;
 			packageProductDependencies = (
 				46A32F562E7D536B00FBD8D7 /* HotKey */,
+				467A1DCD2FA8989B00F72DC1 /* Sparkle */,
 			);
 			productName = OptClick;
 			productReference = 46A6B90A2E7C16850037D562 /* OptClicker.app */;
@@ -103,6 +106,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				46A32F552E7D536B00FBD8D7 /* XCRemoteSwiftPackageReference "HotKey" */,
+				467A1DCC2FA8989B00F72DC1 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 46A6B90B2E7C16850037D562 /* Products */;
@@ -266,7 +270,7 @@
 				CODE_SIGN_ENTITLEMENTS = OptClicker/OptClicker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = W94S87F4LJ;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -284,12 +288,14 @@
 				INFOPLIST_KEY_LSUIElement = NO;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "OptClicker needs to access browser URLs to automatically toggle based on your settings.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_SUFeedURL = "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml";
+				INFOPLIST_KEY_SUPublicEDKey = "e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = michaelqiu.OptClicker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -317,7 +323,7 @@
 				CODE_SIGN_ENTITLEMENTS = OptClicker/OptClicker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = W94S87F4LJ;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -335,12 +341,14 @@
 				INFOPLIST_KEY_LSUIElement = NO;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "OptClicker needs to access browser URLs to automatically toggle based on your settings.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_SUFeedURL = "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml";
+				INFOPLIST_KEY_SUPublicEDKey = "e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = michaelqiu.OptClicker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -383,6 +391,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		467A1DCC2FA8989B00F72DC1 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.1;
+			};
+		};
 		46A32F552E7D536B00FBD8D7 /* XCRemoteSwiftPackageReference "HotKey" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/soffes/HotKey";
@@ -394,6 +410,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		467A1DCD2FA8989B00F72DC1 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 467A1DCC2FA8989B00F72DC1 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		46A32F562E7D536B00FBD8D7 /* HotKey */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 46A32F552E7D536B00FBD8D7 /* XCRemoteSwiftPackageReference "HotKey" */;

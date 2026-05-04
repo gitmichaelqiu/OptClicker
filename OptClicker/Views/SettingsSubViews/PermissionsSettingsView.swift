@@ -1,41 +1,14 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct AdvancedSettingsView: View {
-    @EnvironmentObject var hotkeyManager: HotkeyManager
+struct PermissionsSettingsView: View {
     @StateObject private var permissionManager = PermissionManager.shared
     @State private var selection: String? = nil
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Hotkey Section
-                SettingsSection("General") {
-                    SettingsRow("Toggle OptClicker") {
-                        Text(hotkeyManager.shortcutDescription)
-                            .font(.body)
-                            .foregroundColor(.primary)
-                    }
-                    .frame(minHeight: 36)
-                    
-                    Divider()
-
-                    SettingsRow("") {
-                        HStack(spacing: 8) {
-                            Button("Change…") {
-                                hotkeyManager.startListeningForNewShortcut()
-                            }
-                            Button("Reset") {
-                                hotkeyManager.resetToDefault()
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
-                    .frame(minHeight: 36)
-                }
-                
-                // Permissions Section
-                SettingsSection("Permissions") {
+            VStack(alignment: .leading, spacing: 20) {
+                SettingsSection("Permissions", helperText: "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant.") {
                     VStack(alignment: .leading, spacing: 0) {
                         // Accessibility
                         SettingsRow("Accessibility", helperText: "Required for reading window information.") {
@@ -106,7 +79,6 @@ struct AdvancedSettingsView: View {
                                     )
                                     .padding(.horizontal, 10)
                                     
-                                    // Button bar exactly like AutoToggleView
                                     HStack(spacing: 12) {
                                         Button(action: {
                                             if let sel = selection {
@@ -136,15 +108,6 @@ struct AdvancedSettingsView: View {
                         .animation(.easeInOut(duration: 0.2), value: permissionManager.automationPermissions)
                     }
                 }
-                
-                if let helpText = "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant." as String?, !helpText.isEmpty {
-                    Text(helpText)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 4)
-                }
-
-                Spacer()
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .topLeading)

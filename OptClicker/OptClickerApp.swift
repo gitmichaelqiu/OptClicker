@@ -3,8 +3,6 @@ import UserNotifications
 import Combine
 import AppKit
 
-let defaultSettingsWindowWidth = 450
-let defaultSettingsWindowHeight = 480
 
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     private var inputManagerCancellable: AnyCancellable?
@@ -52,15 +50,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             object: nil
         )
 
-        // Auto update
-        UNUserNotificationCenter.current().delegate = self
-        if UpdateManager.isAutoCheckEnabled {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                Task {
-                    await UpdateManager.shared.checkForUpdate(from: nil, suppressUpToDateAlert: true)
-                }
-            }
-        }
+        // Sparkle handles auto updates automatically.
     }
 
     @objc private func handleHotkeyTriggered() {
@@ -82,12 +72,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        defer { completionHandler() }
-        if response.actionIdentifier == "openRelease",
-           let url = URL(string: UpdateManager.shared.latestReleaseURL.trimmingCharacters(in: .whitespacesAndNewlines)) {
-            NSWorkspace.shared.open(url)
-            NSApp.perform(#selector(NSApp.terminate), with: nil, afterDelay: 0.5)
-        }
+        completionHandler()
     }
 
     deinit {
