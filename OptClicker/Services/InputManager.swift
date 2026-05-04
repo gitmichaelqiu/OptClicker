@@ -157,18 +157,12 @@ class InputManager: ObservableObject {
             return
         }
 
-        let chromiumStyle = [
-            "com.google.Chrome",
-            "com.microsoft.edgemac",
-            "com.brave.Browser",
-            "com.operasoftware.Opera",
-            "com.vivaldi.Vivaldi",
-            "company.thebrowser.Browser"
-        ]
-
         if let frontmost = NSWorkspace.shared.frontmostApplication,
            let bundleId = frontmost.bundleIdentifier,
-           (bundleId == "com.apple.Safari" || chromiumStyle.contains(bundleId)) {
+           bundleId != selfBundleID {
+            // We'll try to start the timer for any app that isn't ourselves, 
+            // and let getFrontmostBrowserURL handle the actual check.
+            // This is more generic.
             startRefreshTimer()
         } else {
             stopRefreshTimer()
@@ -218,22 +212,11 @@ class InputManager: ObservableObject {
               let bundleId = app.bundleIdentifier else { return nil }
 
         let scriptSource: String
-        let chromiumStyle = [
-            "com.google.Chrome",
-            "com.microsoft.edgemac",
-            "com.brave.Browser",
-            "com.operasoftware.Opera",
-            "com.vivaldi.Vivaldi",
-            "company.thebrowser.Browser" // Arc
-        ]
-
         if bundleId == "com.apple.Safari" {
             scriptSource = "tell application \"Safari\" to return URL of front document"
-        } else if chromiumStyle.contains(bundleId) {
+        } else {
             let appName = app.localizedName ?? "Google Chrome"
             scriptSource = "tell application \"\(appName)\" to return URL of active tab of front window"
-        } else {
-            return nil
         }
 
         var error: NSDictionary?

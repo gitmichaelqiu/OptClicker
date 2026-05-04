@@ -10,15 +10,13 @@ class PermissionManager: ObservableObject {
     @Published var automationPermissions: [String: Bool] = [:] // bundleId: isGranted
     
     private let knownBrowsersKey = "PermissionManager.KnownBrowsers"
+    private let authorizedBrowsersKey = "PermissionManager.AuthorizedBrowsers"
     @Published var knownBrowsers: [String: String] = [:] // bundleId: appName
+    @Published var authorizedBrowsers: Set<String> = []
 
     private init() {
-        self.knownBrowsers = UserDefaults.standard.dictionary(forKey: knownBrowsersKey) as? [String: String] ?? [
-            "com.apple.Safari": "Safari",
-            "com.google.Chrome": "Google Chrome",
-            "com.microsoft.edgemac": "Microsoft Edge",
-            "company.thebrowser.Browser": "Arc"
-        ]
+        self.knownBrowsers = UserDefaults.standard.dictionary(forKey: knownBrowsersKey) as? [String: String] ?? [:]
+        self.authorizedBrowsers = Set(UserDefaults.standard.stringArray(forKey: authorizedBrowsersKey) ?? [])
         
         checkPermissions()
         // Re-verify permissions when the application returns to the foreground.
@@ -43,8 +41,15 @@ class PermissionManager: ObservableObject {
         // Automation checks.
         var statuses: [String: Bool] = [:]
         for bundleId in knownBrowsers.keys {
-            statuses[bundleId] = isAutomationGranted(for: bundleId)
+            let isGranted = isAutomationGranted(for: bundleId)
+            statuses[bundleId] = isGranted
+            if isGranted {
+                authorizedBrowsers.insert(bundleId)
+            }
         }
+        
+        // Persist authorized browsers
+        UserDefaults.standard.set(Array(authorizedBrowsers), forKey: authorizedBrowsersKey)
         self.automationPermissions = statuses
     }
     
@@ -56,7 +61,9 @@ class PermissionManager: ObservableObject {
     
     func removeBrowser(bundleId: String) {
         knownBrowsers.removeValue(forKey: bundleId)
+        authorizedBrowsers.remove(bundleId)
         UserDefaults.standard.set(knownBrowsers, forKey: knownBrowsersKey)
+        UserDefaults.standard.set(Array(authorizedBrowsers), forKey: authorizedBrowsersKey)
         checkPermissions()
     }
 

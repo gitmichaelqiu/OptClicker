@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 struct AdvancedSettingsView: View {
     @EnvironmentObject var hotkeyManager: HotkeyManager
     @StateObject private var permissionManager = PermissionManager.shared
+    @State private var selection: String? = nil
 
     var body: some View {
         ScrollView {
@@ -49,7 +50,7 @@ struct AdvancedSettingsView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             SettingsRow("Settings.Advanced.Permissions.Automation", helperText: "Settings.Advanced.Permissions.Automation.Description") {
                                 HStack(spacing: 12) {
-                                    let anyGranted = permissionManager.automationPermissions.values.contains(true)
+                                    let anyGranted = !permissionManager.authorizedBrowsers.isEmpty || permissionManager.automationPermissions.values.contains(true)
                                     PermissionStatusIcon(isGranted: anyGranted)
                                     
                                     Button(NSLocalizedString("Settings.Advanced.Permissions.Grant", comment: "")) {
@@ -58,38 +59,72 @@ struct AdvancedSettingsView: View {
                                 }
                             }
                             
-                            let grantedBrowsers = permissionManager.knownBrowsers.filter { permissionManager.automationPermissions[$0.key] == true }
+                            // Show authorized browsers (even if closed)
+                            let authorizedList = permissionManager.knownBrowsers
+                                .filter { permissionManager.authorizedBrowsers.contains($0.key) || permissionManager.automationPermissions[$0.key] == true }
+                                .map { (bundleId: $0.key, name: $0.value) }
+                                .sorted(by: { $0.name < $1.name })
                             
-                            if !grantedBrowsers.isEmpty {
+                            if !authorizedList.isEmpty {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(NSLocalizedString("Settings.Advanced.Permissions.Automation.GrantedList", comment: "Granted browsers:"))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .padding(.horizontal, 10)
-                                    
-                                    ForEach(grantedBrowsers.sorted(by: { $0.value < $1.value }), id: \.key) { bundleId, name in
-                                        HStack {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .font(.caption)
-                                                .foregroundColor(.green)
-                                            Text(name)
-                                                .font(.caption)
-                                            Spacer()
-                                            
-                                            Button {
-                                                permissionManager.removeBrowser(bundleId: bundleId)
-                                            } label: {
-                                                Image(systemName: "xmark")
-                                                    .font(.caption2)
-                                                    .foregroundColor(.secondary)
+                                    List(selection: $selection) {
+                                        ForEach(authorizedList, id: \.bundleId) { browser in
+                                            HStack {
+                                                if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: browser.bundleId) {
+                                                    Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
+                                                        .resizable()
+                                                        .frame(width: 16, height: 16)
+                                                        .cornerRadius(3)
+                                                } else {
+                                                    Image(systemName: "network")
+                                                        .resizable()
+                                                        .frame(width: 16, height: 16)
+                                                        .foregroundColor(.secondary)
+                                                }
+                                                
+                                                Text(browser.name)
+                                                    .font(.body)
+                                                
+                                                Spacer()
+                                                
+                                                // Show as granted if it's in our authorized list
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .font(.caption)
+                                                    .foregroundColor(.green)
                                             }
-                                            .buttonStyle(.plain)
+                                            .tag(browser.bundleId)
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
+                                                selection = browser.bundleId
+                                            }
                                         }
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 2)
                                     }
+                                    .frame(height: min(120, CGFloat(authorizedList.count) * 28 + 8))
+                                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                            .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+                                    )
+                                    .padding(.horizontal, 10)
+                                    
+                                    HStack {
+                                        Spacer()
+                                        Button {
+                                            if let sel = selection {
+                                                permissionManager.removeBrowser(bundleId: sel)
+                                                selection = nil
+                                            }
+                                        } label: {
+                                            Image(systemName: "minus")
+                                                .frame(width: 20, height: 14)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .disabled(selection == nil)
+                                        .padding(.trailing, 14)
+                                    }
+                                    .padding(.top, 4)
                                 }
-                                .padding(.bottom, 8)
+                                .padding(.bottom, 12)
                             }
                         }
                     }
@@ -106,6 +141,9 @@ struct AdvancedSettingsView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .onAppear {
+            permissionManager.checkPermissions()
         }
     }
     
@@ -124,6 +162,11 @@ struct AdvancedSettingsView: View {
                     let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent
                     permissionManager.addBrowser(bundleId: bundleId, name: name)
                     permissionManager.requestAutomationPermission(for: bundleId, appName: name)
+                    
+                    // Refresh selection to help user
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        permissionManager.checkPermissions()
+                    }
                 }
             }
         }
