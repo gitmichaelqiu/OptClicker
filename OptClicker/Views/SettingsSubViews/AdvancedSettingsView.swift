@@ -9,12 +9,14 @@ struct AdvancedSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                // Hotkey Section
                 SettingsSection("Settings.Shortcuts.General") {
                     SettingsRow("Settings.Shortcuts.Hotkey") {
                         Text(hotkeyManager.shortcutDescription)
                             .font(.body)
                             .foregroundColor(.primary)
                     }
+                    .frame(minHeight: 36)
                     
                     Divider()
 
@@ -29,8 +31,10 @@ struct AdvancedSettingsView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .trailing)
                     }
+                    .frame(minHeight: 36)
                 }
                 
+                // Permissions Section
                 SettingsSection("Settings.Advanced.Permissions") {
                     VStack(alignment: .leading, spacing: 0) {
                         // Accessibility
@@ -66,7 +70,7 @@ struct AdvancedSettingsView: View {
                                 .sorted(by: { $0.name < $1.name })
                             
                             if !authorizedList.isEmpty {
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: 0) {
                                     List(selection: $selection) {
                                         ForEach(authorizedList, id: \.bundleId) { browser in
                                             HStack {
@@ -87,19 +91,14 @@ struct AdvancedSettingsView: View {
                                                 
                                                 Spacer()
                                                 
-                                                // Show as granted if it's in our authorized list
                                                 Image(systemName: "checkmark.circle.fill")
                                                     .font(.caption)
                                                     .foregroundColor(.green)
                                             }
                                             .tag(browser.bundleId)
-                                            .contentShape(Rectangle())
-                                            .onTapGesture {
-                                                selection = browser.bundleId
-                                            }
                                         }
                                     }
-                                    .frame(height: min(120, CGFloat(authorizedList.count) * 28 + 8))
+                                    .frame(height: min(120, CGFloat(authorizedList.count) * 28 + 28))
                                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -107,24 +106,27 @@ struct AdvancedSettingsView: View {
                                     )
                                     .padding(.horizontal, 10)
                                     
-                                    HStack {
-                                        Spacer()
-                                        Button {
+                                    // Button bar similar to AutoToggleView
+                                    HStack(spacing: 12) {
+                                        Button(action: {
                                             if let sel = selection {
                                                 permissionManager.removeBrowser(bundleId: sel)
                                                 selection = nil
                                             }
-                                        } label: {
+                                        }) {
                                             Image(systemName: "minus")
-                                                .frame(width: 20, height: 14)
+                                                .frame(width: 24, height: 14)
+                                                .contentShape(Rectangle())
                                         }
                                         .buttonStyle(.plain)
                                         .disabled(selection == nil)
-                                        .padding(.trailing, 14)
+                                        
+                                        Spacer()
                                     }
+                                    .padding(.horizontal, 14)
                                     .padding(.top, 4)
+                                    .padding(.bottom, 8)
                                 }
-                                .padding(.bottom, 12)
                             }
                         }
                     }
