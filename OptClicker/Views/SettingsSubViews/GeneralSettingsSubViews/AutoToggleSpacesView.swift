@@ -44,15 +44,20 @@ struct AutoToggleSpacesView: View {
 
         if isExpandedLocal {
             VStack(alignment: .leading, spacing: 0) {
-                let displayRules: [(id: String, name: String, icon: String)] = rules.map { rule in
-                    if rule == "fullscreen" {
-                        return (rule, "Fullscreen", "rectangle.expand.vertical")
-                    } else if let space = spaceManager.availableSpaces.first(where: { $0.id == rule }) {
-                        return (rule, space.name, "square.grid.2x2")
-                    } else {
-                        return (rule, rule, "questionmark.square")
+                let displayRules: [(id: String, name: String, icon: String)] = {
+                    if rules.isEmpty {
+                        return [("all", "All", "square.grid.3x3.fill")]
                     }
-                }
+                    return rules.map { rule in
+                        if rule == "fullscreen" {
+                            return (rule, "Fullscreen", "rectangle.expand.vertical")
+                        } else if let space = spaceManager.availableSpaces.first(where: { $0.id == rule }) {
+                            return (rule, space.name, "square.grid.2x2")
+                        } else {
+                            return (rule, rule, "questionmark.square")
+                        }
+                    }
+                }()
 
                 List(selection: $selection) {
                     ForEach(displayRules, id: \.id) { item in
@@ -63,9 +68,11 @@ struct AutoToggleSpacesView: View {
                                 .frame(width: 16, height: 16)
                                 .foregroundColor(.secondary)
                             Text(item.name)
+                                .foregroundColor(item.id == "all" ? .secondary : .primary)
+                                .italic(item.id == "all")
                             Spacer()
                         }
-                        .tag(item.id)
+                        .tag(item.id == "all" ? nil : item.id)
                     }
                 }
                 .frame(height: min(160, CGFloat(displayRules.count) * 28 + 28))
@@ -105,6 +112,14 @@ struct AutoToggleSpacesView: View {
                         systemImage: "minus",
                         action: removeSelectedRule,
                         disabled: selection == nil
+                    )
+                    
+                    Divider().frame(height: 16)
+                    
+                    addButton(
+                        systemImage: "trash",
+                        action: removeAllRules,
+                        disabled: rules.isEmpty
                     )
                     
                     Spacer()
@@ -149,6 +164,28 @@ struct AutoToggleSpacesView: View {
                 rules.remove(at: idx)
                 selection = nil
                 onRuleChange()
+            }
+        }
+    }
+    
+    private func removeAllRules() {
+        let alert = NSAlert()
+        alert.messageText = "Remove All Targeted Spaces"
+        alert.informativeText = "Are you sure to remove all targeted spaces?"
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Cancel")
+        alert.alertStyle = .informational
+        
+        Task {
+            if let targetWindow = NSApp.suitableSheetWindow(nil) {
+                let response = await alert.beginSheetModal(for: targetWindow)
+                if response == .alertFirstButtonReturn {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        rules.removeAll()
+                        selection = nil
+                        onRuleChange()
+                    }
+                }
             }
         }
     }
