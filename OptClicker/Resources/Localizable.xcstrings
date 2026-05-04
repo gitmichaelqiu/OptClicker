@@ -134,6 +134,9 @@
         }
       }
     },
+    "Control which app and dock to show in each space." : {
+
+    },
     "CrossOver %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -441,6 +444,12 @@
     "More Apps" : {
 
     },
+    "My GitHub" : {
+
+    },
+    "My website" : {
+
+    },
     "No Spaces available (DesktopRenamer not running?)" : {
 
     },
@@ -450,13 +459,19 @@
     "OptClicker" : {
 
     },
-    "OptClicker lets you simulate right-clicks by pressing the Option (⌥) key." : {
+    "OptClicker's GitHub" : {
+
+    },
+    "OptClicker's website" : {
 
     },
     "Partial match" : {
 
     },
     "Permissions" : {
+
+    },
+    "Report an issue" : {
 
     },
     "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported." : {
@@ -1955,6 +1970,9 @@
 
     },
     "Targeted spaces" : {
+
+    },
+    "The ultimate desktop naming and management tool." : {
 
     },
     "Toggle OptClicker" : {

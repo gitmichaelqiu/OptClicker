@@ -31,7 +31,7 @@ let sidebarWidth: CGFloat = 180
 let defaultSettingsWindowWidth: CGFloat = 750
 let defaultSettingsWindowHeight: CGFloat = 550
 let sidebarRowHeight: CGFloat = 32
-let sidebarFontSize: CGFloat = 14
+let sidebarFontSize: CGFloat = 16
 let titleHeaderHeight: CGFloat = 48
 
 struct SettingsView: View {
@@ -74,7 +74,7 @@ struct SettingsView: View {
                     }
                 } header: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Color.clear.frame(height: 30)
+                        Color.clear.frame(height: 45)
                         Text("Opt").font(.custom("Syncopate-Bold", size: 21)).foregroundStyle(.primary)
                         Text("Clicker").font(.custom("Syncopate-Bold", size: 21)).foregroundStyle(.primary).padding(.bottom, 20)
                     }
@@ -96,9 +96,9 @@ struct SettingsView: View {
                     }
                 } header: {
                     VStack(alignment: .leading, spacing: 2) {
-                        Color.clear.frame(height: 30)
-                        Text("Opt").font(.system(size: 21, weight: .bold, design: .monospaced)).foregroundStyle(.primary)
-                        Text("Clicker").font(.system(size: 21, weight: .bold, design: .monospaced)).foregroundStyle(.primary).padding(.bottom, 20)
+                        Color.clear.frame(height: 45)
+                        Text("Opt").font(.custom("Syncopate-Bold", size: 21)).foregroundStyle(.primary)
+                        Text("Clicker").font(.custom("Syncopate-Bold", size: 21)).foregroundStyle(.primary).padding(.bottom, 20)
                     }
                 }
                 .collapsible(false)
@@ -140,7 +140,7 @@ struct SettingsView: View {
             if let tab = selectedTab {
                 VStack(spacing: 0) {
                     HStack {
-                        Text(tab.localizedName).font(.system(size: 18, weight: .semibold)).padding(
+                        Text(tab.localizedName).font(.system(size: 20, weight: .semibold)).padding(
                             .leading, 20)
                         Spacer()
                     }
@@ -162,7 +162,7 @@ struct SettingsView: View {
                     .padding(.leading, 2)
             } icon: {
                 Image(systemName: tab.iconName).resizable().scaledToFit().frame(
-                    height: sidebarRowHeight - 16)
+                    height: sidebarRowHeight - 15)
             }
         }
         .frame(height: sidebarRowHeight)

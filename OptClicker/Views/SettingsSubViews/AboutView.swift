@@ -29,7 +29,7 @@ struct AboutView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(appName)
-                            .font(.system(size: 24, weight: .bold, design: .monospaced))
+                            .font(.custom("Syncopate-Bold", size: 24))
                         
                         Text("v\(appVersion)")
                             .font(.title3)
@@ -41,11 +41,6 @@ struct AboutView: View {
                     }
                 }
 
-                // Description
-                Text("OptClicker lets you simulate right-clicks by pressing the Option (⌥) key.")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-
                 // Links Section
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Links")
@@ -53,11 +48,11 @@ struct AboutView: View {
                         .foregroundColor(.primary)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        AboutLinkRow(title: "Report an issue", url: "https://github.com/gitmichaelqiu/OptClicker/issues")
-                        AboutLinkRow(title: "OptClicker's website", url: "https://gitmichaelqiu.github.io/OptClicker")
-                        AboutLinkRow(title: "OptClicker's GitHub", url: "https://github.com/gitmichaelqiu/OptClicker")
-                        AboutLinkRow(title: "Michael's Website", url: "https://gitmichaelqiu.github.io")
-                        AboutLinkRow(title: "Michael's GitHub", url: "https://github.com/gitmichaelqiu")
+                        AboutLinkRow(title: NSLocalizedString("Report an issue", comment: ""), url: "https://github.com/gitmichaelqiu/OptClicker/issues")
+                        AboutLinkRow(title: NSLocalizedString("OptClicker's website", comment: ""), url: "https://gitmichaelqiu.github.io/OptClicker")
+                        AboutLinkRow(title: NSLocalizedString("OptClicker's GitHub", comment: ""), url: "https://github.com/gitmichaelqiu/OptClicker")
+                        AboutLinkRow(title: NSLocalizedString("My website", comment: ""), url: "https://gitmichaelqiu.github.io")
+                        AboutLinkRow(title: NSLocalizedString("My GitHub", comment: ""), url: "https://github.com/gitmichaelqiu")
                     }
                 }
 
@@ -69,16 +64,16 @@ struct AboutView: View {
                     
                     VStack(spacing: 12) {
                         OtherAppRow(
-                            imageName: "DesktopRenamerIcon", // Try to find icon in Assets
+                            imageName: "DesktopRenamerIcon_Default",
                             appName: "DesktopRenamer",
-                            description: "The ultimate desktop naming and management tool.",
+                            description: NSLocalizedString("The ultimate desktop naming and management tool.", comment: ""),
                             url: "https://github.com/gitmichaelqiu/DesktopRenamer"
                         )
                         
                         OtherAppRow(
-                            imageName: "SpaceSwitcherIcon",
+                            imageName: "SpaceSwitcherIcon_Default",
                             appName: "SpaceSwitcher",
-                            description: "Control which app and dock to show in each space.",
+                            description: NSLocalizedString("Control which app and dock to show in each space.", comment: ""),
                             url: "https://github.com/gitmichaelqiu/SpaceSwitcher"
                         )
                     }
@@ -134,24 +129,27 @@ struct OtherAppRow: View {
     var body: some View {
         Link(destination: URL(string: url)!) {
             HStack(spacing: 16) {
-                // Icon Placeholder
+                // Icon
                 ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.secondary.opacity(0.1))
-                        .frame(width: 44, height: 44)
-                    
-                    Image(systemName: "app.dashed")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(.secondary)
+                    if let nsImage = NSImage(named: imageName) {
+                        Image(nsImage: nsImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 44, height: 44)
+                    } else {
+                        Image(systemName: "app.dashed")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .shadow(color: .black.opacity(isHovering ? 0.2 : 0.1), radius: isHovering ? 6 : 2, x: 0, y: 2)
                 .scaleEffect(isHovering ? 1.05 : 1.0)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(appName)
-                        .font(.headline)
+                        .font(.custom("Syncopate-Bold", size: 17))
                         .foregroundColor(.primary)
                     
                     Text(description)
@@ -166,6 +164,7 @@ struct OtherAppRow: View {
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundColor(.accentColor)
+                        .transition(.opacity.combined(with: .move(edge: .leading)))
                 }
             }
             .padding(12)
