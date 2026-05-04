@@ -98,7 +98,7 @@ struct GeneralSettingsView: View {
                     }
 
                     SettingsRow("Check for updates") {
-                        Button("Check Now") {
+                        Button(NSLocalizedString("Check Now", comment: "")) {
                             UpdateManager.shared.updaterController.checkForUpdates(nil)
                         }
                     }

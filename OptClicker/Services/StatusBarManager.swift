@@ -76,7 +76,7 @@ class StatusBarManager: ObservableObject {
         
         // Toggle item
         let toggleItem = NSMenuItem(
-            title: "Option → Right Click",
+            title: NSLocalizedString("Option → Right Click", comment: ""),
             action: #selector(handleToggleItemClick),
             keyEquivalent: ""
         )
@@ -87,7 +87,7 @@ class StatusBarManager: ObservableObject {
 
         // Auto Toggle item
         let autoToggleItem = NSMenuItem(
-            title: "Auto Toggle",
+            title: NSLocalizedString("Auto Toggle", comment: ""),
             action: #selector(handleAutoToggleItemClick),
             keyEquivalent: ""
         )
@@ -107,7 +107,7 @@ class StatusBarManager: ObservableObject {
         if showProc {
             if let procName = inputManager.getFrontmostProcessNameExcludingSelf() {
                 let title = String(
-                    format: "Frontmost Process: %@",
+                    format: NSLocalizedString("Frontmost Process: %@", comment: ""),
                     procName
                 )
                 let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
@@ -120,7 +120,7 @@ class StatusBarManager: ObservableObject {
 
         // Settings
         let settingsItem = NSMenuItem(
-            title: "Settings...",
+            title: NSLocalizedString("Settings...", comment: ""),
             action: #selector(handleSettingsItemClick),
             keyEquivalent: ","
         )
@@ -132,7 +132,7 @@ class StatusBarManager: ObservableObject {
 
         // Quit
         let quitItem = NSMenuItem(
-            title: "Quit",
+            title: NSLocalizedString("Quit", comment: ""),
             action: #selector(handleQuitItemClick),
             keyEquivalent: "q"
         )
@@ -163,7 +163,7 @@ class StatusBarManager: ObservableObject {
         let combinedImage = NSImage(size: iconSize)
         combinedImage.lockFocus()
 
-        if let image = NSImage(systemSymbolName: "option", accessibilityDescription: "Option") {
+        if let image = NSImage(systemSymbolName: "option", accessibilityDescription: NSLocalizedString("Option", comment: "")) {
             let resized = resizeImage(image, to: iconSize)
             resized.draw(in: NSRect(origin: .zero, size: iconSize))
         }

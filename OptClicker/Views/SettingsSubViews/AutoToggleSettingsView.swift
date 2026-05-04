@@ -31,7 +31,7 @@ struct AutoToggleSettingsView: View {
                 }
 
                 if inputManager.isAutoToggleEnabled {
-                    SettingsSection("Rules") {
+                SettingsSection("Rules") {
                         // Toggle logic selection
                         SettingsRow("Based on apps") {
                             Toggle("", isOn: $inputManager.isBasedOnApps)

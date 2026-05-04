@@ -11,9 +11,9 @@ enum AutoToggleBehavior: String, CaseIterable {
     var localizedDescription: String {
         switch self {
         case .disable:
-            return "Disable OptClicker"
+            return NSLocalizedString("Disable OptClicker", comment: "")
         case .followLast:
-            return "Follow last setting"
+            return NSLocalizedString("Follow last setting", comment: "")
         }
     }
 }
@@ -26,11 +26,11 @@ enum LaunchBehavior: String, CaseIterable {
     var localizedDescription: String {
         switch self {
         case .enabled:
-            return "Enable OptClicker"
+            return NSLocalizedString("Enable OptClicker", comment: "")
         case .disabled:
-            return "Disable OptClicker"
+            return NSLocalizedString("Disable OptClicker", comment: "")
         case .lastState:
-            return "Follow last setting"
+            return NSLocalizedString("Follow last setting", comment: "")
         }
     }
 }
@@ -41,8 +41,8 @@ enum MatchCondition: String, CaseIterable {
 
     var localizedDescription: String {
         switch self {
-        case .and: return "And"
-        case .or: return "Or"
+        case .and: return NSLocalizedString("And", comment: "")
+        case .or: return NSLocalizedString("Or", comment: "")
         }
     }
 }
@@ -382,22 +382,22 @@ class InputManager: ObservableObject {
         if let am = appMatch, let sm = spaceMatch {
             if matchCondition == .and {
                 let result = am && sm
-                let reason = result ? "Enabled by both apps and spaces" : "Disabled (does not match both conditions)"
+                let reason = result ? NSLocalizedString("Enabled by both apps and spaces", comment: "") : NSLocalizedString("Disabled (does not match both conditions)", comment: "")
                 return (result, reason)
             } else {
                 let result = am || sm
-                let reason = result ? "Enabled by app or space match" : "Disabled (no app or space match)"
+                let reason = result ? NSLocalizedString("Enabled by app or space match", comment: "") : NSLocalizedString("Disabled (no app or space match)", comment: "")
                 return (result, reason)
             }
         } else if let am = appMatch {
-            let reason = am ? "Enabled by app match" : "Disabled by app mismatch"
+            let reason = am ? NSLocalizedString("Enabled by app match", comment: "") : NSLocalizedString("Disabled by app mismatch", comment: "")
             return (am, reason)
         } else if let sm = spaceMatch {
-            let reason = sm ? "Enabled by space match" : "Disabled by space mismatch"
+            let reason = sm ? NSLocalizedString("Enabled by space match", comment: "") : NSLocalizedString("Disabled by space mismatch", comment: "")
             return (sm, reason)
         }
         
-        return (false, "Disabled (no auto-toggle conditions enabled)")
+        return (false, NSLocalizedString("Disabled (no auto-toggle conditions enabled)", comment: ""))
     }
 
     private func handleFrontmostAppChange(notification: Notification) {
@@ -410,7 +410,7 @@ class InputManager: ObservableObject {
         objectWillChange.send()
 
         guard isAutoToggleEnabled else {
-            self.statusReason = "Auto-toggle is disabled"
+            self.statusReason = NSLocalizedString("Auto-toggle is disabled", comment: "")
             return
         }
 

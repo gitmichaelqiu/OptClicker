@@ -38,9 +38,9 @@ class HotkeyManager: ObservableObject {
 
     func shortcutDescription(for type: HotkeyType) -> String {
         if listeningType == type {
-            return "Press new shortcut…"
+            return NSLocalizedString("Press new shortcut…", comment: "")
         }
-        return shortcuts[type]?.description ?? "Unassigned"
+        return shortcuts[type]?.description ?? NSLocalizedString("Unassigned", comment: "")
     }
 
     // MARK: - Shortcut Handling
@@ -218,7 +218,7 @@ struct Shortcut: Equatable, Codable {
     }
 
     var description: String {
-        if key == nil { return "Unassigned" }
+        if key == nil { return NSLocalizedString("Unassigned", comment: "") }
 
         var parts: [String] = []
         if modifiers.contains(.control) { parts.append("^") }

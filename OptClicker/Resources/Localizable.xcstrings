@@ -60,12 +60,82 @@
         }
       }
     },
+    "Add" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加"
+          }
+        }
+      }
+    },
+    "Add App by Process Name" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加进程名称"
+          }
+        }
+      }
+    },
+    "Add Partial Process Match" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加模糊进程名称"
+          }
+        }
+      }
+    },
+    "Add Website Rule" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加网站"
+          }
+        }
+      }
+    },
+    "And" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "且"
+          }
+        }
+      }
+    },
+    "Are you sure to remove all target apps?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要删除所有的App？"
+          }
+        }
+      }
+    },
     "Auto Toggle" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "自动切换"
+          }
+        }
+      }
+    },
+    "Auto-toggle is disabled" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动切换已禁用"
           }
         }
       }
@@ -120,6 +190,16 @@
         }
       }
     },
+    "Cancel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
+    },
     "Check for updates" : {
       "localizations" : {
         "zh-Hans" : {
@@ -150,12 +230,22 @@
         }
       }
     },
-    "Chrome %@" : {
+    "Choose Application" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chrome %@"
+            "value" : "选择App"
+          }
+        }
+      }
+    },
+    "Chrome Apps" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chrome的App"
           }
         }
       }
@@ -241,12 +331,94 @@
         }
       }
     },
-    "CrossOver %@" : {
+    "CrossOver Apps" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CrossOver %@"
+            "value" : "CrossOver的App"
+          }
+        }
+      }
+    },
+    "Disable OptClicker" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禁用OptClicker"
+          }
+        }
+      }
+    },
+    "Disabled (does not match both conditions)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禁用（两组条件都不满足）"
+          }
+        }
+      }
+    },
+    "Disabled (no app or space match)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禁用（无匹配App或桌面）"
+          }
+        }
+      }
+    },
+    "Disabled (no auto-toggle conditions enabled)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禁用（无自动切换条件）"
+          }
+        }
+      }
+    },
+    "Disabled by app mismatch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disabled (app mismatch)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禁用（无匹配App）"
+          }
+        }
+      }
+    },
+    "Disabled by space mismatch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disabled (space mismatch)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禁用（无匹配桌面）"
+          }
+        }
+      }
+    },
+    "Duplicated Process" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重复进程"
           }
         }
       }
@@ -261,12 +433,149 @@
         }
       }
     },
+    "Enable OptClicker" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用OptClicker"
+          }
+        }
+      }
+    },
     "Enable option → right click" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "启用Option → 右键"
+          }
+        }
+      }
+    },
+    "Enabled by app match" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enabled (app match)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用（匹配App）"
+          }
+        }
+      }
+    },
+    "Enabled by app or space match" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enabled (app or space match)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用（匹配App或桌面）"
+          }
+        }
+      }
+    },
+    "Enabled by both apps and spaces" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enabled (app and space match)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用（匹配App和桌面）"
+          }
+        }
+      }
+    },
+    "Enabled by space match" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enabled (space match)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用（匹配桌面）"
+          }
+        }
+      }
+    },
+    "Enter a domain or URL (e.g., google.com):" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入网站（如baidu.com）："
+          }
+        }
+      }
+    },
+    "Enter a pattern (case-insensitive)." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入进程匹配（不区分大小写）。"
+          }
+        }
+      }
+    },
+    "Enter the exact process name (case-insensitive):" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入精确的进程（不区分大小写）。"
+          }
+        }
+      }
+    },
+    "example.com" : {
+      "shouldTranslate" : false
+    },
+    "Folder Not Found" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文件夹未找到"
+          }
+        }
+      }
+    },
+    "Follow last setting" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟随上一次设置"
+          }
+        }
+      }
+    },
+    "Frontmost Process: %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最前进程：%@"
           }
         }
       }
@@ -636,6 +945,16 @@
         }
       }
     },
+    "Minecraft (%@)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我的世界（%@）"
+          }
+        }
+      }
+    },
     "More Apps" : {
       "localizations" : {
         "zh-Hans" : {
@@ -694,8 +1013,28 @@
         }
       }
     },
+    "OK" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确认"
+          }
+        }
+      }
+    },
     "Opt" : {
       "shouldTranslate" : false
+    },
+    "OptClicker cannot find %@ app folder" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OptClicker无法找到%@的文件夹"
+          }
+        }
+      }
     },
     "OptClicker's GitHub" : {
       "localizations" : {
@@ -717,6 +1056,29 @@
         }
       }
     },
+    "Option" : {
+      "shouldTranslate" : false
+    },
+    "Option → Right Click" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Option → 右键"
+          }
+        }
+      }
+    },
+    "Or" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "或"
+          }
+        }
+      }
+    },
     "Partial match" : {
       "localizations" : {
         "zh-Hans" : {
@@ -733,6 +1095,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "权限"
+          }
+        }
+      }
+    },
+    "Press new shortcut…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按下新快捷键"
+          }
+        }
+      }
+    },
+    "Process" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进程"
+          }
+        }
+      }
+    },
+    "Process (Partial): %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进程（模糊）：%@"
+          }
+        }
+      }
+    },
+    "Process %@ already exists" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进程%@已存在"
+          }
+        }
+      }
+    },
+    "Process: %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进程：%@"
+          }
+        }
+      }
+    },
+    "Quit" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
+        }
+      }
+    },
+    "Remove All Target Apps" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除所有目标App"
           }
         }
       }
@@ -787,12 +1219,12 @@
         }
       }
     },
-    "Safari %@" : {
+    "Safari Apps" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Safari %@"
+            "value" : "Safari的软件"
           }
         }
       }
@@ -813,6 +1245,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "设置"
+          }
+        }
+      }
+    },
+    "Settings..." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置…"
           }
         }
       }
@@ -2292,12 +2734,12 @@
         }
       }
     },
-    "Steam %@" : {
+    "Steam Games" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Steam %@"
+            "value" : "Steam游戏"
           }
         }
       }
@@ -2352,6 +2794,16 @@
         }
       }
     },
+    "Unassigned" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未分配"
+          }
+        }
+      }
+    },
     "Update" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2368,6 +2820,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "v%@"
+          }
+        }
+      }
+    },
+    "Website: %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "网站：%@"
           }
         }
       }
