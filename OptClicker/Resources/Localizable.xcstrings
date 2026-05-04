@@ -543,6 +543,40 @@
         }
       }
     },
+    "Settings.Advanced.Permissions.Automation.GrantedList" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authorized Browsers:"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已授权浏览器:"
+          }
+        }
+      }
+    },
+    "Settings.Advanced.Permissions.SelectBrowser" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Browser from Applications"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从应用程序中选择浏览器"
+          }
+        }
+      }
+    },
     "Settings.Advanced.Permissions.Description" : {
       "extractionState" : "manual",
       "localizations" : {

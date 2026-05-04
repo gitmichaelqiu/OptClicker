@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AdvancedSettingsView: View {
     @EnvironmentObject var hotkeyManager: HotkeyManager
@@ -6,19 +7,16 @@ struct AdvancedSettingsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 16) {
                 SettingsSection("Settings.Shortcuts.General") {
-                    // Row: label + current shortcut
                     SettingsRow("Settings.Shortcuts.Hotkey") {
                         Text(hotkeyManager.shortcutDescription)
                             .font(.body)
                             .foregroundColor(.primary)
                     }
-                    .frame(minHeight: 36)
-
+                    
                     Divider()
 
-                    // Row: buttons aligned right
                     SettingsRow("") {
                         HStack(spacing: 8) {
                             Button(NSLocalizedString("Settings.Shortcuts.Hotkey.Change", comment: "Change")) {
@@ -30,14 +28,13 @@ struct AdvancedSettingsView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .trailing)
                     }
-                    .frame(minHeight: 36)
                 }
                 
                 SettingsSection("Settings.Advanced.Permissions") {
                     VStack(alignment: .leading, spacing: 0) {
                         // Accessibility
                         SettingsRow("Settings.Advanced.Permissions.Accessibility", helperText: "Settings.Advanced.Permissions.Accessibility.Description") {
-                            HStack {
+                            HStack(spacing: 12) {
                                 PermissionStatusIcon(isGranted: permissionManager.isAccessibilityGranted)
                                 
                                 Button(permissionManager.isAccessibilityGranted ? NSLocalizedString("Settings.Advanced.Permissions.Settings", comment: "") : NSLocalizedString("Settings.Advanced.Permissions.Grant", comment: "")) {
@@ -46,29 +43,63 @@ struct AdvancedSettingsView: View {
                             }
                         }
                         
-                        Divider().padding(.vertical, 8)
+                        Divider()
                         
                         // Automation
-                        SettingsRow("Settings.Advanced.Permissions.Automation", helperText: "Settings.Advanced.Permissions.Automation.Description") {
-                            HStack {
-                                let anyGranted = permissionManager.isAutomationGrantedSafari || 
-                                                 permissionManager.isAutomationGrantedChrome || 
-                                                 permissionManager.isAutomationGrantedEdge || 
-                                                 permissionManager.isAutomationGrantedArc
-                                
-                                PermissionStatusIcon(isGranted: anyGranted)
-                                
-                                Menu {
-                                    browserButton(name: "Safari", bundleId: "com.apple.Safari", isGranted: permissionManager.isAutomationGrantedSafari)
-                                    browserButton(name: "Google Chrome", bundleId: "com.google.Chrome", isGranted: permissionManager.isAutomationGrantedChrome)
-                                    browserButton(name: "Microsoft Edge", bundleId: "com.microsoft.edgemac", isGranted: permissionManager.isAutomationGrantedEdge)
-                                    browserButton(name: "Arc", bundleId: "company.thebrowser.Browser", isGranted: permissionManager.isAutomationGrantedArc)
-                                } label: {
-                                    Text(NSLocalizedString("Settings.Advanced.Permissions.Grant", comment: ""))
+                        VStack(alignment: .leading, spacing: 0) {
+                            SettingsRow("Settings.Advanced.Permissions.Automation", helperText: "Settings.Advanced.Permissions.Automation.Description") {
+                                HStack(spacing: 12) {
+                                    let anyGranted = permissionManager.automationPermissions.values.contains(true)
+                                    PermissionStatusIcon(isGranted: anyGranted)
+                                    
+                                    Button(NSLocalizedString("Settings.Advanced.Permissions.Grant", comment: "")) {
+                                        selectBrowserFromApplications()
+                                    }
                                 }
+                            }
+                            
+                            let grantedBrowsers = permissionManager.knownBrowsers.filter { permissionManager.automationPermissions[$0.key] == true }
+                            
+                            if !grantedBrowsers.isEmpty {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(NSLocalizedString("Settings.Advanced.Permissions.Automation.GrantedList", comment: "Granted browsers:"))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .padding(.horizontal, 10)
+                                    
+                                    ForEach(grantedBrowsers.sorted(by: { $0.value < $1.value }), id: \.key) { bundleId, name in
+                                        HStack {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .font(.caption)
+                                                .foregroundColor(.green)
+                                            Text(name)
+                                                .font(.caption)
+                                            Spacer()
+                                            
+                                            Button {
+                                                permissionManager.removeBrowser(bundleId: bundleId)
+                                            } label: {
+                                                Image(systemName: "xmark")
+                                                    .font(.caption2)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 2)
+                                    }
+                                }
+                                .padding(.bottom, 8)
                             }
                         }
                     }
+                }
+                
+                if let helpText = NSLocalizedString("Settings.Advanced.Permissions.Description", comment: "") as String?, !helpText.isEmpty {
+                    Text(helpText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 4)
                 }
 
                 Spacer()
@@ -78,16 +109,22 @@ struct AdvancedSettingsView: View {
         }
     }
     
-    @ViewBuilder
-    private func browserButton(name: String, bundleId: String, isGranted: Bool) -> some View {
-        Button {
-            permissionManager.requestAutomationPermission(for: bundleId, appName: name)
-        } label: {
-            HStack {
-                if isGranted {
-                    Image(systemName: "checkmark")
+    private func selectBrowserFromApplications() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.application]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.title = NSLocalizedString("Settings.Advanced.Permissions.SelectBrowser", comment: "Select Browser")
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        
+        let hostWindow = NSApp.suitableSheetWindow(nil)!
+        panel.beginSheetModal(for: hostWindow) { response in
+            if response == .OK, let url = panel.url {
+                if let bundle = Bundle(url: url), let bundleId = bundle.bundleIdentifier {
+                    let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent
+                    permissionManager.addBrowser(bundleId: bundleId, name: name)
+                    permissionManager.requestAutomationPermission(for: bundleId, appName: name)
                 }
-                Text(name)
             }
         }
     }

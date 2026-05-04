@@ -7,12 +7,19 @@ class PermissionManager: ObservableObject {
     static let shared = PermissionManager()
 
     @Published var isAccessibilityGranted: Bool = false
-    @Published var isAutomationGrantedSafari: Bool = false
-    @Published var isAutomationGrantedChrome: Bool = false
-    @Published var isAutomationGrantedEdge: Bool = false
-    @Published var isAutomationGrantedArc: Bool = false
+    @Published var automationPermissions: [String: Bool] = [:] // bundleId: isGranted
+    
+    private let knownBrowsersKey = "PermissionManager.KnownBrowsers"
+    @Published var knownBrowsers: [String: String] = [:] // bundleId: appName
 
     private init() {
+        self.knownBrowsers = UserDefaults.standard.dictionary(forKey: knownBrowsersKey) as? [String: String] ?? [
+            "com.apple.Safari": "Safari",
+            "com.google.Chrome": "Google Chrome",
+            "com.microsoft.edgemac": "Microsoft Edge",
+            "company.thebrowser.Browser": "Arc"
+        ]
+        
         checkPermissions()
         // Re-verify permissions when the application returns to the foreground.
         NotificationCenter.default.addObserver(
@@ -34,10 +41,23 @@ class PermissionManager: ObservableObject {
         self.isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
 
         // Automation checks.
-        self.isAutomationGrantedSafari = isAutomationGranted(for: "com.apple.Safari")
-        self.isAutomationGrantedChrome = isAutomationGranted(for: "com.google.Chrome")
-        self.isAutomationGrantedEdge = isAutomationGranted(for: "com.microsoft.edgemac")
-        self.isAutomationGrantedArc = isAutomationGranted(for: "company.thebrowser.Browser")
+        var statuses: [String: Bool] = [:]
+        for bundleId in knownBrowsers.keys {
+            statuses[bundleId] = isAutomationGranted(for: bundleId)
+        }
+        self.automationPermissions = statuses
+    }
+    
+    func addBrowser(bundleId: String, name: String) {
+        knownBrowsers[bundleId] = name
+        UserDefaults.standard.set(knownBrowsers, forKey: knownBrowsersKey)
+        checkPermissions()
+    }
+    
+    func removeBrowser(bundleId: String) {
+        knownBrowsers.removeValue(forKey: bundleId)
+        UserDefaults.standard.set(knownBrowsers, forKey: knownBrowsersKey)
+        checkPermissions()
     }
 
     func isAutomationGranted(for bundleId: String) -> Bool {
