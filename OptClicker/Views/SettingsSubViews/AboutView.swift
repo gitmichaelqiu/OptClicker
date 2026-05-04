@@ -53,7 +53,9 @@ struct AboutView: View {
                         .foregroundColor(.primary)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        AboutLinkRow(title: "GitHub Repository", url: "https://github.com/gitmichaelqiu/OptClicker")
+                        AboutLinkRow(title: "Report an issue", url: "https://github.com/gitmichaelqiu/OptClicker/issues")
+                        AboutLinkRow(title: "OptClicker's website", url: "https://gitmichaelqiu.github.io/OptClicker")
+                        AboutLinkRow(title: "OptClicker's GitHub", url: "https://github.com/gitmichaelqiu/OptClicker")
                         AboutLinkRow(title: "Michael's Website", url: "https://gitmichaelqiu.github.io")
                         AboutLinkRow(title: "Michael's GitHub", url: "https://github.com/gitmichaelqiu")
                     }

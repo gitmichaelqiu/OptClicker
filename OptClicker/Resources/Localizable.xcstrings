@@ -17,6 +17,9 @@
     "↺" : {
 
     },
+    "◉" : {
+
+    },
     "About" : {
 
     },
@@ -39,9 +42,6 @@
 
     },
     "Behavior" : {
-
-    },
-    "Change…" : {
 
     },
     "Check for updates" : {
@@ -463,9 +463,6 @@
 
     },
     "Required for reading window information." : {
-
-    },
-    "Reset" : {
 
     },
     "Reset to default" : {

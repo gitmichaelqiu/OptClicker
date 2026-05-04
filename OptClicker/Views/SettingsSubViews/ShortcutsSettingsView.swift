@@ -8,26 +8,22 @@ struct ShortcutsSettingsView: View {
             VStack(alignment: .leading, spacing: 20) {
                 SettingsSection("Keyboard Shortcuts") {
                     SettingsRow("Toggle OptClicker") {
-                        Text(hotkeyManager.shortcutDescription)
-                            .font(.body)
-                            .foregroundColor(.primary)
-                    }
-                    .frame(minHeight: 36)
-                    
-                    Divider()
-
-                    SettingsRow("") {
-                        HStack(spacing: 8) {
-                            Button("Change…") {
+                        HStack {
+                            Text(hotkeyManager.shortcutDescription)
+                                .foregroundColor(.secondary)
+                                .padding(.trailing, 8)
+                            
+                            Button("◉") {
                                 hotkeyManager.startListeningForNewShortcut()
                             }
-                            Button("Reset") {
+                            .disabled(hotkeyManager.isListeningForShortcut)
+                            
+                            Button("↺") {
                                 hotkeyManager.resetToDefault()
                             }
+                            .disabled(hotkeyManager.isListeningForShortcut)
                         }
-                        .frame(maxWidth: .infinity, alignment: .trailing)
                     }
-                    .frame(minHeight: 36)
                 }
 
                 Spacer()

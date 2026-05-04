@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum SettingsTab: String, CaseIterable, Identifiable {
-    case general, autoToggle, permissions, shortcuts, about
+    case general, autoToggle, shortcuts, permissions, about
 
     var id: String { self.rawValue }
 
@@ -75,8 +75,8 @@ struct SettingsView: View {
                 } header: {
                     VStack(alignment: .leading, spacing: 2) {
                         Color.clear.frame(height: 30)
-                        Text("Opt").font(.system(size: 21, weight: .bold, design: .monospaced)).foregroundStyle(.primary)
-                        Text("Clicker").font(.system(size: 21, weight: .bold, design: .monospaced)).foregroundStyle(.primary).padding(.bottom, 20)
+                        Text("Opt").font(.custom("Syncopate-Bold", size: 21)).foregroundStyle(.primary)
+                        Text("Clicker").font(.custom("Syncopate-Bold", size: 21)).foregroundStyle(.primary).padding(.bottom, 20)
                     }
                 }
                 .collapsible(false)
