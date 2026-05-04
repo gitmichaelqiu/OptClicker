@@ -162,17 +162,25 @@ struct AdvancedSettingsView: View {
         panel.title = "Select Browser from Applications"
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
         
-        let hostWindow = NSApp.suitableSheetWindow(nil)!
-        panel.beginSheetModal(for: hostWindow) { response in
-            if response == .OK, let url = panel.url {
-                if let bundle = Bundle(url: url), let bundleId = bundle.bundleIdentifier {
-                    let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent
-                    
-                    DispatchQueue.main.async {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            permissionManager.addBrowser(bundleId: bundleId, name: name)
-                            permissionManager.requestAutomationPermission(for: bundleId, appName: name)
-                        }
+        if let hostWindow = NSApp.suitableSheetWindow(nil) {
+            panel.beginSheetModal(for: hostWindow) { response in
+                self.handleOpenPanelResponse(response, panel: panel)
+            }
+        } else {
+            let response = panel.runModal()
+            handleOpenPanelResponse(response, panel: panel)
+        }
+    }
+    
+    private func handleOpenPanelResponse(_ response: NSApplication.ModalResponse, panel: NSOpenPanel) {
+        if response == .OK, let url = panel.url {
+            if let bundle = Bundle(url: url), let bundleId = bundle.bundleIdentifier {
+                let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent
+                
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        permissionManager.addBrowser(bundleId: bundleId, name: name)
+                        permissionManager.requestAutomationPermission(for: bundleId, appName: name)
                     }
                 }
             }

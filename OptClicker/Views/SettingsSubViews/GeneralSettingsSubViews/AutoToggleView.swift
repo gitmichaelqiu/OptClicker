@@ -345,8 +345,14 @@ struct AutoToggleView: View {
             panel.directoryURL = url
         }
         
-        let hostWindow = NSApp.suitableSheetWindow(nil)!
-        panel.beginSheetModal(for: hostWindow) { response in
+        if let hostWindow = NSApp.suitableSheetWindow(nil) {
+            panel.beginSheetModal(for: hostWindow) { response in
+                if response == .OK, let url = panel.url {
+                    self.handleSelectedApp(url)
+                }
+            }
+        } else {
+            let response = panel.runModal()
             if response == .OK, let url = panel.url {
                 self.handleSelectedApp(url)
             }
@@ -374,9 +380,14 @@ struct AutoToggleView: View {
         alert.addButton(withTitle: "Add")
         alert.addButton(withTitle: "Cancel")
 
-        let hostWindow = NSApp.suitableSheetWindow(nil)!
-
-        alert.beginSheetModal(for: hostWindow) { response in
+        if let hostWindow = NSApp.suitableSheetWindow(nil) {
+            alert.beginSheetModal(for: hostWindow) { response in
+                if response == .alertFirstButtonReturn {
+                    self.processKeyword(textField.stringValue)
+                }
+            }
+        } else {
+            let response = alert.runModal()
             if response == .alertFirstButtonReturn {
                 self.processKeyword(textField.stringValue)
             }
@@ -420,8 +431,14 @@ struct AutoToggleView: View {
         alert.addButton(withTitle: "Add")
         alert.addButton(withTitle: "Cancel")
 
-        let hostWindow = NSApp.suitableSheetWindow(nil)!
-        alert.beginSheetModal(for: hostWindow) { response in
+        if let hostWindow = NSApp.suitableSheetWindow(nil) {
+            alert.beginSheetModal(for: hostWindow) { response in
+                if response == .alertFirstButtonReturn {
+                    self.processPartialKeyword(textField.stringValue)
+                }
+            }
+        } else {
+            let response = alert.runModal()
             if response == .alertFirstButtonReturn {
                 self.processPartialKeyword(textField.stringValue)
             }
@@ -465,8 +482,14 @@ struct AutoToggleView: View {
         alert.addButton(withTitle: "Add")
         alert.addButton(withTitle: "Cancel")
 
-        let hostWindow = NSApp.suitableSheetWindow(nil)!
-        alert.beginSheetModal(for: hostWindow) { response in
+        if let hostWindow = NSApp.suitableSheetWindow(nil) {
+            alert.beginSheetModal(for: hostWindow) { response in
+                if response == .alertFirstButtonReturn {
+                    self.processWebsiteKeyword(textField.stringValue)
+                }
+            }
+        } else {
+            let response = alert.runModal()
             if response == .alertFirstButtonReturn {
                 self.processWebsiteKeyword(textField.stringValue)
             }
