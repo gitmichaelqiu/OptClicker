@@ -95,7 +95,7 @@ class PermissionManager: ObservableObject {
         if bundleId == "com.apple.Safari" {
             scriptSource = "tell application \"Safari\" to return name of front document"
         } else {
-            scriptSource = "tell application \"\(appName)\" to return URL of active tab of front window"
+            scriptSource = "tell application id \"\(bundleId)\" to return URL of active tab of front window"
         }
         
         if let script = NSAppleScript(source: scriptSource) {
