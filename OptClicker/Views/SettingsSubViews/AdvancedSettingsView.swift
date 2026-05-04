@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ShortcutsSettingsView: View {
+struct AdvancedSettingsView: View {
     @EnvironmentObject var hotkeyManager: HotkeyManager
 
     var body: some View {
@@ -31,11 +31,34 @@ struct ShortcutsSettingsView: View {
                     }
                     .frame(minHeight: 36)
                 }
+                
+                SettingsSection("Settings.Advanced.Permissions") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(NSLocalizedString("Settings.Advanced.Permissions.Description", comment: "Description"))
+                            .font(.callout)
+                            .foregroundColor(.secondary)
+                        
+                        HStack {
+                            Spacer()
+                            Button(NSLocalizedString("Settings.Advanced.Permissions.Grant", comment: "Grant")) {
+                                requestAutomationPermission()
+                            }
+                        }
+                    }
+                }
 
                 Spacer()
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+    }
+    
+    private func requestAutomationPermission() {
+        let scriptSource = "tell application \"Safari\" to return name of front document"
+        var error: NSDictionary?
+        if let script = NSAppleScript(source: scriptSource) {
+            script.executeAndReturnError(&error)
         }
     }
 }

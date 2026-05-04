@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum SettingsTab: String {
-    case general, shortcuts, about
+    case general, advanced, about
 }
 
 struct SettingsView: View {
@@ -14,8 +14,8 @@ struct SettingsView: View {
                 Tab(NSLocalizedString("Settings.General", comment: "General"), systemImage: "gearshape.fill", value: .general) {
                     GeneralSettingsView(inputManager: inputManager)
                 }
-                Tab(NSLocalizedString("Settings.Shortcuts", comment: "Shortcuts"), systemImage: "keyboard.fill", value: .shortcuts) {
-                    ShortcutsSettingsView()
+                Tab(NSLocalizedString("Settings.Advanced", comment: "Advanced"), systemImage: "gearshape.2.fill", value: .advanced) {
+                    AdvancedSettingsView()
                 }
                 Tab(NSLocalizedString("Settings.About", comment: "About"), systemImage: "info.circle.fill", value: .about) {
                     AboutView()
@@ -33,14 +33,14 @@ struct SettingsView: View {
                    }
                    .tag(SettingsTab.general)
 
-                ShortcutsSettingsView()
+                AdvancedSettingsView()
                    .tabItem {
                        Label(
-                           NSLocalizedString("Settings.Shortcuts", comment: "Shortcuts"),
-                           systemImage: "keyboard.fill"
+                           NSLocalizedString("Settings.Advanced", comment: "Advanced"),
+                           systemImage: "gearshape.2.fill"
                        )
                    }
-                   .tag(SettingsTab.shortcuts)
+                   .tag(SettingsTab.advanced)
 
                 AboutView()
                    .tabItem {
