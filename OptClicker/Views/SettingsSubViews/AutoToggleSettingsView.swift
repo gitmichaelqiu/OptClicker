@@ -105,6 +105,8 @@ struct AutoToggleSettingsView: View {
         .animation(.easeInOut(duration: 0.2), value: inputManager.isAutoToggleEnabled)
         .animation(.easeInOut(duration: 0.2), value: inputManager.isBasedOnApps)
         .animation(.easeInOut(duration: 0.2), value: inputManager.isBasedOnSpaces)
+        .animation(.easeInOut(duration: 0.2), value: isAutoToggleExpanded)
+        .animation(.easeInOut(duration: 0.2), value: isAutoToggleSpacesExpanded)
     }
 
     private func saveAndRefresh() {

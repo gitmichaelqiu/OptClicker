@@ -130,6 +130,7 @@ struct AutoToggleSpacesView: View {
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 2)
+            .transition(.opacity.combined(with: .move(edge: .top)))
         }
     }
 
