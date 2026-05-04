@@ -2149,13 +2149,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toggle OptClicker"
+            "value" : "Toggle option → right click"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "启用/禁用 OptClicker"
+            "value" : "切换Option → 右键"
           }
         }
       }
