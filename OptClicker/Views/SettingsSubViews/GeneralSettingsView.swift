@@ -26,14 +26,14 @@ struct GeneralSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SettingsSection("Settings.General.OptClicker") {
-                    SettingsRow("Settings.General.OptClicker.EnableOptClicker") {
+                SettingsSection("OptClicker") {
+                    SettingsRow("Enable option → right click") {
                         Toggle("", isOn: $inputManager.isEnabled)
                             .labelsHidden()
                             .toggleStyle(.switch)
                     }
                     Divider()
-                    SettingsRow("Settings.General.OptClicker.EnableAutoToggle") {
+                    SettingsRow("Enable auto toggle") {
                         Toggle("", isOn: $inputManager.isAutoToggleEnabled)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -46,9 +46,9 @@ struct GeneralSettingsView: View {
                 }
 
                 if inputManager.isAutoToggleEnabled {
-                    SettingsSection("Settings.General.AutoToggle") {
+                    SettingsSection("Auto Toggle") {
                         // Toggle logic selection
-                        SettingsRow("Settings.General.AutoToggle.BasedOnApps") {
+                        SettingsRow("Based on apps") {
                             Toggle("", isOn: $inputManager.isBasedOnApps)
                                 .labelsHidden()
                                 .toggleStyle(.switch)
@@ -56,7 +56,7 @@ struct GeneralSettingsView: View {
                         
                         Divider()
                         
-                        SettingsRow("Settings.General.AutoToggle.BasedOnSpaces") {
+                        SettingsRow("Based on spaces") {
                             Toggle("", isOn: $inputManager.isBasedOnSpaces)
                                 .labelsHidden()
                                 .toggleStyle(.switch)
@@ -64,7 +64,7 @@ struct GeneralSettingsView: View {
                         
                         if inputManager.isBasedOnApps && inputManager.isBasedOnSpaces {
                             Divider()
-                            SettingsRow("Settings.General.AutoToggle.MatchCondition") {
+                            SettingsRow("Match condition") {
                                 Picker("", selection: $inputManager.matchCondition) {
                                     ForEach(MatchCondition.allCases, id: \.self) { condition in
                                         Text(condition.localizedDescription).tag(condition)
@@ -93,7 +93,7 @@ struct GeneralSettingsView: View {
                             Divider()
                         }
                         
-                        SettingsRow("Settings.General.AutoToggle.NotFrontmost") {
+                        SettingsRow("When not frontmost") {
                             Picker("", selection: $autoToggleBehavior) {
                                 ForEach(AutoToggleBehavior.allCases, id: \.self) { behavior in
                                     Text(behavior.localizedDescription).tag(behavior)
@@ -108,8 +108,8 @@ struct GeneralSettingsView: View {
                     }
                 }
 
-                SettingsSection("Settings.General.Launch") {
-                    SettingsRow("Settings.General.Launch.AtLogin") {
+                SettingsSection("Launch") {
+                    SettingsRow("Launch at login") {
                         Toggle("", isOn: $launchAtLogin)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -120,7 +120,7 @@ struct GeneralSettingsView: View {
                     if !inputManager.isAutoToggleEnabled {
                         Divider()
                         
-                        SettingsRow("Settings.General.LaunchBehavior") {
+                        SettingsRow("Launch behavior") {
                             Picker("", selection: $selectedLaunchBehavior) {
                                 ForEach(LaunchBehavior.allCases, id: \.self) { behavior in
                                     Text(behavior.localizedDescription).tag(behavior)
@@ -135,8 +135,8 @@ struct GeneralSettingsView: View {
                     }
                 }
                 
-                SettingsSection("Settings.General.Menubar") {
-                    SettingsRow("Settings.General.Menubar.ShowReason") {
+                SettingsSection("Menubar") {
+                    SettingsRow("Show OptClicker status reason") {
                         Toggle("", isOn: $showStatusReason)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -148,7 +148,7 @@ struct GeneralSettingsView: View {
                     
                     Divider()
                     
-                    SettingsRow("Settings.General.Menubar.ShowFrontmostProc") {
+                    SettingsRow("Show frontmost process name") {
                         Toggle("", isOn: $showFrontmostProc)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -159,8 +159,8 @@ struct GeneralSettingsView: View {
                     }
                 }
 
-                SettingsSection("Settings.General.Update") {
-                    SettingsRow("Settings.General.Update.AutoCheck") {
+                SettingsSection("Update") {
+                    SettingsRow("Automatically check for updates") {
                         Toggle("", isOn: $autoCheckForUpdates)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -169,8 +169,8 @@ struct GeneralSettingsView: View {
                             }
                     }
                     Divider()
-                    SettingsRow("Settings.General.Update.ManualCheck") {
-                        Button(NSLocalizedString("Settings.General.Update.ManualCheck", comment: "")) {
+                    SettingsRow("Check for updates") {
+                        Button("Check for updates") {
                             Task {
                                 await UpdateManager.shared.checkForUpdate(from: NSApp.keyWindow)
                             }

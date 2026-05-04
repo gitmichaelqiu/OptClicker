@@ -73,7 +73,7 @@ class StatusBarManager: ObservableObject {
         
         // Toggle item
         let toggleItem = NSMenuItem(
-            title: NSLocalizedString("Menu.Toggle", comment: "Option → Right Click"),
+            title: "Option → Right Click",
             action: #selector(handleToggleItemClick),
             keyEquivalent: ""
         )
@@ -93,7 +93,7 @@ class StatusBarManager: ObservableObject {
         if showProc {
             if let procName = inputManager.getFrontmostProcessNameExcludingSelf() {
                 let title = String(
-                    format: NSLocalizedString("Menu.Proc", comment: ""),
+                    format: "Frontmost Process: %@",
                     procName
                 )
                 let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
@@ -106,7 +106,7 @@ class StatusBarManager: ObservableObject {
 
         // Settings
         let settingsItem = NSMenuItem(
-            title: NSLocalizedString("Menu.Settings", comment: "Settings"),
+            title: "Settings...",
             action: #selector(handleSettingsItemClick),
             keyEquivalent: ","
         )
@@ -118,7 +118,7 @@ class StatusBarManager: ObservableObject {
 
         // Quit
         let quitItem = NSMenuItem(
-            title: NSLocalizedString("Menu.Quit", comment: "Quit"),
+            title: "Quit",
             action: #selector(handleQuitItemClick),
             keyEquivalent: "q"
         )
@@ -201,7 +201,7 @@ class StatusBarManager: ObservableObject {
         let reasonKey = inputManager.statusReason
         if reasonKey.isEmpty { return nil }
         
-        return NSLocalizedString(reasonKey, comment: "")
+        return reasonKey
     }
 }
 

@@ -108,7 +108,7 @@ struct OptClickerApp: App {
         Settings { EmptyView() }
         .commands {
             CommandGroup(replacing: .appInfo) {
-                Button(NSLocalizedString("Menu.About", comment: "")) {
+                Button("About OptClicker") {
                     UserDefaults.standard.set(SettingsTab.about.rawValue, forKey: "selectedSettingsTab")
                 }
             }

@@ -21,7 +21,7 @@ struct AutoToggleSpacesView: View {
     }
     
     var body: some View {
-        SettingsRow("Settings.General.AutoToggle.TargetSpaces") {
+        SettingsRow("Targeted spaces") {
             HStack(spacing: 8) {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.16)) {
@@ -46,7 +46,7 @@ struct AutoToggleSpacesView: View {
             VStack(alignment: .leading, spacing: 0) {
                 let displayRules: [(id: String, name: String, icon: String)] = rules.map { rule in
                     if rule == "fullscreen" {
-                        return (rule, NSLocalizedString("Settings.General.AutoToggle.Space.Fullscreen", comment: ""), "rectangle.expand.vertical")
+                        return (rule, "Fullscreen", "rectangle.expand.vertical")
                     } else if let space = spaceManager.availableSpaces.first(where: { $0.id == rule }) {
                         return (rule, space.name, "square.grid.2x2")
                     } else {
@@ -77,14 +77,14 @@ struct AutoToggleSpacesView: View {
 
                 HStack {
                     Menu {
-                        Button(NSLocalizedString("Settings.General.AutoToggle.Space.Fullscreen", comment: "")) {
+                        Button("Fullscreen") {
                             addRule("fullscreen")
                         }
                         
                         Divider()
                         
                         if spaceManager.availableSpaces.isEmpty {
-                            Text(NSLocalizedString("Settings.General.AutoToggle.Space.NoAPI", comment: ""))
+                            Text("No Spaces available (DesktopRenamer not running?)")
                                 .disabled(true)
                         } else {
                             ForEach(spaceManager.availableSpaces) { space in

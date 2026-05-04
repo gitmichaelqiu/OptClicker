@@ -44,8 +44,8 @@ class UpdateManager {
                   let tag = json["tag_name"] as? String else {
                 if !suppressUpToDateAlert {
                     await showAlert(
-                        NSLocalizedString("Settings.General.Update.Failed.Title", comment: ""),
-                        NSLocalizedString("Settings.General.Update.Failed.Msg", comment: ""),
+                        "Update Check Failed",
+                        "OptClicker could not connect to the update server. Please check your network.",
                         in: window
                     )
                 }
@@ -61,10 +61,10 @@ class UpdateManager {
                 }
                 
                 let alert = NSAlert()
-                alert.messageText = NSLocalizedString("Settings.General.Update.Available.Title", comment: "")
-                alert.informativeText = String(format: NSLocalizedString("Settings.General.Update.Available.Msg", comment: ""), currentVersion, latestVersion)
-                alert.addButton(withTitle: NSLocalizedString("Settings.General.Update.Available.Button.Update", comment: ""))
-                alert.addButton(withTitle: NSLocalizedString("Settings.General.Update.Available.Button.Cancel", comment: ""))
+                alert.messageText = "Update Available"
+                alert.informativeText = String(format: "v%@ → v%@ is available. Open the release page to download and install?", currentVersion, latestVersion)
+                alert.addButton(withTitle: "Update & Quit")
+                alert.addButton(withTitle: "Cancel")
                 alert.alertStyle = .informational
                 
                 let response = await alert.beginSheetModal(
@@ -80,16 +80,16 @@ class UpdateManager {
                 }
             } else if !suppressUpToDateAlert {
                 await showAlert(
-                    NSLocalizedString("Settings.General.Update.UpToDate.Title", comment: ""),
-                    String(format: NSLocalizedString("Settings.General.Update.UpToDate.Msg", comment: ""), currentVersion),
+                    "Up to Date",
+                    String(format: "You are running the latest version (%@).", currentVersion),
                     in: window
                 )
             }
         } catch {
             if !suppressUpToDateAlert {
                 await showAlert(
-                    NSLocalizedString("Settings.General.Update.Failed.Title", comment: ""),
-                    NSLocalizedString("Settings.General.Update.Failed.Msg", comment: ""),
+                    "Update Check Failed",
+                    "OptClicker could not connect to the update server. Please check your network.",
                     in: window
                 )
             } else {
@@ -164,21 +164,21 @@ class UpdateManager {
     }
     
     private func sendCheckFailedNotification() {
-        let title = NSLocalizedString("Settings.General.Update.Failed.Notif.Title", comment: "")
-        let body = NSLocalizedString("Settings.General.Update.Failed.Notif.Msg", comment: "")
+        let title = "OptClicker Update Check Failed"
+        let body = "Could not connect to the update server. Please check your network."
         sendNotification(title: title, body: body)
     }
     
     private func sendUpdateAvailableNotification(latestVersion: String, currentVersion: String) {
-        let title = NSLocalizedString("Settings.General.Update.Available.Notif.Title", comment: "")
+        let title = "OptClicker Update Available"
         let body = String(
-            format: NSLocalizedString("Settings.General.Update.Available.Notif.Msg", comment: ""),
+            format: "v%@ → v%@ is available. Click to open the release page.",
             currentVersion, latestVersion
         )
         sendNotification(
             title: title,
             body: body,
-            actionTitle: NSLocalizedString("Settings.General.Update.Available.Button.Update", comment: ""),
+            actionTitle: "Update & Quit",
             actionHandlerID: "openRelease"
         )
     }

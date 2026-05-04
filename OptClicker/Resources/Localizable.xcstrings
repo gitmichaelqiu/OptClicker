@@ -1,174 +1,4 @@
 {
-  "Settings.Status.Reason.Disabled" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Auto-toggle is disabled"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "自动切换已禁用"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.Match.App" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Enabled by app match"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "由于应用匹配而启用"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.Match.Both" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Enabled by both apps and spaces"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "由于应用和桌面均匹配而启用"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.Match.Either" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Enabled by app or space match"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "由于应用或桌面匹配而启用"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.Match.Space" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Enabled by space match"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "由于桌面匹配而启用"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.NoCondition" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Disabled (no auto-toggle conditions enabled)"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "禁用 (未启用任何自动切换条件)"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.NoMatch.App" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Disabled by app mismatch"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "由于应用不匹配而禁用"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.NoMatch.Both" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Disabled (does not match both conditions)"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "禁用 (不同时满足两个条件)"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.NoMatch.Either" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Disabled (no app or space match)"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "禁用 (应用和桌面均不匹配)"
-        }
-      }
-    }
-  },
-  "Settings.Status.Reason.NoMatch.Space" : {
-    "extractionState" : "manual",
-    "localizations" : {
-      "en" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "Disabled by space mismatch"
-        }
-      },
-      "zh-Hans" : {
-        "stringUnit" : {
-          "state" : "translated",
-          "value" : "由于桌面不匹配而禁用"
-        }
-      }
-    }
-  },
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
@@ -185,6 +15,39 @@
       }
     },
     "↺" : {
+
+    },
+    "About" : {
+
+    },
+    "About OptClicker" : {
+
+    },
+    "Accessibility" : {
+
+    },
+    "Advanced" : {
+
+    },
+    "Auto Toggle" : {
+
+    },
+    "Automatically check for updates" : {
+
+    },
+    "Automation" : {
+
+    },
+    "Based on apps" : {
+
+    },
+    "Based on spaces" : {
+
+    },
+    "Change…" : {
+
+    },
+    "Check for updates" : {
 
     },
     "Chrome %@" : {
@@ -274,6 +137,36 @@
           }
         }
       }
+    },
+    "Enable auto toggle" : {
+
+    },
+    "Enable option → right click" : {
+
+    },
+    "Fullscreen" : {
+
+    },
+    "General" : {
+
+    },
+    "GitHub Repository" : {
+
+    },
+    "Grant" : {
+
+    },
+    "Launch" : {
+
+    },
+    "Launch at login" : {
+
+    },
+    "Launch behavior" : {
+
+    },
+    "Match condition" : {
+
     },
     "Menu.About" : {
       "extractionState" : "manual",
@@ -530,6 +423,33 @@
         }
       }
     },
+    "Menubar" : {
+
+    },
+    "No Spaces available (DesktopRenamer not running?)" : {
+
+    },
+    "OptClicker" : {
+
+    },
+    "OptClicker lets you simulate right-clicks by pressing the Option (⌥) key." : {
+
+    },
+    "Partial match" : {
+
+    },
+    "Permissions" : {
+
+    },
+    "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported." : {
+
+    },
+    "Required for reading window information." : {
+
+    },
+    "Reset" : {
+
+    },
     "Reset to default" : {
 
     },
@@ -542,6 +462,9 @@
           }
         }
       }
+    },
+    "Settings" : {
+
     },
     "Settings.About" : {
       "extractionState" : "manual",
@@ -1988,6 +1911,12 @@
         }
       }
     },
+    "Show frontmost process name" : {
+
+    },
+    "Show OptClicker status reason" : {
+
+    },
     "Steam %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1998,6 +1927,18 @@
         }
       }
     },
+    "Target apps" : {
+
+    },
+    "Targeted spaces" : {
+
+    },
+    "Toggle OptClicker" : {
+
+    },
+    "Update" : {
+
+    },
     "v%@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2007,6 +1948,9 @@
           }
         }
       }
+    },
+    "When not frontmost" : {
+
     }
   },
   "version" : "1.1"

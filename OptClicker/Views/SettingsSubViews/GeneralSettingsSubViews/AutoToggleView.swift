@@ -22,7 +22,7 @@ struct AutoToggleView: View {
     }
     
     var body: some View {
-        SettingsRow("Settings.General.AutoToggle.TargetApps") {
+        SettingsRow("Target apps") {
             HStack(spacing: 8) {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.16)) {
@@ -51,19 +51,19 @@ struct AutoToggleView: View {
                             // Exact proc
                             let kw = String(rule.dropFirst(5)).trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !kw.isEmpty else { return nil }
-                            let displayName = String(format: NSLocalizedString("Settings.General.AutoToggle.Process", comment: ""), kw)
+                            let displayName = String(format: "Process: %@", kw)
                             return (rule, displayName, nil, 0)
                         } else if rule.hasPrefix("proc~") {
                             // Partial proc
                             let kw = String(rule.dropFirst(5)).trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !kw.isEmpty else { return nil }
-                            let displayName = String(format: NSLocalizedString("Settings.General.AutoToggle.Process.Partial.Proc", comment: ""), kw)
+                            let displayName = String(format: "Process (Partial): %@", kw)
                             return (rule, displayName, nil, 1)
                         } else if rule.hasPrefix("web:") {
                             // Website
                             let kw = String(rule.dropFirst(4)).trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !kw.isEmpty else { return nil }
-                            let displayName = String(format: NSLocalizedString("Settings.General.AutoToggle.Website", comment: ""), kw)
+                            let displayName = String(format: "Website: %@", kw)
                             return (rule, displayName, NSImage(systemSymbolName: "network", accessibilityDescription: nil), 2)
                         } else {
                             // Bundle ID fallback
@@ -120,12 +120,12 @@ struct AutoToggleView: View {
                     
                     // Extra add
                     Menu {
-                        Button("Steam \(NSLocalizedString("Common.Translation.Game", comment: ""))") { addSteamApp() }
-                        Button("Chrome \(NSLocalizedString("Common.Translation.App", comment: ""))") { addChromeApp() }
-                        Button("CrossOver \(NSLocalizedString("Common.Translation.App", comment: ""))") { addCrossOverApp() }
-                        Button("Safari \(NSLocalizedString("Common.Translation.App", comment: ""))")  { addSafariApp() }
+                        Button("Steam \("Games")") { addSteamApp() }
+                        Button("Chrome \("Apps")") { addChromeApp() }
+                        Button("CrossOver \("Apps")") { addCrossOverApp() }
+                        Button("Safari \("Apps")")  { addSafariApp() }
                         Button(
-                            String(format: "Minecraft (%@)", String(format: NSLocalizedString("Settings.General.AutoToggle.Process", comment: ""), "java"))
+                            String(format: "Minecraft (%@)", String(format: "Process: %@", "java"))
                         ) { addMinecraftJavaApp() }
                             .disabled(InputManager.isRuleDuplicated(newRule: "proc:java"))
                     } label: {
@@ -144,7 +144,7 @@ struct AutoToggleView: View {
                     
                     // Partial match
                     Menu {
-                        Button(NSLocalizedString("Settings.General.AutoToggle.Process.Partial", comment: "")) { addPartialMatchProcess() }
+                        Button("Partial match") { addPartialMatchProcess() }
                     } label: {
                     }
                     .frame(width: 8, height: 14)
@@ -217,8 +217,8 @@ struct AutoToggleView: View {
         
         if !FileManager.default.fileExists(atPath: steamCommonPath.path) {
             let alert = NSAlert()
-            alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Msg", comment: "")
-            alert.informativeText =  String(format: NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Info", comment: ""), "Steam")
+            alert.messageText = "Folder Not Found"
+            alert.informativeText =  String(format: "OptClicker cannot find %@ app folder", "Steam")
             alert.alertStyle = .warning
             
             Task {
@@ -244,8 +244,8 @@ struct AutoToggleView: View {
         
         if !FileManager.default.fileExists(atPath: appFolderPath.path) {
             let alert = NSAlert()
-            alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Msg", comment: "")
-            alert.informativeText =  String(format: NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Info", comment: ""), "Chrome Apps")
+            alert.messageText = "Folder Not Found"
+            alert.informativeText =  String(format: "OptClicker cannot find %@ app folder", "Chrome Apps")
             alert.alertStyle = .warning
             
             Task {
@@ -271,8 +271,8 @@ struct AutoToggleView: View {
         
         if !FileManager.default.fileExists(atPath: appFolderPath.path) {
             let alert = NSAlert()
-            alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Msg", comment: "")
-            alert.informativeText =  String(format: NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Info", comment: ""), "CrossOver")
+            alert.messageText = "Folder Not Found"
+            alert.informativeText =  String(format: "OptClicker cannot find %@ app folder", "CrossOver")
             alert.alertStyle = .warning
             
             Task {
@@ -297,8 +297,8 @@ struct AutoToggleView: View {
         
         if !FileManager.default.fileExists(atPath: appFolderPath.path) {
             let alert = NSAlert()
-            alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Msg", comment: "")
-            alert.informativeText =  String(format: NSLocalizedString("Settings.General.AutoToggle.Add.App.Failed.Info", comment: ""), "Safari Apps")
+            alert.messageText = "Folder Not Found"
+            alert.informativeText =  String(format: "OptClicker cannot find %@ app folder", "Safari Apps")
             alert.alertStyle = .warning
             
             Task {
@@ -366,13 +366,13 @@ struct AutoToggleView: View {
     
     private func addAppByProcessName() {
         let alert = NSAlert()
-        alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Process.Add.Msg", comment: "")
-        alert.informativeText = NSLocalizedString("Settings.General.AutoToggle.Process.Add.Info", comment: "")
+        alert.messageText = "Add App by Process Name"
+        alert.informativeText = "Enter the exact process name (case-insensitive):"
         let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
-        textField.placeholderString = NSLocalizedString("Settings.General.AutoToggle.Process.Add.Placeholder", comment: "Process")
+        textField.placeholderString = "Process"
         alert.accessoryView = textField
-        alert.addButton(withTitle: NSLocalizedString("Settings.General.AutoToggle.Process.Add.Add", comment: ""))
-        alert.addButton(withTitle: NSLocalizedString("Settings.General.AutoToggle.Process.Add.Cancel", comment: ""))
+        alert.addButton(withTitle: "Add")
+        alert.addButton(withTitle: "Cancel")
 
         let hostWindow = NSApp.suitableSheetWindow(nil)!
 
@@ -394,9 +394,9 @@ struct AutoToggleView: View {
                 }
             } else {
                 let alert = NSAlert()
-                alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Msg", comment: "")
-                alert.informativeText = String(format: NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Info", comment: ""), "\(rule.dropFirst(5))")
-                alert.addButton(withTitle: NSLocalizedString("Common.Button.OK", comment: ""))
+                alert.messageText = "Duplicated Process"
+                alert.informativeText = String(format: "Process %@ already exists", "\(rule.dropFirst(5))")
+                alert.addButton(withTitle: "OK")
                 alert.alertStyle = .informational
                 
                 Task {
@@ -412,13 +412,13 @@ struct AutoToggleView: View {
     
     private func addPartialMatchProcess() {
         let alert = NSAlert()
-        alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Process.Partial.Add.Msg", comment: "Add partial process match")
-        alert.informativeText = NSLocalizedString("Settings.General.AutoToggle.Process.Partial.Add.Info", comment: "Enter a substring to match in process names")
+        alert.messageText = "Add Partial Process Match"
+        alert.informativeText = "Enter a pattern (case-insensitive)."
         let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
-        textField.placeholderString = NSLocalizedString("Settings.General.AutoToggle.Process.Add.Placeholder", comment: "Process substring")
+        textField.placeholderString = "Process"
         alert.accessoryView = textField
-        alert.addButton(withTitle: NSLocalizedString("Settings.General.AutoToggle.Process.Add.Add", comment: "Add"))
-        alert.addButton(withTitle: NSLocalizedString("Settings.General.AutoToggle.Process.Add.Cancel", comment: "Cancel"))
+        alert.addButton(withTitle: "Add")
+        alert.addButton(withTitle: "Cancel")
 
         let hostWindow = NSApp.suitableSheetWindow(nil)!
         alert.beginSheetModal(for: hostWindow) { response in
@@ -439,9 +439,9 @@ struct AutoToggleView: View {
                 }
             } else {
                 let alert = NSAlert()
-                alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Msg", comment: "Duplicate rule")
-                alert.informativeText = String(format: NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Info", comment: ""), keyword)
-                alert.addButton(withTitle: NSLocalizedString("Common.Button.OK", comment: "OK"))
+                alert.messageText = "Duplicated Process"
+                alert.informativeText = String(format: "Process %@ already exists", keyword)
+                alert.addButton(withTitle: "OK")
                 alert.alertStyle = .informational
                 
                 Task {
@@ -457,13 +457,13 @@ struct AutoToggleView: View {
 
     private func addWebsiteRule() {
         let alert = NSAlert()
-        alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Website.Add.Msg", comment: "Add website rule")
-        alert.informativeText = NSLocalizedString("Settings.General.AutoToggle.Website.Add.Info", comment: "Enter a domain or URL")
+        alert.messageText = "Add Website Rule"
+        alert.informativeText = "Enter a domain or URL (e.g., google.com):"
         let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
-        textField.placeholderString = NSLocalizedString("Settings.General.AutoToggle.Website.Add.Placeholder", comment: "example.com")
+        textField.placeholderString = "example.com"
         alert.accessoryView = textField
-        alert.addButton(withTitle: NSLocalizedString("Settings.General.AutoToggle.Process.Add.Add", comment: "Add"))
-        alert.addButton(withTitle: NSLocalizedString("Settings.General.AutoToggle.Process.Add.Cancel", comment: "Cancel"))
+        alert.addButton(withTitle: "Add")
+        alert.addButton(withTitle: "Cancel")
 
         let hostWindow = NSApp.suitableSheetWindow(nil)!
         alert.beginSheetModal(for: hostWindow) { response in
@@ -484,9 +484,9 @@ struct AutoToggleView: View {
                 }
             } else {
                 let alert = NSAlert()
-                alert.messageText = NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Msg", comment: "Duplicate rule")
-                alert.informativeText = String(format: NSLocalizedString("Settings.General.AutoToggle.Add.Duplicated.Info", comment: ""), keyword)
-                alert.addButton(withTitle: NSLocalizedString("Common.Button.OK", comment: "OK"))
+                alert.messageText = "Duplicated Process"
+                alert.informativeText = String(format: "Process %@ already exists", keyword)
+                alert.addButton(withTitle: "OK")
                 alert.alertStyle = .informational
                 
                 Task {
@@ -513,10 +513,10 @@ struct AutoToggleView: View {
     
     private func removeAllRules() {
         let alert = NSAlert()
-        alert.messageText = NSLocalizedString("Settings.General.AutoToggle.RemoveAll.Msg", comment: "")
-        alert.informativeText =  NSLocalizedString("Settings.General.AutoToggle.RemoveAll.Info", comment: "")
-        alert.addButton(withTitle: NSLocalizedString("Common.Button.OK", comment: ""))
-        alert.addButton(withTitle: NSLocalizedString("Common.Button.Cancel", comment: ""))
+        alert.messageText = "Remove All Target Apps"
+        alert.informativeText =  "Are you sure to remove all target apps?"
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .informational
         
         Task {
