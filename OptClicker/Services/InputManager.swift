@@ -169,6 +169,18 @@ class InputManager: ObservableObject {
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }
+
+        NotificationCenter.default.addObserver(
+            forName: .autoToggleHotkeyTriggered,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.toggleAutoToggle()
+        }
+    }
+
+    func toggleAutoToggle() {
+        isAutoToggleEnabled.toggle()
     }
 
     private func startFrontmostAppMonitor() {

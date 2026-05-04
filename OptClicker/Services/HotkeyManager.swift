@@ -3,80 +3,98 @@ import AppKit
 import Combine
 import HotKey
 
+enum HotkeyType: String, CaseIterable {
+    case toggleApp = "ToggleApp"
+    case toggleAutoToggle = "ToggleAutoToggle"
+}
+
 class HotkeyManager: ObservableObject {
-    @Published var shortcut: Shortcut {
-        didSet {
-            saveShortcut()
-            registerShortcut()
-        }
-    }
+    @Published var shortcuts: [HotkeyType: Shortcut] = [:]
+    @Published var listeningType: HotkeyType? = nil
 
-    @Published var isListeningForShortcut: Bool = false
+    var isListening: Bool { listeningType != nil }
 
-    private var hotKey: HotKey?
+    private var hotKeys: [HotkeyType: HotKey] = [:]
     private var monitor: Any?
-    private let defaultShortcut = Shortcut(key: Key.r, modifiers: [.control])
-    private let shortcutDefaultsKey = "HotkeyManager.Shortcut"
+    private let defaultShortcuts: [HotkeyType: Shortcut] = [
+        .toggleApp: Shortcut(key: Key.r, modifiers: [.control]),
+        .toggleAutoToggle: Shortcut(key: nil, modifiers: [])
+    ]
+    
+    private func defaultsKey(for type: HotkeyType) -> String {
+        "HotkeyManager.Shortcut.\(type.rawValue)"
+    }
 
     init() {
-        if let saved = Self.loadShortcutFromDefaults(key: shortcutDefaultsKey) {
-            self.shortcut = saved
-        } else {
-            self.shortcut = defaultShortcut
+        for type in HotkeyType.allCases {
+            if let saved = Self.loadShortcutFromDefaults(key: defaultsKey(for: type)) {
+                shortcuts[type] = saved
+            } else {
+                shortcuts[type] = defaultShortcuts[type] ?? Shortcut(key: nil, modifiers: [])
+            }
         }
-        registerShortcut()
+        registerAllShortcuts()
     }
 
-    var shortcutDescription: String {
-        isListeningForShortcut ? "Press new shortcut…" : shortcut.description
+    func shortcutDescription(for type: HotkeyType) -> String {
+        if listeningType == type {
+            return "Press new shortcut…"
+        }
+        return shortcuts[type]?.description ?? "Unassigned"
     }
-    
-    private static let functionKeys: Set<Key> = [
-        Key.f1, Key.f2, Key.f3, Key.f4, Key.f5, Key.f6,
-        Key.f7, Key.f8, Key.f9, Key.f10, Key.f11, Key.f12
-    ]
 
     // MARK: - Shortcut Handling
-    private func registerShortcut() {
-        // Unregister existing hotkey
-        unregisterShortcut()
+    private func registerAllShortcuts() {
+        for type in HotkeyType.allCases {
+            registerShortcut(for: type)
+        }
+    }
+
+    private func registerShortcut(for type: HotkeyType) {
+        // Unregister existing
+        hotKeys[type]?.keyDownHandler = nil
+        hotKeys[type] = nil
         
-        // Don't register if key is empty (unassigned)
-        guard let key = shortcut.hotkeyKey,
+        guard let shortcut = shortcuts[type],
+              let key = shortcut.hotkeyKey,
               let modifiers = shortcut.hotkeyModifiers else {
             return
         }
         
-        // Create and register the hotkey using HotKey library
-        hotKey = HotKey(key: key, modifiers: modifiers)
-        
-        // Set up the handler
-        hotKey?.keyDownHandler = {
+        let hotKey = HotKey(key: key, modifiers: modifiers)
+        hotKey.keyDownHandler = { [weak self] in
             DispatchQueue.main.async {
-                NotificationCenter.default.post(name: .hotkeyTriggered, object: nil)
+                self?.handleHotkeyTriggered(for: type)
             }
         }
-    }
-    
-    private func unregisterShortcut() {
-        hotKey?.keyDownHandler = nil
-        hotKey = nil
+        hotKeys[type] = hotKey
     }
 
-    func startListeningForNewShortcut() {
-        isListeningForShortcut = true
+    private func handleHotkeyTriggered(for type: HotkeyType) {
+        switch type {
+        case .toggleApp:
+            NotificationCenter.default.post(name: .hotkeyTriggered, object: nil)
+        case .toggleAutoToggle:
+            NotificationCenter.default.post(name: .autoToggleHotkeyTriggered, object: nil)
+        }
+    }
 
-        // Temporarily unregister current hotkey
-        unregisterShortcut()
+    func startListening(for type: HotkeyType) {
+        listeningType = type
+        
+        // Temporarily unregister hotkeys
+        for t in HotkeyType.allCases {
+            hotKeys[t]?.keyDownHandler = nil
+            hotKeys[t] = nil
+        }
 
-        // Remove any existing monitor
         removeKeyListener()
 
         monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self else { return event }
             
             if Shortcut.keyName(from: event) == "Escape" {
-                self.shortcut = Shortcut(key: nil, modifiers: [])
+                self.shortcuts[type] = Shortcut(key: nil, modifiers: [])
                 self.finishListening()
                 return nil
             }
@@ -92,7 +110,8 @@ class HotkeyManager: ObservableObject {
             let hasModifiers = !cleanedModifiers.isEmpty
             
             if hasModifiers || isFunctionKey {
-                self.shortcut = Shortcut(key: key, modifiers: cleanedModifiers)
+                self.shortcuts[type] = Shortcut(key: key, modifiers: cleanedModifiers)
+                self.saveShortcut(for: type)
                 self.finishListening()
                 return nil
             } else {
@@ -102,9 +121,9 @@ class HotkeyManager: ObservableObject {
     }
     
     private func finishListening() {
-        isListeningForShortcut = false
+        listeningType = nil
         removeKeyListener()
-        registerShortcut()
+        registerAllShortcuts()
     }
     
     private func removeKeyListener() {
@@ -123,14 +142,16 @@ class HotkeyManager: ObservableObject {
         return result
     }
 
-    func resetToDefault() {
-        shortcut = defaultShortcut
-        saveShortcut()
+    func resetToDefault(for type: HotkeyType) {
+        shortcuts[type] = defaultShortcuts[type]
+        saveShortcut(for: type)
+        registerShortcut(for: type)
     }
     
-    private func saveShortcut() {
-        if let data = try? JSONEncoder().encode(shortcut) {
-            UserDefaults.standard.set(data, forKey: shortcutDefaultsKey)
+    private func saveShortcut(for type: HotkeyType) {
+        if let shortcut = shortcuts[type],
+           let data = try? JSONEncoder().encode(shortcut) {
+            UserDefaults.standard.set(data, forKey: defaultsKey(for: type))
         }
     }
 
@@ -142,8 +163,15 @@ class HotkeyManager: ObservableObject {
         return shortcut
     }
     
+    private static let functionKeys: Set<Key> = [
+        Key.f1, Key.f2, Key.f3, Key.f4, Key.f5, Key.f6,
+        Key.f7, Key.f8, Key.f9, Key.f10, Key.f11, Key.f12
+    ]
+
     deinit {
-        unregisterShortcut()
+        for type in HotkeyType.allCases {
+            hotKeys[type]?.keyDownHandler = nil
+        }
         removeKeyListener()
     }
 }
@@ -153,7 +181,6 @@ struct Shortcut: Equatable, Codable {
     let key: Key?
     let modifiers: NSEvent.ModifierFlags
     
-    // For backward compatibility with the UI
     var keyString: String {
         key?.description ?? ""
     }
@@ -165,7 +192,6 @@ struct Shortcut: Equatable, Codable {
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        // Store key as its description string
         try container.encode(key?.description, forKey: .key)
         try container.encode(modifiers.rawValue, forKey: .modifiers)
     }
@@ -195,27 +221,20 @@ struct Shortcut: Equatable, Codable {
         if key == nil { return "Unassigned" }
 
         var parts: [String] = []
-        if modifiers.contains(.command) { parts.append("⌘") }
-        if modifiers.contains(.option) { parts.append("⌥") }
         if modifiers.contains(.control) { parts.append("^") }
+        if modifiers.contains(.option) { parts.append("⌥") }
         if modifiers.contains(.shift) { parts.append("⇧") }
+        if modifiers.contains(.command) { parts.append("⌘") }
+        
         if let key = key {
             parts.append(keyDisplayName(for: key))
         }
         return parts.joined()
     }
     
-    // Convert to HotKey library Key type
-    var hotkeyKey: Key? {
-        return key
-    }
+    var hotkeyKey: Key? { key }
+    var hotkeyModifiers: NSEvent.ModifierFlags? { modifiers }
     
-    // Convert to HotKey library modifiers
-    var hotkeyModifiers: NSEvent.ModifierFlags? {
-        return modifiers
-    }
-    
-    // Helper to get display name for Key
     private func keyDisplayName(for key: Key) -> String {
         switch key {
         case Key.a: return "A"
@@ -280,7 +299,6 @@ struct Shortcut: Equatable, Codable {
         }
     }
 
-    // Convert NSEvent keyCode to HotKey Key type
     static func keyFromEvent(_ event: NSEvent) -> Key? {
         switch event.keyCode {
         case 0x00: return Key.a
@@ -345,7 +363,6 @@ struct Shortcut: Equatable, Codable {
         }
     }
     
-    // Convert NSEvent to readable key name (for UI display)
     static func keyName(from event: NSEvent) -> String {
         switch event.keyCode {
         case 0x35: return "Escape"
@@ -371,14 +388,11 @@ struct Shortcut: Equatable, Codable {
         case 0x24: return "⏎"
         case 0x30: return "⇥"
         default:
-            // For normal keys, use charactersIgnoringModifiers
             return event.charactersIgnoringModifiers?.uppercased() ?? ""
         }
     }
 
-    // Helper to convert a key description string back to a Key
     static func keyFromDescription(_ description: String) -> Key? {
-        // Try to match by description
         let allKeys: [Key] = [
             .a, .b, .c, .d, .e, .f, .g, .h, .i, .j, .k, .l, .m, .n, .o, .p, .q, .r, .s, .t, .u, .v, .w, .x, .y, .z,
             .zero, .one, .two, .three, .four, .five, .six, .seven, .eight, .nine,
@@ -392,4 +406,5 @@ struct Shortcut: Equatable, Codable {
 // Notification
 extension Notification.Name {
     static let hotkeyTriggered = Notification.Name("HotkeyTriggered")
+    static let autoToggleHotkeyTriggered = Notification.Name("AutoToggleHotkeyTriggered")
 }

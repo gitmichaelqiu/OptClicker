@@ -82,6 +82,17 @@ class StatusBarManager: ObservableObject {
         toggleItem.state = inputManager.isEnabled ? .on : .off
         menu.addItem(toggleItem)
 
+        // Auto Toggle item
+        let autoToggleItem = NSMenuItem(
+            title: "Auto Toggle",
+            action: #selector(handleAutoToggleItemClick),
+            keyEquivalent: ""
+        )
+        autoToggleItem.image = NSImage(systemSymbolName: "switch.2", accessibilityDescription: nil)
+        autoToggleItem.target = self
+        autoToggleItem.state = inputManager.isAutoToggleEnabled ? .on : .off
+        menu.addItem(autoToggleItem)
+
         // Status reason (non-clickable)
         if let statusReason = getStatusReason() {
             let item = NSMenuItem(title: statusReason, action: nil, keyEquivalent: "")
@@ -131,6 +142,10 @@ class StatusBarManager: ObservableObject {
     
     @objc private func handleToggleItemClick() {
         toggleHandler()
+    }
+
+    @objc private func handleAutoToggleItemClick() {
+        inputManager.toggleAutoToggle()
     }
     
     @objc private func handleSettingsItemClick() {

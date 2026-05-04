@@ -9,19 +9,39 @@ struct ShortcutsSettingsView: View {
                 SettingsSection("Keyboard Shortcuts") {
                     SettingsRow("Toggle OptClicker") {
                         HStack {
-                            Text(hotkeyManager.shortcutDescription)
+                            Text(hotkeyManager.shortcutDescription(for: .toggleApp))
                                 .foregroundColor(.secondary)
                                 .padding(.trailing, 8)
                             
                             Button("◉") {
-                                hotkeyManager.startListeningForNewShortcut()
+                                hotkeyManager.startListening(for: .toggleApp)
                             }
-                            .disabled(hotkeyManager.isListeningForShortcut)
+                            .disabled(hotkeyManager.isListening)
                             
                             Button("↺") {
-                                hotkeyManager.resetToDefault()
+                                hotkeyManager.resetToDefault(for: .toggleApp)
                             }
-                            .disabled(hotkeyManager.isListeningForShortcut)
+                            .disabled(hotkeyManager.isListening)
+                        }
+                    }
+                    
+                    Divider()
+                    
+                    SettingsRow("Toggle Auto Toggle") {
+                        HStack {
+                            Text(hotkeyManager.shortcutDescription(for: .toggleAutoToggle))
+                                .foregroundColor(.secondary)
+                                .padding(.trailing, 8)
+                            
+                            Button("◉") {
+                                hotkeyManager.startListening(for: .toggleAutoToggle)
+                            }
+                            .disabled(hotkeyManager.isListening)
+                            
+                            Button("↺") {
+                                hotkeyManager.resetToDefault(for: .toggleAutoToggle)
+                            }
+                            .disabled(hotkeyManager.isListening)
                         }
                     }
                 }
