@@ -28,7 +28,7 @@ class HotkeyManager: ObservableObject {
     }
 
     var shortcutDescription: String {
-        isListeningForShortcut ? NSLocalizedString("Settings.Shotcuts.Hotkey.PressNew", comment: "Press new shortcut…") : shortcut.description
+        isListeningForShortcut ? "Press new shortcut…" : shortcut.description
     }
     
     private static let functionKeys: Set<Key> = [
@@ -192,7 +192,7 @@ struct Shortcut: Equatable, Codable {
     }
 
     var description: String {
-        if key == nil { return NSLocalizedString("Settings.Shortcuts.Unassgined", comment: "Unassigned") }
+        if key == nil { return "Unassigned" }
 
         var parts: [String] = []
         if modifiers.contains(.command) { parts.append("⌘") }

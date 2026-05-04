@@ -11,13 +11,13 @@ struct SettingsView: View {
     var body: some View {
         if #available(macOS 15.0, *) {
             TabView(selection: $selectedTab) {
-                Tab(NSLocalizedString("Settings.General", comment: "General"), systemImage: "gearshape.fill", value: .general) {
+                Tab("General", systemImage: "gearshape.fill", value: .general) {
                     GeneralSettingsView(inputManager: inputManager)
                 }
-                Tab(NSLocalizedString("Settings.Advanced", comment: "Advanced"), systemImage: "gearshape.2.fill", value: .advanced) {
+                Tab("Advanced", systemImage: "gearshape.2.fill", value: .advanced) {
                     AdvancedSettingsView()
                 }
-                Tab(NSLocalizedString("Settings.About", comment: "About"), systemImage: "info.circle.fill", value: .about) {
+                Tab("About", systemImage: "info.circle.fill", value: .about) {
                     AboutView()
                 }
             }
@@ -27,7 +27,7 @@ struct SettingsView: View {
                 GeneralSettingsView(inputManager: inputManager)
                    .tabItem {
                        Label(
-                           NSLocalizedString("Settings.General", comment: "General"),
+                           "General",
                            systemImage: "gearshape.fill"
                        )
                    }
@@ -36,7 +36,7 @@ struct SettingsView: View {
                 AdvancedSettingsView()
                    .tabItem {
                        Label(
-                           NSLocalizedString("Settings.Advanced", comment: "Advanced"),
+                           "Advanced",
                            systemImage: "gearshape.2.fill"
                        )
                    }
@@ -45,7 +45,7 @@ struct SettingsView: View {
                 AboutView()
                    .tabItem {
                        Label(
-                           NSLocalizedString("Settings.About", comment: "About"),
+                           "About",
                            systemImage: "info.circle.fill"
                        )
                    }

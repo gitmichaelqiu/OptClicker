@@ -45,7 +45,7 @@ struct AboutView: View {
                 Divider()
                     .padding(.vertical, 8)
                 
-                Text(NSLocalizedString("Settings.About.Description", comment: "Description"))
+                Text("OptClicker lets you simulate right-clicks by pressing the Option (⌥) key.")
                     .multilineTextAlignment(.center)
                     .font(.body)
                     .lineSpacing(4)
@@ -58,7 +58,7 @@ struct AboutView: View {
                 Spacer()
 
                 VStack(spacing: 8) {
-                    Link(NSLocalizedString("Settings.About.Repo", comment: "GitHub Repo"),
+                    Link("GitHub Repository",
                          destination: URL(string: "https://github.com/gitmichaelqiu/OptClicker")!)
                     .font(.body)
                     .foregroundColor(.blue)

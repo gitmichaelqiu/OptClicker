@@ -1,6 +1,5 @@
 import SwiftUI
 import UniformTypeIdentifiers
-import UniformTypeIdentifiers
 
 struct AdvancedSettingsView: View {
     @EnvironmentObject var hotkeyManager: HotkeyManager
@@ -11,8 +10,8 @@ struct AdvancedSettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // Hotkey Section
-                SettingsSection("Settings.Shortcuts.General") {
-                    SettingsRow("Settings.Shortcuts.Hotkey") {
+                SettingsSection("General") {
+                    SettingsRow("Toggle OptClicker") {
                         Text(hotkeyManager.shortcutDescription)
                             .font(.body)
                             .foregroundColor(.primary)
@@ -23,10 +22,10 @@ struct AdvancedSettingsView: View {
 
                     SettingsRow("") {
                         HStack(spacing: 8) {
-                            Button(NSLocalizedString("Settings.Shortcuts.Hotkey.Change", comment: "Change")) {
+                            Button("Change…") {
                                 hotkeyManager.startListeningForNewShortcut()
                             }
-                            Button(NSLocalizedString("Settings.Shortcuts.Hotkey.Reset", comment: "Reset")) {
+                            Button("Reset") {
                                 hotkeyManager.resetToDefault()
                             }
                         }
@@ -36,14 +35,14 @@ struct AdvancedSettingsView: View {
                 }
                 
                 // Permissions Section
-                SettingsSection("Settings.Advanced.Permissions") {
+                SettingsSection("Permissions") {
                     VStack(alignment: .leading, spacing: 0) {
                         // Accessibility
-                        SettingsRow("Settings.Advanced.Permissions.Accessibility", helperText: "Settings.Advanced.Permissions.Accessibility.Description") {
+                        SettingsRow("Accessibility", helperText: "Required for reading window information.") {
                             HStack(spacing: 12) {
                                 PermissionStatusIcon(isGranted: permissionManager.isAccessibilityGranted)
                                 
-                                Button(permissionManager.isAccessibilityGranted ? NSLocalizedString("Settings.Advanced.Permissions.Settings", comment: "") : NSLocalizedString("Settings.Advanced.Permissions.Grant", comment: "")) {
+                                Button(permissionManager.isAccessibilityGranted ? "Settings" : "Grant") {
                                     permissionManager.requestAccessibilityPermission()
                                 }
                             }
@@ -53,12 +52,12 @@ struct AdvancedSettingsView: View {
                         
                         // Automation
                         VStack(alignment: .leading, spacing: 0) {
-                            SettingsRow("Settings.Advanced.Permissions.Automation", helperText: "Settings.Advanced.Permissions.Automation.Description") {
+                            SettingsRow("Automation", helperText: "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported.") {
                                 HStack(spacing: 12) {
                                     let anyGranted = !permissionManager.authorizedBrowsers.isEmpty || permissionManager.automationPermissions.values.contains(true)
                                     PermissionStatusIcon(isGranted: anyGranted)
                                     
-                                    Button(NSLocalizedString("Settings.Advanced.Permissions.Grant", comment: "")) {
+                                    Button("Grant") {
                                         selectBrowserFromApplications()
                                     }
                                 }
@@ -138,7 +137,7 @@ struct AdvancedSettingsView: View {
                     }
                 }
                 
-                if let helpText = NSLocalizedString("Settings.Advanced.Permissions.Description", comment: "") as String?, !helpText.isEmpty {
+                if let helpText = "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant." as String?, !helpText.isEmpty {
                     Text(helpText)
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -160,20 +159,28 @@ struct AdvancedSettingsView: View {
         panel.allowedContentTypes = [.application]
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
-        panel.title = NSLocalizedString("Settings.Advanced.Permissions.SelectBrowser", comment: "Select Browser")
+        panel.title = "Select Browser from Applications"
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
         
-        let hostWindow = NSApp.suitableSheetWindow(nil)!
-        panel.beginSheetModal(for: hostWindow) { response in
-            if response == .OK, let url = panel.url {
-                if let bundle = Bundle(url: url), let bundleId = bundle.bundleIdentifier {
-                    let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent
-                    
-                    DispatchQueue.main.async {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            permissionManager.addBrowser(bundleId: bundleId, name: name)
-                            permissionManager.requestAutomationPermission(for: bundleId, appName: name)
-                        }
+        if let hostWindow = NSApp.suitableSheetWindow(nil) {
+            panel.beginSheetModal(for: hostWindow) { response in
+                self.handleOpenPanelResponse(response, panel: panel)
+            }
+        } else {
+            let response = panel.runModal()
+            handleOpenPanelResponse(response, panel: panel)
+        }
+    }
+    
+    private func handleOpenPanelResponse(_ response: NSApplication.ModalResponse, panel: NSOpenPanel) {
+        if response == .OK, let url = panel.url {
+            if let bundle = Bundle(url: url), let bundleId = bundle.bundleIdentifier {
+                let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent
+                
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        permissionManager.addBrowser(bundleId: bundleId, name: name)
+                        permissionManager.requestAutomationPermission(for: bundleId, appName: name)
                     }
                 }
             }

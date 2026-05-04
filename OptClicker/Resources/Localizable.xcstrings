@@ -17,6 +17,39 @@
     "↺" : {
 
     },
+    "About" : {
+
+    },
+    "About OptClicker" : {
+
+    },
+    "Accessibility" : {
+
+    },
+    "Advanced" : {
+
+    },
+    "Auto Toggle" : {
+
+    },
+    "Automatically check for updates" : {
+
+    },
+    "Automation" : {
+
+    },
+    "Based on apps" : {
+
+    },
+    "Based on spaces" : {
+
+    },
+    "Change…" : {
+
+    },
+    "Check for updates" : {
+
+    },
     "Chrome %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -104,6 +137,36 @@
           }
         }
       }
+    },
+    "Enable auto toggle" : {
+
+    },
+    "Enable option → right click" : {
+
+    },
+    "Fullscreen" : {
+
+    },
+    "General" : {
+
+    },
+    "GitHub Repository" : {
+
+    },
+    "Grant" : {
+
+    },
+    "Launch" : {
+
+    },
+    "Launch at login" : {
+
+    },
+    "Launch behavior" : {
+
+    },
+    "Match condition" : {
+
     },
     "Menu.About" : {
       "extractionState" : "manual",
@@ -360,6 +423,33 @@
         }
       }
     },
+    "Menubar" : {
+
+    },
+    "No Spaces available (DesktopRenamer not running?)" : {
+
+    },
+    "OptClicker" : {
+
+    },
+    "OptClicker lets you simulate right-clicks by pressing the Option (⌥) key." : {
+
+    },
+    "Partial match" : {
+
+    },
+    "Permissions" : {
+
+    },
+    "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported." : {
+
+    },
+    "Required for reading window information." : {
+
+    },
+    "Reset" : {
+
+    },
     "Reset to default" : {
 
     },
@@ -372,6 +462,9 @@
           }
         }
       }
+    },
+    "Settings" : {
+
     },
     "Settings.About" : {
       "extractionState" : "manual",
@@ -560,23 +653,6 @@
         }
       }
     },
-    "Settings.Advanced.Permissions.SelectBrowser" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select Browser from Applications"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从应用程序中选择浏览器"
-          }
-        }
-      }
-    },
     "Settings.Advanced.Permissions.Description" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -607,6 +683,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "授权"
+          }
+        }
+      }
+    },
+    "Settings.Advanced.Permissions.SelectBrowser" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Browser from Applications"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从应用程序中选择浏览器"
           }
         }
       }
@@ -726,6 +819,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重复进程"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.BasedOnApps" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Based on apps"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "基于应用程序"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.BasedOnSpaces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Based on spaces"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "基于桌面 (Spaces)"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.MatchCondition" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match condition"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "匹配条件"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.MatchCondition.And" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "And"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "且 (AND)"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.MatchCondition.Or" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "或 (OR)"
           }
         }
       }
@@ -985,6 +1163,40 @@
         }
       }
     },
+    "Settings.General.AutoToggle.Space.Fullscreen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fullscreen"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全屏"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.Space.NoAPI" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Spaces available (DesktopRenamer not running?)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有可用桌面 (DesktopRenamer 未运行?)"
+          }
+        }
+      }
+    },
     "Settings.General.AutoToggle.TargetApps" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -998,6 +1210,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目标 App"
+          }
+        }
+      }
+    },
+    "Settings.General.AutoToggle.TargetSpaces" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Targeted spaces"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "目标桌面"
           }
         }
       }
@@ -1682,6 +1911,12 @@
         }
       }
     },
+    "Show frontmost process name" : {
+
+    },
+    "Show OptClicker status reason" : {
+
+    },
     "Steam %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1692,6 +1927,18 @@
         }
       }
     },
+    "Target apps" : {
+
+    },
+    "Targeted spaces" : {
+
+    },
+    "Toggle OptClicker" : {
+
+    },
+    "Update" : {
+
+    },
     "v%@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1701,6 +1948,9 @@
           }
         }
       }
+    },
+    "When not frontmost" : {
+
     }
   },
   "version" : "1.1"
