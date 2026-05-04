@@ -1,6 +1,5 @@
 import SwiftUI
 import UniformTypeIdentifiers
-import UniformTypeIdentifiers
 
 struct AdvancedSettingsView: View {
     @EnvironmentObject var hotkeyManager: HotkeyManager
