@@ -3,6 +3,7 @@ import Combine
 
 struct GeneralSettingsView: View {
     @AppStorage("AutoToggle.isExpanded") private var isAutoToggleExpanded = false
+    @AppStorage("AutoToggle.Spaces.isExpanded") private var isAutoToggleSpacesExpanded = false
     
     @ObservedObject var inputManager: InputManager
     
@@ -13,6 +14,8 @@ struct GeneralSettingsView: View {
         return LaunchBehavior(rawValue: raw) ?? .lastState
     }()
     @State private var autoToggleRules: [String] = UserDefaults.standard.stringArray(forKey: "AutoToggleAppBundleIds") ?? []
+    @State private var autoToggleSpaces: [String] = UserDefaults.standard.stringArray(forKey: "autoToggleSpaces") ?? []
+    
     @State private var autoToggleBehavior: AutoToggleBehavior = {
         let raw = UserDefaults.standard.string(forKey: "AutoToggleBehavior") ?? AutoToggleBehavior.disable.rawValue
         return AutoToggleBehavior(rawValue: raw) ?? .disable
@@ -44,11 +47,52 @@ struct GeneralSettingsView: View {
 
                 if inputManager.isAutoToggleEnabled {
                     SettingsSection("Settings.General.AutoToggle") {
-                        AutoToggleView(
-                            rules: $autoToggleRules, isExpanded: $isAutoToggleExpanded,
-                            onRuleChange: saveAndRefresh
-                        )
+                        // Toggle logic selection
+                        SettingsRow("Settings.General.AutoToggle.BasedOnApps") {
+                            Toggle("", isOn: $inputManager.isBasedOnApps)
+                                .labelsHidden()
+                                .toggleStyle(.switch)
+                        }
+                        
                         Divider()
+                        
+                        SettingsRow("Settings.General.AutoToggle.BasedOnSpaces") {
+                            Toggle("", isOn: $inputManager.isBasedOnSpaces)
+                                .labelsHidden()
+                                .toggleStyle(.switch)
+                        }
+                        
+                        if inputManager.isBasedOnApps && inputManager.isBasedOnSpaces {
+                            Divider()
+                            SettingsRow("Settings.General.AutoToggle.MatchCondition") {
+                                Picker("", selection: $inputManager.matchCondition) {
+                                    ForEach(MatchCondition.allCases, id: \.self) { condition in
+                                        Text(condition.localizedDescription).tag(condition)
+                                    }
+                                }
+                                .labelsHidden()
+                                .pickerStyle(.menu)
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        if inputManager.isBasedOnApps {
+                            AutoToggleView(
+                                rules: $autoToggleRules, isExpanded: $isAutoToggleExpanded,
+                                onRuleChange: saveAndRefresh
+                            )
+                            Divider()
+                        }
+                        
+                        if inputManager.isBasedOnSpaces {
+                            AutoToggleSpacesView(
+                                rules: $autoToggleSpaces, isExpanded: $isAutoToggleSpacesExpanded,
+                                onRuleChange: saveAndRefresh
+                            )
+                            Divider()
+                        }
+                        
                         SettingsRow("Settings.General.AutoToggle.NotFrontmost") {
                             Picker("", selection: $autoToggleBehavior) {
                                 ForEach(AutoToggleBehavior.allCases, id: \.self) { behavior in
@@ -140,10 +184,13 @@ struct GeneralSettingsView: View {
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .animation(.easeInOut(duration: 0.2), value: inputManager.isAutoToggleEnabled)
+        .animation(.easeInOut(duration: 0.2), value: inputManager.isBasedOnApps)
+        .animation(.easeInOut(duration: 0.2), value: inputManager.isBasedOnSpaces)
     }
 
     private func saveAndRefresh() {
         UserDefaults.standard.set(autoToggleRules, forKey: "AutoToggleAppBundleIds")
+        UserDefaults.standard.set(autoToggleSpaces, forKey: "autoToggleSpaces")
         UserDefaults.standard.set(autoToggleBehavior.rawValue, forKey: "AutoToggleBehavior")
         inputManager.refreshAutoToggleState()
     }
