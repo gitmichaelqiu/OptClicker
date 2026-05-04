@@ -19,16 +19,24 @@ extension NSApplication {
     }
 }
 
-class UpdateManager {
+class UpdateManager: NSObject, SPUUpdaterDelegate {
     static let shared = UpdateManager()
     
-    let updaterController: SPUStandardUpdaterController
+    // Using an implicitly unwrapped optional allows us to initialize the controller 
+    // after super.init, which is required to pass 'self' as the delegate.
+    var updaterController: SPUStandardUpdaterController!
     
-    private init() {
+    override private init() {
+        super.init()
         self.updaterController = SPUStandardUpdaterController(
             startingUpdater: true,
-            updaterDelegate: nil,
+            updaterDelegate: self,
             userDriverDelegate: nil
         )
+    }
+    
+    // Programmatic feed URL to ensure Sparkle always knows where to look.
+    func feedURLString(for updater: SPUUpdater) -> String? {
+        return "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml"
     }
 }
