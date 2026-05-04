@@ -1,10 +1,10 @@
 import SwiftUI
 import Combine
+import Sparkle
 
 struct GeneralSettingsView: View {
     @ObservedObject var inputManager: InputManager
     
-    @State private var autoCheckForUpdates = UpdateManager.isAutoCheckEnabled
     @State private var launchAtLogin = LaunchManager.isEnabled
     @State private var selectedLaunchBehavior: LaunchBehavior = {
         let raw = UserDefaults.standard.string(forKey: InputManager.launchBehaviorKey) ?? LaunchBehavior.lastState.rawValue
@@ -13,6 +13,9 @@ struct GeneralSettingsView: View {
     
     @State private var showStatusReason = UserDefaults.standard.bool(forKey: InputManager.showStatusReasonKey)
     @State private var showFrontmostProc = UserDefaults.standard.bool(forKey: InputManager.showFrontmostProcKey)
+
+    @State private var autoCheckUpdate: Bool = UpdateManager.shared.updaterController.updater.automaticallyChecksForUpdates
+    @State private var autoDownloadUpdate: Bool = UpdateManager.shared.updaterController.updater.automaticallyDownloadsUpdates
 
     var body: some View {
         ScrollView {
@@ -77,19 +80,26 @@ struct GeneralSettingsView: View {
 
                 SettingsSection("Update") {
                     SettingsRow("Check for updates automatically") {
-                        Toggle("", isOn: $autoCheckForUpdates)
-                            .labelsHidden()
-                            .toggleStyle(.switch)
-                            .onChange(of: autoCheckForUpdates) { _ in
-                                UpdateManager.isAutoCheckEnabled = autoCheckForUpdates
+                        Toggle("", isOn: $autoCheckUpdate).labelsHidden().toggleStyle(.switch)
+                            .onChange(of: autoCheckUpdate) { value in
+                                UpdateManager.shared.updaterController.updater.automaticallyChecksForUpdates = value
                             }
                     }
                     Divider()
+
+                    if autoCheckUpdate {
+                        SettingsRow("Automatically download updates") {
+                            Toggle("", isOn: $autoDownloadUpdate).labelsHidden().toggleStyle(.switch)
+                                .onChange(of: autoDownloadUpdate) { value in
+                                    UpdateManager.shared.updaterController.updater.automaticallyDownloadsUpdates = value
+                                }
+                        }
+                        Divider()
+                    }
+
                     SettingsRow("Check for updates") {
                         Button("Check Now") {
-                            Task {
-                                await UpdateManager.shared.checkForUpdate(from: NSApp.keyWindow)
-                            }
+                            UpdateManager.shared.updaterController.checkForUpdates(nil)
                         }
                     }
                 }
@@ -99,5 +109,6 @@ struct GeneralSettingsView: View {
             .padding()
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .animation(.easeInOut(duration: 0.2), value: autoCheckUpdate)
     }
 }
