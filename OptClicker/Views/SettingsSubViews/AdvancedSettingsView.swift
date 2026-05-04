@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import UniformTypeIdentifiers
 
 struct AdvancedSettingsView: View {
     @EnvironmentObject var hotkeyManager: HotkeyManager
@@ -129,8 +130,11 @@ struct AdvancedSettingsView: View {
                                     .padding(.top, 4)
                                     .padding(.bottom, 8)
                                 }
+                                .transition(.opacity.combined(with: .move(edge: .top)))
                             }
                         }
+                        .animation(.easeInOut(duration: 0.2), value: permissionManager.authorizedBrowsers)
+                        .animation(.easeInOut(duration: 0.2), value: permissionManager.automationPermissions)
                     }
                 }
                 
@@ -165,9 +169,11 @@ struct AdvancedSettingsView: View {
                 if let bundle = Bundle(url: url), let bundleId = bundle.bundleIdentifier {
                     let name = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? url.deletingPathExtension().lastPathComponent
                     
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        permissionManager.addBrowser(bundleId: bundleId, name: name)
-                        permissionManager.requestAutomationPermission(for: bundleId, appName: name)
+                    DispatchQueue.main.async {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            permissionManager.addBrowser(bundleId: bundleId, name: name)
+                            permissionManager.requestAutomationPermission(for: bundleId, appName: name)
+                        }
                     }
                 }
             }
