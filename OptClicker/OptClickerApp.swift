@@ -3,8 +3,6 @@ import UserNotifications
 import Combine
 import AppKit
 
-let defaultSettingsWindowWidth = 450
-let defaultSettingsWindowHeight = 480
 
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     private var inputManagerCancellable: AnyCancellable?

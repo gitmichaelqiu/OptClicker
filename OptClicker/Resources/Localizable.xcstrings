@@ -26,13 +26,7 @@
     "Accessibility" : {
 
     },
-    "Advanced" : {
-
-    },
     "Auto Toggle" : {
-
-    },
-    "Automatically check for updates" : {
 
     },
     "Automation" : {
@@ -44,10 +38,19 @@
     "Based on spaces" : {
 
     },
+    "Behavior" : {
+
+    },
     "Change…" : {
 
     },
     "Check for updates" : {
+
+    },
+    "Check for updates automatically" : {
+
+    },
+    "Check Now" : {
 
     },
     "Chrome %@" : {
@@ -59,6 +62,9 @@
           }
         }
       }
+    },
+    "Clicker" : {
+
     },
     "Common.Button.Cancel" : {
       "extractionState" : "manual",
@@ -150,10 +156,13 @@
     "General" : {
 
     },
-    "GitHub Repository" : {
+    "Grant" : {
 
     },
-    "Grant" : {
+    "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant." : {
+
+    },
+    "Keyboard Shortcuts" : {
 
     },
     "Launch" : {
@@ -163,6 +172,9 @@
 
     },
     "Launch behavior" : {
+
+    },
+    "Links" : {
 
     },
     "Match condition" : {
@@ -426,7 +438,13 @@
     "Menubar" : {
 
     },
+    "More Apps" : {
+
+    },
     "No Spaces available (DesktopRenamer not running?)" : {
+
+    },
+    "Opt" : {
 
     },
     "OptClicker" : {
@@ -453,6 +471,9 @@
     "Reset to default" : {
 
     },
+    "Rules" : {
+
+    },
     "Safari %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -462,6 +483,9 @@
           }
         }
       }
+    },
+    "Select a category" : {
+
     },
     "Settings" : {
 
@@ -1911,10 +1935,13 @@
         }
       }
     },
-    "Show frontmost process name" : {
+    "Shortcuts" : {
 
     },
-    "Show OptClicker status reason" : {
+    "Show frontmost process" : {
+
+    },
+    "Show status reason" : {
 
     },
     "Steam %@" : {

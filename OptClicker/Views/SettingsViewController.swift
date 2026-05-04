@@ -10,6 +10,7 @@ class SettingsWindowController: NSObject {
 
     private override init() {
         super.init()
+        NSSplitViewItem.swizzle()
     }
 
     func open(inputManager: InputManager, hotkeyManager: HotkeyManager) {
@@ -33,16 +34,20 @@ class SettingsWindowController: NSObject {
         let size = NSSize(width: defaultSettingsWindowWidth, height: defaultSettingsWindowHeight)
         let win = NSWindow(
             contentRect: NSRect(origin: .zero, size: size),
-            styleMask: [.titled, .closable, .miniaturizable],
+            styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         win.center()
         win.setFrameAutosaveName("Settings")
+        win.identifier = NSUserInterfaceItemIdentifier("SettingsWindow")
         win.isReleasedWhenClosed = false
         win.minSize = size
         win.maxSize = size
         win.level = .normal
+        win.titlebarAppearsTransparent = true
+        win.titleVisibility = .hidden
+        win.isMovableByWindowBackground = true
         win.collectionBehavior = [.participatesInCycle]
 
         // Inject dependencies
