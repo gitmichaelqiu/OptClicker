@@ -8,7 +8,7 @@ struct PermissionsSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SettingsSection("Permissions") {
+                SettingsSection("Permissions", helperText: "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant.") {
                     VStack(alignment: .leading, spacing: 0) {
                         // Accessibility
                         SettingsRow("Accessibility", helperText: "Required for reading window information.") {
@@ -108,13 +108,6 @@ struct PermissionsSettingsView: View {
                         .animation(.easeInOut(duration: 0.2), value: permissionManager.automationPermissions)
                     }
                 }
-                
-                Text("If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 4)
-
-                Spacer()
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .topLeading)

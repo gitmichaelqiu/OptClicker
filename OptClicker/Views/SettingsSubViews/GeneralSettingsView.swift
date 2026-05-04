@@ -17,7 +17,7 @@ struct GeneralSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SettingsSection("OptClicker") {
+                SettingsSection("General") {
                     SettingsRow("Enable option → right click") {
                         Toggle("", isOn: $inputManager.isEnabled)
                             .labelsHidden()

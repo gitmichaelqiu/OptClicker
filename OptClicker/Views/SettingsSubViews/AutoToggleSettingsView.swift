@@ -59,9 +59,10 @@ struct AutoToggleSettingsView: View {
                                 .pickerStyle(.menu)
                             }
                         }
-                        
+                    }
+                    
+                    SettingsSection(nil) {
                         if inputManager.isBasedOnApps {
-                            Divider()
                             AutoToggleView(
                                 rules: $autoToggleRules, isExpanded: $isAutoToggleExpanded,
                                 onRuleChange: saveAndRefresh
