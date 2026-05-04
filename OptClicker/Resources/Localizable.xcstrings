@@ -532,13 +532,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Required for reading browser URLs via AppleScript."
+            "value" : "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "通过 AppleScript 读取浏览器 URL 所需。"
+            "value" : "通过 AppleScript 读取浏览器 URL。不支持 Firefox 系的浏览器。"
           }
         }
       }
