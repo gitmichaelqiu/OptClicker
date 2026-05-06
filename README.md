@@ -80,8 +80,11 @@ You are welcome to create issues/suggestions in [GitHub Issues](https://github.c
 This app uses the following packages:
 
 - [HotKey by @soffes](https://github.com/soffes/HotKey)
+- [Sparkle by @sparkle-project](https://github.com/sparkle-project/Sparkle)
 
 Many thanks to all of these wonderful developers!
+
+See [Acknowledgements.pdf](https://github.com/gitmichaelqiu/OptClicker/blob/main/OptClicker/Resources/Acknowledgements/Acknowledgements.pdf) for licenses.
 
 ## ⭐ Support This Project
 
