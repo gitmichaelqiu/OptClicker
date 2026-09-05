@@ -44,13 +44,27 @@ class PermissionManager: ObservableObject {
 
         // Automation checks.
         var statuses: [String: Bool] = [:]
+        var updatedAuthorized = authorizedBrowsers.intersection(Set(knownBrowsers.keys))
         for bundleId in knownBrowsers.keys {
-            let isGranted = isAutomationGranted(for: bundleId)
-            statuses[bundleId] = isGranted
-            if isGranted {
-                authorizedBrowsers.insert(bundleId)
+            // A closed app cannot be checked without producing procNotFound.
+            // Preserve its remembered status until it is running again.
+            let isRunning = !NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).isEmpty
+            if isRunning {
+                let isGranted = isAutomationGranted(for: bundleId)
+                statuses[bundleId] = isGranted
+                if isGranted {
+                    updatedAuthorized.insert(bundleId)
+                } else {
+                    // Remove permissions revoked in System Settings instead
+                    // of trusting the persisted authorization cache.
+                    updatedAuthorized.remove(bundleId)
+                }
+            } else {
+                statuses[bundleId] = updatedAuthorized.contains(bundleId)
             }
         }
+
+        authorizedBrowsers = updatedAuthorized
         
         // Persist authorized browsers
         UserDefaults.standard.set(Array(authorizedBrowsers), forKey: authorizedBrowsersKey)
@@ -71,6 +85,20 @@ class PermissionManager: ObservableObject {
         UserDefaults.standard.set(Array(authorizedBrowsers), forKey: authorizedBrowsersKey)
         
         checkPermissions()
+    }
+
+    func markAutomationPermissionRevoked(for bundleId: String) {
+        guard knownBrowsers[bundleId] != nil else { return }
+
+        let authorizationChanged = authorizedBrowsers.remove(bundleId) != nil
+        let statusChanged = automationPermissions[bundleId] != false
+
+        if authorizationChanged {
+            UserDefaults.standard.set(Array(authorizedBrowsers), forKey: authorizedBrowsersKey)
+        }
+        if statusChanged {
+            automationPermissions[bundleId] = false
+        }
     }
 
     func isAutomationGranted(for bundleId: String) -> Bool {

@@ -293,12 +293,28 @@ class InputManager: ObservableObject {
         guard let app = NSWorkspace.shared.frontmostApplication,
               let bundleId = app.bundleIdentifier else { return nil }
 
+        // Only send Apple Events to browsers the user has explicitly added
+        // and authorized. Sending a `tell application` command to any
+        // frontmost app makes macOS try to resolve that app as an AppleScript
+        // target, which can open the "Choose Application" panel when its
+        // display name is not a registered script target.
+        guard PermissionManager.shared.knownBrowsers[bundleId] != nil else {
+            return nil
+        }
+
+        // The persisted authorization set can be stale if the user revoked
+        // access while the browser was not running. Verify the live target
+        // immediately before sending the Apple Event.
+        guard PermissionManager.shared.isAutomationGranted(for: bundleId) else {
+            PermissionManager.shared.markAutomationPermissionRevoked(for: bundleId)
+            return nil
+        }
+
         let scriptSource: String
         if bundleId == "com.apple.Safari" {
-            scriptSource = "tell application \"Safari\" to return URL of front document"
+            scriptSource = "tell application id \"\(bundleId)\" to return URL of front document"
         } else {
-            let appName = app.localizedName ?? "Google Chrome"
-            scriptSource = "tell application \"\(appName)\" to return URL of active tab of front window"
+            scriptSource = "tell application id \"\(bundleId)\" to return URL of active tab of front window"
         }
 
         var error: NSDictionary?
