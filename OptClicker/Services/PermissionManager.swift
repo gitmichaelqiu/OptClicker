@@ -23,7 +23,6 @@ class PermissionManager: ObservableObject {
         
         print("OptClicker: PermissionManager init. Known: \(savedKnown.count), Authorized: \(savedAuthorized.count)")
         
-        checkPermissions()
         // Re-verify permissions when the application returns to the foreground.
         NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main
@@ -75,6 +74,14 @@ class PermissionManager: ObservableObject {
     }
 
     func isAutomationGranted(for bundleId: String) -> Bool {
+        // AEDeterminePermissionToAutomateTarget requires a live target process.
+        // Calling it for an installed-but-closed browser makes macOS emit a
+        // procNotFound diagnostic during app launch. A closed browser cannot
+        // be authorized or queried yet, so report it as not granted instead.
+        guard NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).isEmpty == false else {
+            return false
+        }
+
         let targetDesc = NSAppleEventDescriptor(bundleIdentifier: bundleId)
         guard let aeDesc = targetDesc.aeDesc else { return false }
         let status = AEDeterminePermissionToAutomateTarget(aeDesc, typeWildCard, typeWildCard, false)

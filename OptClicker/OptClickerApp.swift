@@ -50,6 +50,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             object: nil
         )
 
+        // Permission APIs may synchronously contact system services. Defer
+        // the initial check until AppKit has completed application startup.
+        DispatchQueue.main.async {
+            PermissionManager.shared.checkPermissions()
+        }
+
         // Sparkle handles auto updates automatically.
     }
 
