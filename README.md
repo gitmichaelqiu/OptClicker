@@ -14,7 +14,7 @@
     </td>
     <td align="center">
       <img src="./OptClicker/Resources/Demo/OptClicker_v1-5-1_Settings_Shortcuts.png" width="300" /><br>
-      <i>Customize gobal hotkeys</i>
+      <i>Customize global hotkeys</i>
     </td>
   </tr>
 </table>
