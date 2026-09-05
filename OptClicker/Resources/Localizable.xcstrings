@@ -2790,12 +2790,12 @@
         }
       }
     },
-    "Toggle OptClicker" : {
+    "Toggle option → right click" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "切换OptClicker"
+            "value" : "切换 Option → 右键"
           }
         }
       }

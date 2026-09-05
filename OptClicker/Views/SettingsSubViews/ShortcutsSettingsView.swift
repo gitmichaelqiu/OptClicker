@@ -6,7 +6,7 @@ struct ShortcutsSettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
                 ModularSettingsSection("Keyboard Shortcuts") {
-                    ModularSettingsRow("Toggle OptClicker") {
+                    ModularSettingsRow("Toggle option → right click") {
                         HStack {
                             Text(hotkeyManager.shortcutDescription(for: .toggleApp))
                                 .foregroundColor(.secondary)
