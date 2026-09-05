@@ -1189,12 +1189,12 @@
         }
       }
     },
-    "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported." : {
+    "Click Grant, then select a browser app (such as Safari, Chrome, or Edge). Firefox-based browsers are not supported." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "用以获取浏览器当前页面。不支持火狐系浏览器。"
+            "value" : "点击“授予”，然后选择浏览器应用（例如 Safari、Chrome 或 Edge）。不支持 Firefox 系浏览器。"
           }
         }
       }
@@ -1418,13 +1418,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported."
+            "value" : "Click Grant, then select a browser app (such as Safari, Chrome, or Edge). Firefox-based browsers are not supported."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "通过 AppleScript 读取浏览器 URL。不支持 Firefox 系的浏览器。"
+            "value" : "点击“授予”，然后选择浏览器应用（例如 Safari、Chrome 或 Edge）。不支持 Firefox 系浏览器。"
           }
         }
       }
