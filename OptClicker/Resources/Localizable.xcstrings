@@ -1199,6 +1199,16 @@
         }
       }
     },
+    "Real-time video enhancing player." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "实时视频增强播放器。"
+          }
+        }
+      }
+    },
     "Required for reading window information." : {
       "localizations" : {
         "zh-Hans" : {

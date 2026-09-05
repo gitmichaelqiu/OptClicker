@@ -81,6 +81,13 @@ struct AboutView: View {
                             description: NSLocalizedString("Control which app and dock to show in each space.", comment: ""),
                             url: "https://github.com/gitmichaelqiu/SpaceSwitcher"
                         )
+
+                        OtherAppRow(
+                            imageName: "VTPlayerIcon\(iconSuffix)",
+                            appName: "VTPlayer",
+                            description: NSLocalizedString("Real-time video enhancing player.", comment: ""),
+                            url: "https://vtplayer.mqiu.dev"
+                        )
                     }
                 }
 
