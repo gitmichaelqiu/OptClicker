@@ -1,15 +1,12 @@
 {
+  "features" : [
+    "refractivity"
+  ],
   "fill" : {
     "automatic-gradient" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
   },
   "groups" : [
     {
-      "blur-material-specializations" : [
-        {
-          "appearance" : "dark",
-          "value" : null
-        }
-      ],
       "layers" : [
         {
           "blend-mode-specializations" : [
@@ -23,7 +20,9 @@
           ],
           "fill-specializations" : [
             {
-              "value" : "automatic"
+              "value" : {
+                "automatic-gradient" : "extended-gray:0.00000,1.00000"
+              }
             },
             {
               "appearance" : "dark",
@@ -49,7 +48,30 @@
               261.3629710823596
             ]
           }
-        },
+        }
+      ],
+      "refractivity" : {
+        "depth" : 0,
+        "enabled" : true,
+        "strength" : 0.5
+      },
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 1.2
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.65
+      }
+    },
+    {
+      "blur-material-specializations" : [
+        {
+          "appearance" : "dark",
+          "value" : null
+        }
+      ],
+      "layers" : [
         {
           "image-name" : "Option.png",
           "name" : "Option",
@@ -66,8 +88,8 @@
       "shadow-specializations" : [
         {
           "value" : {
-            "kind" : "layer-color",
-            "opacity" : 0.5
+            "kind" : "neutral",
+            "opacity" : 1
           }
         },
         {
@@ -91,14 +113,14 @@
         {
           "value" : {
             "enabled" : true,
-            "value" : 0.5
+            "value" : 0.45
           }
         },
         {
           "appearance" : "dark",
           "value" : {
             "enabled" : true,
-            "value" : 0.3
+            "value" : 0.4
           }
         }
       ]
