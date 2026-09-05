@@ -111,6 +111,7 @@ struct PermissionsSettingsView: View {
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .onAppear {
             permissionManager.checkPermissions()
+            permissionManager.refreshAutomationPermissions()
         }
     }
     

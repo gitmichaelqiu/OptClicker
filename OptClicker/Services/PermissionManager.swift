@@ -14,6 +14,10 @@ class PermissionManager: ObservableObject {
     @Published var knownBrowsers: [String: String] = [:] // bundleId: appName
     @Published var authorizedBrowsers: Set<String> = []
 
+    // Token for the block-based observer — required for proper cleanup.
+    private var becomeActiveObserver: NSObjectProtocol?
+    private var automationRefreshGeneration = 0
+
     private init() {
         let savedKnown = UserDefaults.standard.dictionary(forKey: knownBrowsersKey) as? [String: String] ?? [:]
         self.knownBrowsers = savedKnown
@@ -22,24 +26,41 @@ class PermissionManager: ObservableObject {
         self.authorizedBrowsers = Set(savedAuthorized)
         
         print("OptClicker: PermissionManager init. Known: \(savedKnown.count), Authorized: \(savedAuthorized.count)")
-        
+
+        // Match the mature manager's startup behavior. Accessibility is a
+        // local check and should be available as soon as the manager exists.
+        checkPermissions()
+        refreshAutomationPermissions()
+
         // Re-verify permissions when the application returns to the foreground.
-        NotificationCenter.default.addObserver(
+        becomeActiveObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main
         ) { [weak self] _ in
             self?.checkPermissions()
+            self?.refreshAutomationPermissions()
         }
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(self)
+        if let observer = becomeActiveObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     func checkPermissions() {
+        // Keep this method consistent with DesktopRenamer: it performs the
+        // immediate Accessibility check only. Browser Automation checks can
+        // contact another process and are refreshed separately off the main
+        // thread.
         let axOptions: NSDictionary = [
             kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: false
         ]
-        let isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
+        self.isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
+    }
+
+    func refreshAutomationPermissions() {
+        automationRefreshGeneration += 1
+        let generation = automationRefreshGeneration
         let knownBrowsers = self.knownBrowsers
         let previouslyAuthorized = self.authorizedBrowsers
 
@@ -70,8 +91,9 @@ class PermissionManager: ObservableObject {
             }
 
             DispatchQueue.main.async {
-                guard let self else { return }
-                self.isAccessibilityGranted = isAccessibilityGranted
+                guard let self,
+                      self.automationRefreshGeneration == generation else { return }
+
                 self.authorizedBrowsers = updatedAuthorized
 
                 UserDefaults.standard.set(
@@ -86,7 +108,7 @@ class PermissionManager: ObservableObject {
     func addBrowser(bundleId: String, name: String) {
         knownBrowsers[bundleId] = name
         UserDefaults.standard.set(knownBrowsers, forKey: knownBrowsersKey)
-        checkPermissions()
+        refreshAutomationPermissions()
     }
     
     func removeBrowser(bundleId: String) {
@@ -96,7 +118,7 @@ class PermissionManager: ObservableObject {
         UserDefaults.standard.set(knownBrowsers, forKey: knownBrowsersKey)
         UserDefaults.standard.set(Array(authorizedBrowsers), forKey: authorizedBrowsersKey)
         
-        checkPermissions()
+        refreshAutomationPermissions()
     }
 
     func markAutomationPermissionRevoked(for bundleId: String) {
@@ -156,7 +178,7 @@ class PermissionManager: ObservableObject {
 
             DispatchQueue.main.async {
                 guard let self else { return }
-                self.checkPermissions()
+                self.refreshAutomationPermissions()
 
                 if status != noErr {
                     self.openSystemSettings(type: "Privacy_Automation")
