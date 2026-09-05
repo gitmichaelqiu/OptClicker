@@ -21,8 +21,7 @@ struct AboutView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 32) {
+        VStack(alignment: .leading, spacing: 32) {
                 // Header Section
                 HStack(spacing: 20) {
                     if let nsImage = NSApplication.shared.applicationIconImage {
@@ -93,10 +92,9 @@ struct AboutView: View {
                     
                     AboutButtonRow(title: "Acknowledgements.pdf", action: openAcknowledgements)
                 }
-            }
-            .padding(30)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func openAcknowledgements() {

@@ -18,18 +18,17 @@ struct GeneralSettingsView: View {
     @State private var autoDownloadUpdate: Bool = UpdateManager.shared.updaterController.updater.automaticallyDownloadsUpdates
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                SettingsSection("General") {
-                    SettingsRow("Enable option → right click") {
+        VStack(alignment: .leading, spacing: 20) {
+                ModularSettingsSection("General") {
+                    ModularSettingsRow("Enable option → right click") {
                         Toggle("", isOn: $inputManager.isEnabled)
                             .labelsHidden()
                             .toggleStyle(.switch)
                     }
                 }
 
-                SettingsSection("Launch") {
-                    SettingsRow("Launch at login") {
+                ModularSettingsSection("Launch") {
+                    ModularSettingsRow("Launch at login") {
                         Toggle("", isOn: $launchAtLogin)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -40,7 +39,7 @@ struct GeneralSettingsView: View {
                     
                     Divider()
                     
-                    SettingsRow("Launch behavior") {
+                    ModularSettingsRow("Launch behavior") {
                         Picker("", selection: $selectedLaunchBehavior) {
                             ForEach(LaunchBehavior.allCases, id: \.self) { behavior in
                                 Text(behavior.localizedDescription).tag(behavior)
@@ -54,8 +53,8 @@ struct GeneralSettingsView: View {
                     }
                 }
                 
-                SettingsSection("Menubar") {
-                    SettingsRow("Show status reason") {
+                ModularSettingsSection("Menubar") {
+                    ModularSettingsRow("Show status reason") {
                         Toggle("", isOn: $showStatusReason)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -67,7 +66,7 @@ struct GeneralSettingsView: View {
                     
                     Divider()
                     
-                    SettingsRow("Show frontmost process") {
+                    ModularSettingsRow("Show frontmost process") {
                         Toggle("", isOn: $showFrontmostProc)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -78,8 +77,8 @@ struct GeneralSettingsView: View {
                     }
                 }
 
-                SettingsSection("Update") {
-                    SettingsRow("Check for updates automatically") {
+                ModularSettingsSection("Update") {
+                    ModularSettingsRow("Check for updates automatically") {
                         Toggle("", isOn: $autoCheckUpdate).labelsHidden().toggleStyle(.switch)
                             .onChange(of: autoCheckUpdate) { value in
                                 UpdateManager.shared.updaterController.updater.automaticallyChecksForUpdates = value
@@ -88,7 +87,7 @@ struct GeneralSettingsView: View {
                     Divider()
 
                     if autoCheckUpdate {
-                        SettingsRow("Automatically download updates") {
+                        ModularSettingsRow("Automatically download updates") {
                             Toggle("", isOn: $autoDownloadUpdate).labelsHidden().toggleStyle(.switch)
                                 .onChange(of: autoDownloadUpdate) { value in
                                     UpdateManager.shared.updaterController.updater.automaticallyDownloadsUpdates = value
@@ -97,7 +96,7 @@ struct GeneralSettingsView: View {
                         Divider()
                     }
 
-                    SettingsRow("Check for updates") {
+                    ModularSettingsRow("Check for updates") {
                         Button(NSLocalizedString("Check Now", comment: "")) {
                             UpdateManager.shared.updaterController.checkForUpdates(nil)
                         }
@@ -105,10 +104,8 @@ struct GeneralSettingsView: View {
                 }
 
                 Spacer()
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .animation(.easeInOut(duration: 0.2), value: autoCheckUpdate)
     }
 }

@@ -21,7 +21,7 @@ struct AutoToggleSpacesView: View {
     }
     
     var body: some View {
-        SettingsRow("Targeted spaces") {
+        ModularSettingsRow("Targeted spaces") {
             HStack(spacing: 8) {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.16)) {

@@ -15,10 +15,9 @@ struct AutoToggleSettingsView: View {
     }()
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                SettingsSection("Auto Toggle") {
-                    SettingsRow("Enable auto toggle") {
+        VStack(alignment: .leading, spacing: 20) {
+                ModularSettingsSection("Auto Toggle") {
+                    ModularSettingsRow("Enable auto toggle") {
                         Toggle("", isOn: $inputManager.isAutoToggleEnabled)
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -31,9 +30,9 @@ struct AutoToggleSettingsView: View {
                 }
 
                 if inputManager.isAutoToggleEnabled {
-                SettingsSection("Rules") {
+                ModularSettingsSection("Rules") {
                         // Toggle logic selection
-                        SettingsRow("Based on apps") {
+                        ModularSettingsRow("Based on apps") {
                             Toggle("", isOn: $inputManager.isBasedOnApps)
                                 .labelsHidden()
                                 .toggleStyle(.switch)
@@ -41,7 +40,7 @@ struct AutoToggleSettingsView: View {
                         
                         Divider()
                         
-                        SettingsRow("Based on spaces") {
+                        ModularSettingsRow("Based on spaces") {
                             Toggle("", isOn: $inputManager.isBasedOnSpaces)
                                 .labelsHidden()
                                 .toggleStyle(.switch)
@@ -49,7 +48,7 @@ struct AutoToggleSettingsView: View {
                         
                         if inputManager.isBasedOnApps && inputManager.isBasedOnSpaces {
                             Divider()
-                            SettingsRow("Match condition") {
+                            ModularSettingsRow("Match condition") {
                                 Picker("", selection: $inputManager.matchCondition) {
                                     ForEach(MatchCondition.allCases, id: \.self) { condition in
                                         Text(condition.localizedDescription).tag(condition)
@@ -61,7 +60,7 @@ struct AutoToggleSettingsView: View {
                         }
                     }
                     
-                    SettingsSection(nil) {
+                    ModularSettingsSection(nil) {
                         if inputManager.isBasedOnApps {
                             AutoToggleView(
                                 rules: $autoToggleRules, isExpanded: $isAutoToggleExpanded,
@@ -81,8 +80,8 @@ struct AutoToggleSettingsView: View {
                         }
                     }
                     
-                    SettingsSection("Behavior") {
-                        SettingsRow("When not frontmost") {
+                    ModularSettingsSection("Behavior") {
+                        ModularSettingsRow("When not frontmost") {
                             Picker("", selection: $autoToggleBehavior) {
                                 ForEach(AutoToggleBehavior.allCases, id: \.self) { behavior in
                                     Text(behavior.localizedDescription).tag(behavior)
@@ -98,10 +97,8 @@ struct AutoToggleSettingsView: View {
                 }
 
                 Spacer()
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .animation(.easeInOut(duration: 0.2), value: inputManager.isAutoToggleEnabled)
         .animation(.easeInOut(duration: 0.2), value: inputManager.isBasedOnApps)
         .animation(.easeInOut(duration: 0.2), value: inputManager.isBasedOnSpaces)

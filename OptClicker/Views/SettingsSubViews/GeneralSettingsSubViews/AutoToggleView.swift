@@ -22,7 +22,7 @@ struct AutoToggleView: View {
     }
     
     var body: some View {
-        SettingsRow("Target apps") {
+        ModularSettingsRow("Target apps") {
             HStack(spacing: 8) {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.16)) {

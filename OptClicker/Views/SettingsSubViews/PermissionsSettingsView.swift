@@ -6,12 +6,11 @@ struct PermissionsSettingsView: View {
     @State private var selection: String? = nil
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                SettingsSection("Permissions", helperText: "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant.") {
+        VStack(alignment: .leading, spacing: 20) {
+                ModularSettingsSection("Permissions", helperText: "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant.") {
                     VStack(alignment: .leading, spacing: 0) {
                         // Accessibility
-                        SettingsRow("Accessibility", helperText: "Required for reading window information.") {
+                        ModularSettingsRow("Accessibility", helperText: "Required for reading window information.") {
                             HStack(spacing: 12) {
                                 PermissionStatusIcon(isGranted: permissionManager.isAccessibilityGranted)
                                 
@@ -25,7 +24,7 @@ struct PermissionsSettingsView: View {
                         
                         // Automation
                         VStack(alignment: .leading, spacing: 0) {
-                            SettingsRow("Automation", helperText: "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported.") {
+                            ModularSettingsRow("Automation", helperText: "Required for reading browser URLs via AppleScript. Firefox-based browsers are not supported.") {
                                 HStack(spacing: 12) {
                                     let anyGranted = !permissionManager.authorizedBrowsers.isEmpty || permissionManager.automationPermissions.values.contains(true)
                                     PermissionStatusIcon(isGranted: anyGranted)
@@ -108,10 +107,8 @@ struct PermissionsSettingsView: View {
                         .animation(.easeInOut(duration: 0.2), value: permissionManager.automationPermissions)
                     }
                 }
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .onAppear {
             permissionManager.checkPermissions()
         }

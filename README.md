@@ -45,6 +45,8 @@ You can still turn OptClicker on when no target apps are frontmost. If you selec
 
 You are not able to modify *launch behavior* when Auto Toggle is on, for when app launches, it will check the frontmost app to determine whether turn OptClicker on.
 
+Settings includes sidebar search, which can find a setting by name and jump directly to the matching control.
+
 ## 📦 Installation
 
 Requires **macOS 13.0 Ventura** or above.

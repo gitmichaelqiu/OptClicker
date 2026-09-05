@@ -4,10 +4,9 @@ struct ShortcutsSettingsView: View {
     @EnvironmentObject var hotkeyManager: HotkeyManager
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                SettingsSection("Keyboard Shortcuts") {
-                    SettingsRow("Toggle OptClicker") {
+        VStack(alignment: .leading, spacing: 20) {
+                ModularSettingsSection("Keyboard Shortcuts") {
+                    ModularSettingsRow("Toggle OptClicker") {
                         HStack {
                             Text(hotkeyManager.shortcutDescription(for: .toggleApp))
                                 .foregroundColor(.secondary)
@@ -27,7 +26,7 @@ struct ShortcutsSettingsView: View {
                     
                     Divider()
                     
-                    SettingsRow("Toggle Auto Toggle") {
+                    ModularSettingsRow("Toggle Auto Toggle") {
                         HStack {
                             Text(hotkeyManager.shortcutDescription(for: .toggleAutoToggle))
                                 .foregroundColor(.secondary)
@@ -47,9 +46,7 @@ struct ShortcutsSettingsView: View {
                 }
 
                 Spacer()
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 }
