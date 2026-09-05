@@ -223,6 +223,7 @@ struct SettingsView: View {
             List(selection: $selectedTab) {
                 sidebarContent(titleSize: 21, spacing: 2)
             }
+            .listStyle(.sidebar)
             .scrollDisabled(true)
             .removeSidebarToggle()
             .ignoresSafeArea(.container, edges: .top)
