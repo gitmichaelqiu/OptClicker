@@ -72,21 +72,21 @@ struct AboutView: View {
                             imageName: "DesktopRenamerIcon\(iconSuffix)",
                             appName: "DesktopRenamer",
                             description: NSLocalizedString("The ultimate desktop naming and management tool.", comment: ""),
-                            url: "https://github.com/gitmichaelqiu/DesktopRenamer"
+                            url: "https://desktoprenamer.mqiu.dev/"
                         )
                         
                         OtherAppRow(
                             imageName: "SpaceSwitcherIcon\(iconSuffix)",
                             appName: "SpaceSwitcher",
                             description: NSLocalizedString("Control which app and dock to show in each space.", comment: ""),
-                            url: "https://github.com/gitmichaelqiu/SpaceSwitcher"
+                            url: "https://spaceswitcher.mqiu.dev/"
                         )
 
                         OtherAppRow(
                             imageName: "VTPlayerIcon\(iconSuffix)",
                             appName: "VTPlayer",
                             description: NSLocalizedString("Real-time video enhancing player.", comment: ""),
-                            url: "https://vtplayer.mqiu.dev"
+                            url: "https://vtplayer.mqiu.dev/"
                         )
                     }
                 }
