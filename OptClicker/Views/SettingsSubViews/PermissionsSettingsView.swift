@@ -192,6 +192,6 @@ private struct SpaceAPIStatusView: View {
                 }
             }
         }
-        .frame(minHeight: 28)
+        .frame(height: 28)
     }
 }
