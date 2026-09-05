@@ -190,16 +190,6 @@
         }
       }
     },
-    "Available" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "可用"
-          }
-        }
-      }
-    },
     "Cancel" : {
       "localizations" : {
         "zh-Hans" : {
@@ -361,6 +351,16 @@
         }
       }
     },
+    "DesktopRenamer SpaceAPI" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DesktopRenamer SpaceAPI"
+          }
+        }
+      }
+    },
     "Disable OptClicker" : {
       "localizations" : {
         "zh-Hans" : {
@@ -439,16 +439,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重复进程"
-          }
-        }
-      }
-    },
-    "DesktopRenamer SpaceAPI" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DesktopRenamer SpaceAPI"
           }
         }
       }
@@ -650,6 +640,16 @@
         }
       }
     },
+    "Install DesktopRenamer" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装 DesktopRenamer"
+          }
+        }
+      }
+    },
     "Keyboard Shortcuts" : {
       "localizations" : {
         "zh-Hans" : {
@@ -670,16 +670,6 @@
         }
       }
     },
-    "Launch DesktopRenamer" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "启动 DesktopRenamer"
-          }
-        }
-      }
-    },
     "Launch at login" : {
       "localizations" : {
         "zh-Hans" : {
@@ -696,6 +686,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "启动行为"
+          }
+        }
+      }
+    },
+    "Launch DesktopRenamer" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启动 DesktopRenamer"
           }
         }
       }
@@ -1063,16 +1063,6 @@
         }
       }
     },
-    "Install DesktopRenamer" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "安装 DesktopRenamer"
-          }
-        }
-      }
-    },
     "OK" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1229,6 +1219,16 @@
         }
       }
     },
+    "Real-time video enhancing player." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "实时视频增强播放器。"
+          }
+        }
+      }
+    },
     "Remove All Target Apps" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1249,12 +1249,12 @@
         }
       }
     },
-    "Real-time video enhancing player." : {
+    "Required for reading desktop spaces and using space-based auto toggle." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "实时视频增强播放器。"
+            "value" : "用于读取桌面空间并使用基于空间的自动切换。"
           }
         }
       }
@@ -1265,16 +1265,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "用于获取窗口名称。"
-          }
-        }
-      }
-    },
-    "Required for reading desktop spaces and using space-based auto toggle." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "用于读取桌面空间并使用基于空间的自动切换。"
           }
         }
       }
@@ -2860,16 +2850,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目标桌面"
-          }
-        }
-      }
-    },
-    "Unavailable" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不可用"
           }
         }
       }
