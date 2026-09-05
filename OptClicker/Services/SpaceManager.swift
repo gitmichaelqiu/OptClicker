@@ -11,8 +11,16 @@ struct SpaceInfo: Identifiable, Codable, Hashable {
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
+enum SpaceAPIAvailability: Equatable {
+    case available
+    case disabled
+    case unavailable
+}
+
 class SpaceManager: ObservableObject {
     static let shared = SpaceManager()
+    static let desktopRenamerBundleIdentifier = "com.michaelqiu.DesktopRenamer"
+    static let desktopRenamerDownloadURL = URL(string: "https://github.com/gitmichaelqiu/DesktopRenamer/releases/latest")!
 
     private let apiPrefix = "com.michaelqiu.DesktopRenamer"
     private let jsonRPCVersion = "2.0"
@@ -35,6 +43,7 @@ class SpaceManager: ObservableObject {
     @Published var currentSpaceName: String = "Unknown"
     @Published var availableSpaces: [SpaceInfo] = []
     @Published var isAPIEnabled: Bool = false
+    @Published private(set) var apiAvailability: SpaceAPIAvailability = .unavailable
 
     private var notificationObservers: [NSObjectProtocol] = []
     private var structuredAPIAvailable = false
@@ -109,6 +118,22 @@ class SpaceManager: ObservableObject {
         }
     }
 
+    var desktopRenamerApplicationURL: URL? {
+        NSWorkspace.shared.urlForApplication(withBundleIdentifier: Self.desktopRenamerBundleIdentifier)
+    }
+
+    func openDesktopRenamer() {
+        guard let applicationURL = desktopRenamerApplicationURL else { return }
+        NSWorkspace.shared.open(applicationURL)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            self?.refreshSpaceList()
+        }
+    }
+
+    func openDesktopRenamerDownloadPage() {
+        NSWorkspace.shared.open(Self.desktopRenamerDownloadURL)
+    }
+
     private func requestStructuredAPIInfo() {
         guard !structuredAPIAvailable, !structuredProbeInFlight else { return }
 
@@ -173,7 +198,7 @@ class SpaceManager: ObservableObject {
         if let error = response["error"] as? [String: Any] {
             let code = (error["code"] as? NSNumber)?.intValue
             if code == -32001 {
-                setDisconnected()
+                setDisconnected(as: .disabled)
             } else if requestType == "getAPIInfo" {
                 structuredProbeInFlight = false
                 structuredAPIAvailable = false
@@ -206,6 +231,7 @@ class SpaceManager: ObservableObject {
 
             structuredProbeInFlight = false
             structuredAPIAvailable = true
+            apiAvailability = .available
             isAPIEnabled = true
             requestStructuredSnapshot()
 
@@ -242,6 +268,7 @@ class SpaceManager: ObservableObject {
 
         structuredAPIAvailable = true
         structuredProbeInFlight = false
+        apiAvailability = .available
         applyStructuredSnapshot(snapshot, isEvent: true)
     }
 
@@ -271,6 +298,7 @@ class SpaceManager: ObservableObject {
         currentSpaceName = snapshot["currentSpaceName"] as? String ?? "Unknown"
         availableSpaces = spaces
         isAPIEnabled = true
+        apiAvailability = .available
 
         if let revision {
             lastSnapshotRevision = revision
@@ -287,7 +315,7 @@ class SpaceManager: ObservableObject {
                 requestStructuredSnapshot()
             }
         } else {
-            setDisconnected()
+            setDisconnected(as: .disabled)
         }
     }
 
@@ -334,11 +362,12 @@ class SpaceManager: ObservableObject {
         isAPIEnabled = true
     }
 
-    private func setDisconnected() {
+    private func setDisconnected(as availability: SpaceAPIAvailability = .unavailable) {
         structuredAPIAvailable = false
         structuredProbeInFlight = false
         pendingRequests.removeAll()
         lastSnapshotRevision = nil
+        apiAvailability = availability
         isAPIEnabled = false
         availableSpaces.removeAll()
         currentSpaceName = "Disconnected"

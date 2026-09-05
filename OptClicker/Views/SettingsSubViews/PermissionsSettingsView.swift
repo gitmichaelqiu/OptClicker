@@ -25,16 +25,7 @@ struct PermissionsSettingsView: View {
 
                         // DesktopRenamer SpaceAPI
                         ModularSettingsRow("DesktopRenamer SpaceAPI", helperText: "Required for reading desktop spaces and using space-based auto toggle.") {
-                            HStack(spacing: 12) {
-                                PermissionStatusIcon(isGranted: spaceManager.isAPIEnabled)
-                                if spaceManager.isAPIEnabled {
-                                    Text("Available")
-                                        .foregroundStyle(.secondary)
-                                } else {
-                                    Text("Unavailable")
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
+                            SpaceAPIStatusView(spaceManager: spaceManager)
                         }
                         
                         Divider()
@@ -173,5 +164,35 @@ struct PermissionStatusIcon: View {
     var body: some View {
         Image(systemName: isGranted ? "checkmark.circle.fill" : "xmark.circle.fill")
             .foregroundColor(isGranted ? .green : .red)
+    }
+}
+
+private struct SpaceAPIStatusView: View {
+    @ObservedObject var spaceManager: SpaceManager
+
+    var body: some View {
+        HStack(spacing: 8) {
+            PermissionStatusIcon(isGranted: spaceManager.apiAvailability == .available)
+
+            switch spaceManager.apiAvailability {
+            case .available:
+                Text("Available")
+                    .foregroundStyle(.secondary)
+            case .disabled:
+                Button("Open DesktopRenamer") {
+                    spaceManager.openDesktopRenamer()
+                }
+            case .unavailable:
+                Button("Launch DesktopRenamer") {
+                    spaceManager.openDesktopRenamer()
+                }
+                .disabled(spaceManager.desktopRenamerApplicationURL == nil)
+
+                Button("Install DesktopRenamer") {
+                    spaceManager.openDesktopRenamerDownloadPage()
+                }
+            }
+        }
+        .frame(minHeight: 28)
     }
 }
