@@ -225,7 +225,6 @@ struct SettingsView: View {
             }
             .listStyle(.sidebar)
             .scrollDisabled(true)
-            .removeSidebarToggle()
             .ignoresSafeArea(.container, edges: .top)
             .navigationSplitViewColumnWidth(
                 min: sidebarWidth, ideal: sidebarWidth, max: sidebarWidth
@@ -309,16 +308,6 @@ struct SettingsView: View {
             }
         }
         .frame(height: sidebarRowHeight)
-    }
-}
-
-@available(macOS 14.0, *)
-extension View {
-    func removeSidebarToggle() -> some View {
-        toolbar(removing: .sidebarToggle)
-            .toolbar {
-                Color.clear
-            }
     }
 }
 
