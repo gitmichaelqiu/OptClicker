@@ -24,7 +24,7 @@ struct PermissionsSettingsView: View {
                         
                         // Automation
                         VStack(alignment: .leading, spacing: 0) {
-                            ModularSettingsRow("Automation", helperText: "Click Grant, then select a browser app (such as Safari, Chrome, or Edge). Firefox-based browsers are not supported.") {
+                            ModularSettingsRow("Browser automation", helperText: "Click Grant, then select a browser app (such as Safari, Chrome, or Edge). Firefox-based browsers are not supported.") {
                                 HStack(spacing: 12) {
                                     let anyGranted = !permissionManager.authorizedBrowsers.isEmpty || permissionManager.automationPermissions.values.contains(true)
                                     PermissionStatusIcon(isGranted: anyGranted)

@@ -150,16 +150,6 @@
         }
       }
     },
-    "Automation" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自动化"
-          }
-        }
-      }
-    },
     "Based on apps" : {
       "localizations" : {
         "zh-Hans" : {
@@ -186,6 +176,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "行为"
+          }
+        }
+      }
+    },
+    "Browser automation" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浏览器自动化"
           }
         }
       }
@@ -246,6 +246,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chrome的App"
+          }
+        }
+      }
+    },
+    "Click Grant, then select a browser app (such as Safari, Chrome, or Edge). Firefox-based browsers are not supported." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击“授予”，然后选择浏览器应用（例如 Safari、Chrome 或 Edge）。不支持 Firefox 系浏览器。"
           }
         }
       }
@@ -1185,16 +1195,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "反馈"
-          }
-        }
-      }
-    },
-    "Click Grant, then select a browser app (such as Safari, Chrome, or Edge). Firefox-based browsers are not supported." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "点击“授予”，然后选择浏览器应用（例如 Safari、Chrome 或 Edge）。不支持 Firefox 系浏览器。"
           }
         }
       }
