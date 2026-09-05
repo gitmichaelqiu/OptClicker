@@ -170,19 +170,39 @@ class PermissionManager: ObservableObject {
     }
 
     func requestAutomationPermission(for bundleId: String) {
-        // Ask macOS directly instead of executing a potentially blocking
-        // AppleScript on the main thread. The target must be running for this
-        // API to identify it; otherwise send the user to Automation settings.
+        // Execute a harmless AppleScript command to trigger macOS's actual
+        // Automation consent flow. Use the bundle identifier so Launch
+        // Services never needs to resolve the target by display name.
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            let status = Self.automationPermissionStatus(for: bundleId, askUserIfNeeded: true)
+            let scriptSource = "tell application id \"\(bundleId)\" to return name"
+            var error: NSDictionary?
+            let requestSucceeded: Bool
+            if let script = NSAppleScript(source: scriptSource) {
+                _ = script.executeAndReturnError(&error)
+                requestSucceeded = error == nil
+            } else {
+                requestSucceeded = false
+            }
+
+            if let error {
+                print("OptClicker: Automation request failed for \(bundleId): \(error)")
+            }
 
             DispatchQueue.main.async {
                 guard let self else { return }
-                self.refreshAutomationPermissions()
 
-                if status != noErr {
+                if requestSucceeded {
+                    self.authorizedBrowsers.insert(bundleId)
+                    self.automationPermissions[bundleId] = true
+                    UserDefaults.standard.set(
+                        Array(self.authorizedBrowsers),
+                        forKey: self.authorizedBrowsersKey
+                    )
+                } else {
                     self.openSystemSettings(type: "Privacy_Automation")
                 }
+
+                self.refreshAutomationPermissions()
             }
         }
     }
