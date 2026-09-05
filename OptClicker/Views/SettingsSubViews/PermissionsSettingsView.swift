@@ -176,8 +176,7 @@ private struct SpaceAPIStatusView: View {
 
             switch spaceManager.apiAvailability {
             case .available:
-                Text("Available")
-                    .foregroundStyle(.secondary)
+                EmptyView()
             case .disabled:
                 Button("Open DesktopRenamer") {
                     spaceManager.openDesktopRenamer()

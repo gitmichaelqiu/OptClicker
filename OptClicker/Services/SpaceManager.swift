@@ -125,8 +125,14 @@ class SpaceManager: ObservableObject {
     func openDesktopRenamer() {
         guard let applicationURL = desktopRenamerApplicationURL else { return }
         NSWorkspace.shared.open(applicationURL)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            self?.refreshSpaceList()
+
+        // DesktopRenamer starts its API listener after the application launch
+        // callback, so retry while it finishes initializing instead of leaving
+        // the status page stuck at unavailable after the first probe races it.
+        for delay in [0.5, 1.5, 3.0, 5.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.refreshSpaceList()
+            }
         }
     }
 
@@ -344,6 +350,7 @@ class SpaceManager: ObservableObject {
         currentSpaceID = info["spaceUUID"] as? String
         currentSpaceName = info["spaceName"] as? String ?? "Unknown"
         isAPIEnabled = true
+        apiAvailability = .available
     }
 
     private func handleLegacySpaceList(_ notification: Notification) {
@@ -360,6 +367,7 @@ class SpaceManager: ObservableObject {
             return SpaceInfo(id: id, name: name, number: number)
         }.sorted { $0.number < $1.number }
         isAPIEnabled = true
+        apiAvailability = .available
     }
 
     private func setDisconnected(as availability: SpaceAPIAvailability = .unavailable) {

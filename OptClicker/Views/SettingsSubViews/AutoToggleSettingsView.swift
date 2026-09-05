@@ -5,6 +5,7 @@ struct AutoToggleSettingsView: View {
     @AppStorage("AutoToggle.Spaces.isExpanded") private var isAutoToggleSpacesExpanded = false
     
     @ObservedObject var inputManager: InputManager
+    @ObservedObject private var spaceManager = SpaceManager.shared
     
     @State private var autoToggleRules: [String] = UserDefaults.standard.stringArray(forKey: "AutoToggleAppBundleIds") ?? []
     @State private var autoToggleSpaces: [String] = UserDefaults.standard.stringArray(forKey: "autoToggleSpaces") ?? []
@@ -40,7 +41,11 @@ struct AutoToggleSettingsView: View {
                         
                         Divider()
                         
-                        ModularSettingsRow("Based on spaces") {
+                        ModularSettingsRow(
+                            "Based on spaces",
+                            warningText: spaceManager.apiAvailability == .available
+                                ? nil : "Requires DesktopRenamer SpaceAPI."
+                        ) {
                             Toggle("", isOn: $inputManager.isBasedOnSpaces)
                                 .labelsHidden()
                                 .toggleStyle(.switch)

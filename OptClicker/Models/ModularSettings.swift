@@ -212,8 +212,10 @@ public struct ModularSettingsSection<Content: View>: View {
                 .padding(.leading, 4)
             }
             VStack(spacing: 0) { content }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, title == nil ? -10 : 0)
     }
 }
