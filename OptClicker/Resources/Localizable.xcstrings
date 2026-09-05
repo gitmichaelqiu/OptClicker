@@ -997,6 +997,16 @@
         }
       }
     },
+    "No results" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无结果"
+          }
+        }
+      }
+    },
     "No Spaces available (DesktopRenamer not running?)" : {
       "localizations" : {
         "en" : {
@@ -1199,16 +1209,6 @@
         }
       }
     },
-    "Reset to default" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重置默认"
-          }
-        }
-      }
-    },
     "Rules" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1229,12 +1229,12 @@
         }
       }
     },
-    "Select a category" : {
+    "Search" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选择分类"
+            "value" : "搜索"
           }
         }
       }
@@ -2776,6 +2776,12 @@
     },
     "Toggle Auto Toggle" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toggle auto toggle"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
