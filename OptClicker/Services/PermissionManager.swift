@@ -36,39 +36,51 @@ class PermissionManager: ObservableObject {
     }
 
     func checkPermissions() {
-        // Accessibility check.
         let axOptions: NSDictionary = [
             kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: false
         ]
-        self.isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
+        let isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
+        let knownBrowsers = self.knownBrowsers
+        let previouslyAuthorized = self.authorizedBrowsers
 
-        // Automation checks.
-        var statuses: [String: Bool] = [:]
-        var updatedAuthorized = authorizedBrowsers.intersection(Set(knownBrowsers.keys))
-        for bundleId in knownBrowsers.keys {
-            // A closed app cannot be checked without producing procNotFound.
-            // Preserve its remembered status until it is running again.
-            let isRunning = !NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).isEmpty
-            if isRunning {
-                let isGranted = isAutomationGranted(for: bundleId)
-                statuses[bundleId] = isGranted
-                if isGranted {
-                    updatedAuthorized.insert(bundleId)
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            var statuses: [String: Bool] = [:]
+            var updatedAuthorized = previouslyAuthorized.intersection(Set(knownBrowsers.keys))
+
+            for bundleId in knownBrowsers.keys {
+                // A closed app cannot be checked without producing procNotFound.
+                // Preserve its remembered status until it is running again.
+                let isRunning = !NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).isEmpty
+                if isRunning {
+                    let isGranted = Self.automationPermissionStatus(
+                        for: bundleId,
+                        askUserIfNeeded: false
+                    ) == noErr
+                    statuses[bundleId] = isGranted
+                    if isGranted {
+                        updatedAuthorized.insert(bundleId)
+                    } else {
+                        // Remove permissions revoked in System Settings instead
+                        // of trusting the persisted authorization cache.
+                        updatedAuthorized.remove(bundleId)
+                    }
                 } else {
-                    // Remove permissions revoked in System Settings instead
-                    // of trusting the persisted authorization cache.
-                    updatedAuthorized.remove(bundleId)
+                    statuses[bundleId] = updatedAuthorized.contains(bundleId)
                 }
-            } else {
-                statuses[bundleId] = updatedAuthorized.contains(bundleId)
+            }
+
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.isAccessibilityGranted = isAccessibilityGranted
+                self.authorizedBrowsers = updatedAuthorized
+
+                UserDefaults.standard.set(
+                    Array(updatedAuthorized),
+                    forKey: self.authorizedBrowsersKey
+                )
+                self.automationPermissions = statuses
             }
         }
-
-        authorizedBrowsers = updatedAuthorized
-        
-        // Persist authorized browsers
-        UserDefaults.standard.set(Array(authorizedBrowsers), forKey: authorizedBrowsersKey)
-        self.automationPermissions = statuses
     }
     
     func addBrowser(bundleId: String, name: String) {

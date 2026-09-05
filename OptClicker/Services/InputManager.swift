@@ -302,11 +302,11 @@ class InputManager: ObservableObject {
             return nil
         }
 
-        // The persisted authorization set can be stale if the user revoked
-        // access while the browser was not running. Verify the live target
-        // immediately before sending the Apple Event.
-        guard PermissionManager.shared.isAutomationGranted(for: bundleId) else {
-            PermissionManager.shared.markAutomationPermissionRevoked(for: bundleId)
+        // PermissionManager refreshes this status asynchronously so the TCC
+        // query never blocks the main thread. Do not send an Apple Event until
+        // that latest check confirms access.
+        guard PermissionManager.shared.authorizedBrowsers.contains(bundleId),
+              PermissionManager.shared.automationPermissions[bundleId] == true else {
             return nil
         }
 
