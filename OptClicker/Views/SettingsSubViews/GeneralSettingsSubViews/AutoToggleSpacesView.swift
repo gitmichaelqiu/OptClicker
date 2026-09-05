@@ -6,7 +6,7 @@ struct AutoToggleSpacesView: View {
     let onRuleChange: () -> Void
 
     @State private var selection: String? = nil
-    @StateObject private var spaceManager = SpaceManager.shared
+    @ObservedObject private var spaceManager = SpaceManager.shared
     @State var isExpandedLocal: Bool = false
     
     init(
@@ -21,7 +21,11 @@ struct AutoToggleSpacesView: View {
     }
     
     var body: some View {
-        ModularSettingsRow("Targeted spaces") {
+        ModularSettingsRow(
+            "Targeted spaces",
+            warningText: spaceManager.isAPIEnabled
+                ? nil : "Requires DesktopRenamer SpaceAPI."
+        ) {
             HStack(spacing: 8) {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.16)) {

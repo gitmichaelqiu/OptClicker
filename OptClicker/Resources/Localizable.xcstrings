@@ -190,6 +190,16 @@
         }
       }
     },
+    "Available" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "zh-Hans" : {
@@ -429,6 +439,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重复进程"
+          }
+        }
+      }
+    },
+    "DesktopRenamer SpaceAPI" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DesktopRenamer SpaceAPI"
           }
         }
       }
@@ -1215,6 +1235,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "用于获取窗口名称。"
+          }
+        }
+      }
+    },
+    "Required for reading desktop spaces and using space-based auto toggle." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用于读取桌面空间并使用基于空间的自动切换。"
+          }
+        }
+      }
+    },
+    "Requires Accessibility permission." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要辅助功能权限。"
+          }
+        }
+      }
+    },
+    "Requires Browser automation permission." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要浏览器自动化权限。"
+          }
+        }
+      }
+    },
+    "Requires DesktopRenamer SpaceAPI." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要 DesktopRenamer SpaceAPI。"
           }
         }
       }
@@ -2770,6 +2830,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目标桌面"
+          }
+        }
+      }
+    },
+    "Unavailable" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不可用"
           }
         }
       }

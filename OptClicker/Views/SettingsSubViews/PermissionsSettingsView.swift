@@ -2,7 +2,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct PermissionsSettingsView: View {
-    @StateObject private var permissionManager = PermissionManager.shared
+    @ObservedObject private var permissionManager = PermissionManager.shared
+    @ObservedObject private var spaceManager = SpaceManager.shared
     @State private var selection: String? = nil
 
     var body: some View {
@@ -16,6 +17,22 @@ struct PermissionsSettingsView: View {
                                 
                                 Button(permissionManager.isAccessibilityGranted ? "Settings" : "Grant") {
                                     permissionManager.requestAccessibilityPermission()
+                                }
+                            }
+                        }
+
+                        Divider()
+
+                        // DesktopRenamer SpaceAPI
+                        ModularSettingsRow("DesktopRenamer SpaceAPI", helperText: "Required for reading desktop spaces and using space-based auto toggle.") {
+                            HStack(spacing: 12) {
+                                PermissionStatusIcon(isGranted: spaceManager.isAPIEnabled)
+                                if spaceManager.isAPIEnabled {
+                                    Text("Available")
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    Text("Unavailable")
+                                        .foregroundStyle(.secondary)
                                 }
                             }
                         }
@@ -112,6 +129,7 @@ struct PermissionsSettingsView: View {
         .onAppear {
             permissionManager.checkPermissions()
             permissionManager.refreshAutomationPermissions()
+            spaceManager.refreshSpaceList()
         }
     }
     

@@ -7,6 +7,7 @@ struct AutoToggleView: View {
     @Binding var isExpanded: Bool
     let onRuleChange: () -> Void
 
+    @ObservedObject private var permissionManager = PermissionManager.shared
     @State private var selection: String? = nil
     @State var isExpandedLocal: Bool = false
     
@@ -22,7 +23,11 @@ struct AutoToggleView: View {
     }
     
     var body: some View {
-        ModularSettingsRow("Target apps") {
+        ModularSettingsRow(
+            "Target apps",
+            warningText: hasWebsiteRules && !hasBrowserAutomation
+                ? "Requires Browser automation permission." : nil
+        ) {
             HStack(spacing: 8) {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.16)) {
@@ -185,6 +190,14 @@ struct AutoToggleView: View {
             .padding(.bottom, 2)
             .transition(.opacity.combined(with: .move(edge: .top)))
         }
+    }
+
+    private var hasWebsiteRules: Bool {
+        rules.contains { $0.hasPrefix("web:") }
+    }
+
+    private var hasBrowserAutomation: Bool {
+        !permissionManager.authorizedBrowsers.isEmpty
     }
 
     private func addButton(

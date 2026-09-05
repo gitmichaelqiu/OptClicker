@@ -4,6 +4,7 @@ import Sparkle
 
 struct GeneralSettingsView: View {
     @ObservedObject var inputManager: InputManager
+    @ObservedObject private var permissionManager = PermissionManager.shared
     
     @State private var launchAtLogin = LaunchManager.isEnabled
     @State private var selectedLaunchBehavior: LaunchBehavior = {
@@ -20,7 +21,11 @@ struct GeneralSettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
                 ModularSettingsSection("General") {
-                    ModularSettingsRow("Enable option → right click") {
+                    ModularSettingsRow(
+                        "Enable option → right click",
+                        warningText: permissionManager.isAccessibilityGranted
+                            ? nil : "Requires Accessibility permission."
+                    ) {
                         Toggle("", isOn: $inputManager.isEnabled)
                             .labelsHidden()
                             .toggleStyle(.switch)
