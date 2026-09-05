@@ -140,7 +140,7 @@ struct PermissionsSettingsView: View {
                 DispatchQueue.main.async {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         permissionManager.addBrowser(bundleId: bundleId, name: name)
-                        permissionManager.requestAutomationPermission(for: bundleId, appName: name)
+                        permissionManager.requestAutomationPermission(for: bundleId)
                     }
                 }
             }

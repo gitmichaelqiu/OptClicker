@@ -102,18 +102,29 @@ class PermissionManager: ObservableObject {
     }
 
     func isAutomationGranted(for bundleId: String) -> Bool {
+        Self.automationPermissionStatus(for: bundleId, askUserIfNeeded: false) == noErr
+    }
+
+    private static func automationPermissionStatus(
+        for bundleId: String,
+        askUserIfNeeded: Bool
+    ) -> OSStatus? {
         // AEDeterminePermissionToAutomateTarget requires a live target process.
         // Calling it for an installed-but-closed browser makes macOS emit a
         // procNotFound diagnostic during app launch. A closed browser cannot
-        // be authorized or queried yet, so report it as not granted instead.
-        guard NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).isEmpty == false else {
-            return false
+        // be authorized or queried yet, so report it as unavailable instead.
+        guard !NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).isEmpty else {
+            return nil
         }
 
         let targetDesc = NSAppleEventDescriptor(bundleIdentifier: bundleId)
-        guard let aeDesc = targetDesc.aeDesc else { return false }
-        let status = AEDeterminePermissionToAutomateTarget(aeDesc, typeWildCard, typeWildCard, false)
-        return status == noErr
+        guard let aeDesc = targetDesc.aeDesc else { return nil }
+        return AEDeterminePermissionToAutomateTarget(
+            aeDesc,
+            typeWildCard,
+            typeWildCard,
+            askUserIfNeeded
+        )
     }
 
     func requestAccessibilityPermission() {
@@ -124,28 +135,21 @@ class PermissionManager: ObservableObject {
         openSystemSettings(type: "Privacy_Accessibility")
     }
 
-    func requestAutomationPermission(for bundleId: String, appName: String) {
-        // Attempt to trigger the prompt via a simple AppleScript execution.
-        let scriptSource: String
-        if bundleId == "com.apple.Safari" {
-            scriptSource = "tell application \"Safari\" to return name of front document"
-        } else {
-            scriptSource = "tell application id \"\(bundleId)\" to return URL of active tab of front window"
-        }
-        
-        if let script = NSAppleScript(source: scriptSource) {
-            var error: NSDictionary?
-            script.executeAndReturnError(&error)
-        }
+    func requestAutomationPermission(for bundleId: String) {
+        // Ask macOS directly instead of executing a potentially blocking
+        // AppleScript on the main thread. The target must be running for this
+        // API to identify it; otherwise send the user to Automation settings.
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let status = Self.automationPermissionStatus(for: bundleId, askUserIfNeeded: true)
 
-        // Check again after a short delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.checkPermissions()
-        }
-        
-        // Fallback to opening system settings if still not granted
-        if !isAutomationGranted(for: bundleId) {
-            openSystemSettings(type: "Privacy_Automation")
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.checkPermissions()
+
+                if status != noErr {
+                    self.openSystemSettings(type: "Privacy_Automation")
+                }
+            }
         }
     }
 
