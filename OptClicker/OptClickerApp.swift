@@ -29,7 +29,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        inputManager.applicationDidFinishLaunching()
         
         // Status bar
         statusBarManager = StatusBarManager(inputManager: inputManager) {

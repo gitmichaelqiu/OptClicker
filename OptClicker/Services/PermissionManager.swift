@@ -3,44 +3,6 @@ import AppKit
 import Foundation
 import Combine
 
-final class OptClickerDiagnosticLog {
-    static let shared = OptClickerDiagnosticLog()
-
-    let fileURL: URL
-    private let queue = DispatchQueue(label: "dev.mqiu.OptClicker.diagnostics")
-
-    private init() {
-        let logsDirectory = FileManager.default.urls(
-            for: .libraryDirectory,
-            in: .userDomainMask
-        )[0].appendingPathComponent("Logs", isDirectory: true)
-        try? FileManager.default.createDirectory(
-            at: logsDirectory,
-            withIntermediateDirectories: true
-        )
-        fileURL = logsDirectory.appendingPathComponent("OptClicker.log")
-        if !FileManager.default.fileExists(atPath: fileURL.path) {
-            FileManager.default.createFile(atPath: fileURL.path, contents: nil)
-        }
-
-        log("=== OptClicker diagnostic session started ===")
-        log("bundle=\(Bundle.main.bundleIdentifier ?? "<nil>") pid=\(ProcessInfo.processInfo.processIdentifier)")
-        log("executable=\(Bundle.main.executablePath ?? "<nil>")")
-    }
-
-    func log(_ message: String) {
-        let line = "[\(ISO8601DateFormatter().string(from: Date()))] \(message)\n"
-        print("OptClicker: \(message)")
-        queue.async { [fileURL] in
-            guard let data = line.data(using: .utf8),
-                  let handle = try? FileHandle(forWritingTo: fileURL) else { return }
-            handle.seekToEndOfFile()
-            handle.write(data)
-            handle.closeFile()
-        }
-    }
-}
-
 class PermissionManager: ObservableObject {
     static let shared = PermissionManager()
 
@@ -64,10 +26,6 @@ class PermissionManager: ObservableObject {
         let savedAuthorized = UserDefaults.standard.stringArray(forKey: authorizedBrowsersKey) ?? []
         self.authorizedBrowsers = Set(savedAuthorized)
         
-        OptClickerDiagnosticLog.shared.log(
-            "PermissionManager init. Known: \(savedKnown.count), Authorized: \(savedAuthorized.count)"
-        )
-
         // Both checks are local and should be available as soon as the manager
         // exists. Accessibility trust alone is not sufficient for OptClicker:
         // synthetic mouse events use the separate Post Event TCC permission.
@@ -95,9 +53,6 @@ class PermissionManager: ObservableObject {
         ]
         self.isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
         self.isPostEventGranted = CGPreflightPostEventAccess()
-        OptClickerDiagnosticLog.shared.log(
-            "Permission check: accessibility=\(self.isAccessibilityGranted) postEvent=\(self.isPostEventGranted)"
-        )
     }
 
     func refreshAutomationPermissions() {
@@ -209,37 +164,42 @@ class PermissionManager: ObservableObject {
         ]
         isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
         isPostEventGranted = CGRequestPostEventAccess()
-        OptClickerDiagnosticLog.shared.log(
-            "Input permissions requested. accessibility=\(isAccessibilityGranted) postEvent=\(isPostEventGranted)"
-        )
         openSystemSettings(type: "Privacy_Accessibility")
     }
 
     func requestAutomationPermission(for bundleId: String) {
-        // Execute a harmless AppleScript command to trigger macOS's actual
-        // Automation consent flow. Use the bundle identifier so Launch
-        // Services never needs to resolve the target by display name.
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            let scriptSource = "tell application id \"\(bundleId)\" to return name"
-            var error: NSDictionary?
-            let requestSucceeded: Bool
-            if let script = NSAppleScript(source: scriptSource) {
-                _ = script.executeAndReturnError(&error)
-                requestSucceeded = error == nil
-            } else {
-                requestSucceeded = false
-            }
+        guard let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) else {
+            openSystemSettings(type: "Privacy_Automation")
+            return
+        }
 
-            if let error {
-                print("OptClicker: Automation request failed for \(bundleId): \(error)")
+        if NSRunningApplication.runningApplications(withBundleIdentifier: bundleId).isEmpty {
+            let configuration = NSWorkspace.OpenConfiguration()
+            configuration.activates = false
+            NSWorkspace.shared.openApplication(at: appURL, configuration: configuration) { [weak self] _, error in
+                guard error == nil else {
+                    DispatchQueue.main.async {
+                        self?.openSystemSettings(type: "Privacy_Automation")
+                    }
+                    return
+                }
+
+                self?.requestAutomationPermission(for: bundleId)
             }
+            return
+        }
+
+        // The consent prompt must be triggered with a real Apple Event target.
+        // Run this off the main thread because macOS blocks the calling thread
+        // while the user responds to the prompt.
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let status = Self.automationPermissionStatus(for: bundleId, askUserIfNeeded: true)
 
             DispatchQueue.main.async {
                 guard let self else { return }
 
-                if requestSucceeded {
+                if status == noErr {
                     self.authorizedBrowsers.insert(bundleId)
-                    self.automationPermissions[bundleId] = true
                     UserDefaults.standard.set(
                         Array(self.authorizedBrowsers),
                         forKey: self.authorizedBrowsersKey

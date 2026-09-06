@@ -107,7 +107,6 @@ class InputManager: ObservableObject {
     }
     @Published var isEnabled: Bool = false {
         didSet {
-            OptClickerDiagnosticLog.shared.log("isEnabled changed to \(isEnabled)")
             if !isAutoToggling {
                 lastManualState = isEnabled
             }
@@ -134,10 +133,6 @@ class InputManager: ObservableObject {
 
         let behaviorString = UserDefaults.standard.string(forKey: Self.launchBehaviorKey) ?? LaunchBehavior.lastState.rawValue
         let launchBehavior = LaunchBehavior(rawValue: behaviorString) ?? .lastState
-
-        OptClickerDiagnosticLog.shared.log(
-            "InputManager init. launchBehavior=\(launchBehavior.rawValue) lastState=\(UserDefaults.standard.bool(forKey: Self.lastStateKey))"
-        )
 
         switch launchBehavior {
         case .enabled:
@@ -225,15 +220,6 @@ class InputManager: ObservableObject {
         isAutoToggleEnabled.toggle()
     }
 
-    /// Re-register input monitors after NSApplication has finished launching.
-    /// InputManager is created while AppDelegate is being initialized, which
-    /// is too early for a reliable global event-monitor registration.
-    func applicationDidFinishLaunching() {
-        OptClickerDiagnosticLog.shared.log("applicationDidFinishLaunching. isEnabled=\(isEnabled)")
-        guard isEnabled else { return }
-        startMonitoring()
-    }
-
     private func startFrontmostAppMonitor() {
         // Auto-toggle
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -271,8 +257,7 @@ class InputManager: ObservableObject {
     }
 
     private var permissionCancellable: AnyCancellable?
-    private var accessibilityPermissionCancellable: AnyCancellable?
-    private var postEventPermissionCancellable: AnyCancellable?
+    private var inputPermissionCancellable: AnyCancellable?
     private func startPermissionMonitor() {
         permissionCancellable = PermissionManager.shared.$authorizedBrowsers
             .receive(on: RunLoop.main)
@@ -280,30 +265,19 @@ class InputManager: ObservableObject {
                 self?.updateRefreshTimerState()
             }
 
-        accessibilityPermissionCancellable = PermissionManager.shared.$isAccessibilityGranted
-            .removeDuplicates()
+        inputPermissionCancellable = Publishers.CombineLatest(
+            PermissionManager.shared.$isAccessibilityGranted,
+            PermissionManager.shared.$isPostEventGranted
+        )
+            .removeDuplicates { lhs, rhs in lhs == rhs }
             .receive(on: RunLoop.main)
-            .sink { [weak self] isGranted in
+            .sink { [weak self] accessibilityGranted, postEventGranted in
                 guard let self, self.isEnabled else { return }
 
-                if isGranted {
+                if accessibilityGranted && postEventGranted {
                     self.startMonitoring()
                 } else {
-                    self.isOptionDown = false
                     self.stopMonitoring()
-                }
-            }
-
-        postEventPermissionCancellable = PermissionManager.shared.$isPostEventGranted
-            .removeDuplicates()
-            .receive(on: RunLoop.main)
-            .sink { [weak self] isGranted in
-                guard let self, self.isEnabled else { return }
-
-                if isGranted {
-                    self.startMonitoring()
-                } else {
-                    self.isOptionDown = false
                 }
             }
     }
@@ -555,11 +529,8 @@ class InputManager: ObservableObject {
     // Monitor Keyboard
     private func startMonitoring() {
         stopMonitoring() // ensure no duplicate monitors
-        PermissionManager.shared.checkPermissions()
-
-        OptClickerDiagnosticLog.shared.log(
-            "startMonitoring. accessibility=\(PermissionManager.shared.isAccessibilityGranted) postEvent=\(PermissionManager.shared.isPostEventGranted)"
-        )
+        guard PermissionManager.shared.isAccessibilityGranted,
+              PermissionManager.shared.isPostEventGranted else { return }
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleFlagsChanged(event: event)
@@ -570,12 +541,6 @@ class InputManager: ObservableObject {
             return event
         }
 
-        if keyDownMonitor == nil {
-            OptClickerDiagnosticLog.shared.log("global flagsChanged monitor registration returned nil")
-        }
-        OptClickerDiagnosticLog.shared.log(
-            "monitor registration. global=\(keyDownMonitor != nil) local=\(keyUpMonitor != nil)"
-        )
     }
 
     private func stopMonitoring() {
@@ -595,10 +560,6 @@ class InputManager: ObservableObject {
     private func handleFlagsChanged(event: NSEvent) {
         let optionPressed = event.modifierFlags.contains(.option)
 
-        OptClickerDiagnosticLog.shared.log(
-            "flagsChanged. option=\(optionPressed) previousOption=\(isOptionDown) modifierRaw=\(event.modifierFlags.rawValue)"
-        )
-
         if optionPressed && !isOptionDown {
             // Key just pressed
             isOptionDown = true
@@ -613,9 +574,6 @@ class InputManager: ObservableObject {
     // Mouse Simulation
     private func simulateRightMouseDown() {
         guard PermissionManager.shared.isPostEventGranted else {
-            OptClickerDiagnosticLog.shared.log(
-                "rightMouseDown skipped: Post Event permission is not granted"
-            )
             return
         }
 
@@ -624,17 +582,11 @@ class InputManager: ObservableObject {
                             mouseType: .rightMouseDown,
                             mouseCursorPosition: location,
                             mouseButton: .right)
-        OptClickerDiagnosticLog.shared.log(
-            "rightMouseDown. eventCreated=\(event != nil) location=(\(location.x),\(location.y))"
-        )
         event?.post(tap: .cghidEventTap)
     }
 
     private func simulateRightMouseUp() {
         guard PermissionManager.shared.isPostEventGranted else {
-            OptClickerDiagnosticLog.shared.log(
-                "rightMouseUp skipped: Post Event permission is not granted"
-            )
             return
         }
 
@@ -643,9 +595,6 @@ class InputManager: ObservableObject {
                             mouseType: .rightMouseUp,
                             mouseCursorPosition: location,
                             mouseButton: .right)
-        OptClickerDiagnosticLog.shared.log(
-            "rightMouseUp. eventCreated=\(event != nil) location=(\(location.x),\(location.y))"
-        )
         event?.post(tap: .cghidEventTap)
     }
     
