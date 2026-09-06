@@ -220,11 +220,26 @@ class InputManager: ObservableObject {
     }
 
     private var permissionCancellable: AnyCancellable?
+    private var accessibilityPermissionCancellable: AnyCancellable?
     private func startPermissionMonitor() {
         permissionCancellable = PermissionManager.shared.$authorizedBrowsers
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.updateRefreshTimerState()
+            }
+
+        accessibilityPermissionCancellable = PermissionManager.shared.$isAccessibilityGranted
+            .removeDuplicates()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] isGranted in
+                guard let self, self.isEnabled else { return }
+
+                if isGranted {
+                    self.startMonitoring()
+                } else {
+                    self.isOptionDown = false
+                    self.stopMonitoring()
+                }
             }
     }
 
@@ -467,14 +482,16 @@ class InputManager: ObservableObject {
     }
     
     private func getCGMouseLocation() -> CGPoint {
-        let screenHeight = NSScreen.main?.frame.height ?? 0
-        let loc = NSEvent.mouseLocation
-        return CGPoint(x: loc.x, y: screenHeight - loc.y)
+        // CGEvent already reports the cursor in the coordinate system needed
+        // for posting HID events. Using NSEvent.mouseLocation plus the main
+        // display height breaks when the pointer is on another display.
+        return CGEvent(source: nil)?.location ?? .zero
     }
 
     // Monitor Keyboard
     private func startMonitoring() {
         stopMonitoring() // ensure no duplicate monitors
+        guard PermissionManager.shared.isAccessibilityGranted else { return }
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleFlagsChanged(event: event)
@@ -495,6 +512,7 @@ class InputManager: ObservableObject {
             NSEvent.removeMonitor(monitor)
             keyUpMonitor = nil
         }
+        isOptionDown = false
     }
 
     private var isOptionDown = false

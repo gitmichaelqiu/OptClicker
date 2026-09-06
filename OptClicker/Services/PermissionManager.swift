@@ -165,7 +165,7 @@ class PermissionManager: ObservableObject {
         let axOptions: NSDictionary = [
             kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
         ]
-        AXIsProcessTrustedWithOptions(axOptions)
+        isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
         openSystemSettings(type: "Privacy_Accessibility")
     }
 
