@@ -491,6 +491,7 @@ class InputManager: ObservableObject {
     // Monitor Keyboard
     private func startMonitoring() {
         stopMonitoring() // ensure no duplicate monitors
+        PermissionManager.shared.checkPermissions()
         guard PermissionManager.shared.isAccessibilityGranted else { return }
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
