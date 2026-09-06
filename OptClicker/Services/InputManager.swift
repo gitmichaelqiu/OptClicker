@@ -600,10 +600,7 @@ class InputManager: ObservableObject {
     // Mouse Simulation
     private func simulateRightMouseDown() {
         let location = getCGMouseLocation()
-        let event = CGEvent(mouseEventSource: nil,
-                            mouseType: .rightMouseDown,
-                            mouseCursorPosition: location,
-                            mouseButton: .right)
+        let event = makeRightMouseEvent(type: .rightMouseDown, location: location)
         OptClickerDiagnosticLog.shared.log(
             "rightMouseDown. eventCreated=\(event != nil) location=(\(location.x),\(location.y))"
         )
@@ -612,14 +609,34 @@ class InputManager: ObservableObject {
 
     private func simulateRightMouseUp() {
         let location = getCGMouseLocation()
-        let event = CGEvent(mouseEventSource: nil,
-                            mouseType: .rightMouseUp,
-                            mouseCursorPosition: location,
-                            mouseButton: .right)
+        let event = makeRightMouseEvent(type: .rightMouseUp, location: location)
         OptClickerDiagnosticLog.shared.log(
             "rightMouseUp. eventCreated=\(event != nil) location=(\(location.x),\(location.y))"
         )
         event?.post(tap: .cghidEventTap)
+    }
+
+    private func makeRightMouseEvent(
+        type: CGEventType,
+        location: CGPoint
+    ) -> CGEvent? {
+        guard let source = CGEventSource(stateID: .combinedSessionState),
+              let event = CGEvent(
+                mouseEventSource: source,
+                mouseType: type,
+                mouseCursorPosition: location,
+                mouseButton: .right
+              ) else {
+            OptClickerDiagnosticLog.shared.log("Unable to create combined-session right mouse event")
+            return nil
+        }
+
+        // The physical Option key is still down when the synthetic mouse-down
+        // is posted. Clear modifier flags so the target receives a plain
+        // right-click rather than Option + right-click.
+        event.flags = []
+        event.setIntegerValueField(.mouseEventClickState, value: 1)
+        return event
     }
     
     static func isRuleDuplicated(newRule: String) -> Bool {
