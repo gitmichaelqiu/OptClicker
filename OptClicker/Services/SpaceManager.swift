@@ -19,7 +19,12 @@ enum SpaceAPIAvailability: Equatable {
 
 class SpaceManager: ObservableObject {
     static let shared = SpaceManager()
-    static let desktopRenamerBundleIdentifier = "com.michaelqiu.DesktopRenamer"
+    // DesktopRenamer changed its application bundle identifier. Keep the
+    // legacy identifier for users who still have the older release installed.
+    static let desktopRenamerBundleIdentifiers = [
+        "dev.mqiu.DesktopRenamer",
+        "com.michaelqiu.DesktopRenamer"
+    ]
     static let desktopRenamerDownloadURL = URL(string: "https://github.com/gitmichaelqiu/DesktopRenamer/releases/latest")!
 
     private let apiPrefix = "com.michaelqiu.DesktopRenamer"
@@ -119,7 +124,9 @@ class SpaceManager: ObservableObject {
     }
 
     var desktopRenamerApplicationURL: URL? {
-        NSWorkspace.shared.urlForApplication(withBundleIdentifier: Self.desktopRenamerBundleIdentifier)
+        Self.desktopRenamerBundleIdentifiers
+            .compactMap { NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) }
+            .first
     }
 
     func openDesktopRenamer() {
