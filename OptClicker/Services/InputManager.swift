@@ -48,6 +48,9 @@ enum MatchCondition: String, CaseIterable {
 }
 
 class InputManager: ObservableObject {
+    private static let legacyBundleIdentifier = "michaelqiu.OptClicker"
+    private static let defaultsMigrationKey = "OptClicker.DidMigrateLegacyDefaults"
+
     // Auto toggle properties
     static let autoToggleEnabledKey = "isAutoToggleEnabled"
     static let showStatusReasonKey = "showStatusReason"
@@ -126,6 +129,8 @@ class InputManager: ObservableObject {
     private let selfBundleID = Bundle.main.bundleIdentifier ?? "michaelqiu.OptClicker"
     
     init() {
+        Self.migrateLegacyDefaultsIfNeeded()
+
         let behaviorString = UserDefaults.standard.string(forKey: Self.launchBehaviorKey) ?? LaunchBehavior.lastState.rawValue
         let launchBehavior = LaunchBehavior(rawValue: behaviorString) ?? .lastState
 
@@ -177,6 +182,38 @@ class InputManager: ObservableObject {
         ) { [weak self] _ in
             self?.toggleAutoToggle()
         }
+    }
+
+    private static func migrateLegacyDefaultsIfNeeded() {
+        let currentDefaults = UserDefaults.standard
+        guard !currentDefaults.bool(forKey: defaultsMigrationKey) else { return }
+
+        let legacyDefaults = UserDefaults(suiteName: legacyBundleIdentifier)
+        let keys = [
+            autoToggleEnabledKey,
+            showStatusReasonKey,
+            showFrontmostProcKey,
+            isBasedOnAppsKey,
+            isBasedOnSpacesKey,
+            matchConditionKey,
+            launchBehaviorKey,
+            lastStateKey,
+            "AutoToggleAppBundleIds",
+            "AutoToggleBehavior",
+            "autoToggleSpaces",
+            "HotkeyManager.Shortcut.ToggleApp",
+            "HotkeyManager.Shortcut.ToggleAutoToggle",
+            "AutoToggle.isExpanded",
+            "AutoToggle.Spaces.isExpanded"
+        ]
+
+        for key in keys where currentDefaults.object(forKey: key) == nil {
+            if let value = legacyDefaults?.object(forKey: key) {
+                currentDefaults.set(value, forKey: key)
+            }
+        }
+
+        currentDefaults.set(true, forKey: defaultsMigrationKey)
     }
 
     func toggleAutoToggle() {
