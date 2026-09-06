@@ -533,10 +533,9 @@ class InputManager: ObservableObject {
     }
     
     private func getCGMouseLocation() -> CGPoint {
-        // CGEvent already reports the cursor in the coordinate system needed
-        // for posting HID events. Using NSEvent.mouseLocation plus the main
-        // display height breaks when the pointer is on another display.
-        return CGEvent(source: nil)?.location ?? .zero
+        let screenHeight = NSScreen.main?.frame.height ?? 0
+        let loc = NSEvent.mouseLocation
+        return CGPoint(x: loc.x, y: screenHeight - loc.y)
     }
 
     // Monitor Keyboard
@@ -600,7 +599,10 @@ class InputManager: ObservableObject {
     // Mouse Simulation
     private func simulateRightMouseDown() {
         let location = getCGMouseLocation()
-        let event = makeRightMouseEvent(type: .rightMouseDown, location: location)
+        let event = CGEvent(mouseEventSource: nil,
+                            mouseType: .rightMouseDown,
+                            mouseCursorPosition: location,
+                            mouseButton: .right)
         OptClickerDiagnosticLog.shared.log(
             "rightMouseDown. eventCreated=\(event != nil) location=(\(location.x),\(location.y))"
         )
@@ -609,34 +611,14 @@ class InputManager: ObservableObject {
 
     private func simulateRightMouseUp() {
         let location = getCGMouseLocation()
-        let event = makeRightMouseEvent(type: .rightMouseUp, location: location)
+        let event = CGEvent(mouseEventSource: nil,
+                            mouseType: .rightMouseUp,
+                            mouseCursorPosition: location,
+                            mouseButton: .right)
         OptClickerDiagnosticLog.shared.log(
             "rightMouseUp. eventCreated=\(event != nil) location=(\(location.x),\(location.y))"
         )
         event?.post(tap: .cghidEventTap)
-    }
-
-    private func makeRightMouseEvent(
-        type: CGEventType,
-        location: CGPoint
-    ) -> CGEvent? {
-        guard let source = CGEventSource(stateID: .combinedSessionState),
-              let event = CGEvent(
-                mouseEventSource: source,
-                mouseType: type,
-                mouseCursorPosition: location,
-                mouseButton: .right
-              ) else {
-            OptClickerDiagnosticLog.shared.log("Unable to create combined-session right mouse event")
-            return nil
-        }
-
-        // The physical Option key is still down when the synthetic mouse-down
-        // is posted. Clear modifier flags so the target receives a plain
-        // right-click rather than Option + right-click.
-        event.flags = []
-        event.setIntegerValueField(.mouseEventClickState, value: 1)
-        return event
     }
     
     static func isRuleDuplicated(newRule: String) -> Bool {
