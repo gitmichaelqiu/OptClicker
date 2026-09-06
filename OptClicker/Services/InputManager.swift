@@ -107,6 +107,7 @@ class InputManager: ObservableObject {
     }
     @Published var isEnabled: Bool = false {
         didSet {
+            OptClickerDiagnosticLog.shared.log("isEnabled changed to \(isEnabled)")
             if !isAutoToggling {
                 lastManualState = isEnabled
             }
@@ -133,6 +134,10 @@ class InputManager: ObservableObject {
 
         let behaviorString = UserDefaults.standard.string(forKey: Self.launchBehaviorKey) ?? LaunchBehavior.lastState.rawValue
         let launchBehavior = LaunchBehavior(rawValue: behaviorString) ?? .lastState
+
+        OptClickerDiagnosticLog.shared.log(
+            "InputManager init. launchBehavior=\(launchBehavior.rawValue) lastState=\(UserDefaults.standard.bool(forKey: Self.lastStateKey))"
+        )
 
         switch launchBehavior {
         case .enabled:
@@ -224,6 +229,7 @@ class InputManager: ObservableObject {
     /// InputManager is created while AppDelegate is being initialized, which
     /// is too early for a reliable global event-monitor registration.
     func applicationDidFinishLaunching() {
+        OptClickerDiagnosticLog.shared.log("applicationDidFinishLaunching. isEnabled=\(isEnabled)")
         guard isEnabled else { return }
         startMonitoring()
     }
@@ -538,6 +544,10 @@ class InputManager: ObservableObject {
         stopMonitoring() // ensure no duplicate monitors
         PermissionManager.shared.checkPermissions()
 
+        OptClickerDiagnosticLog.shared.log(
+            "startMonitoring. accessibility=\(PermissionManager.shared.isAccessibilityGranted)"
+        )
+
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleFlagsChanged(event: event)
         }
@@ -548,8 +558,11 @@ class InputManager: ObservableObject {
         }
 
         if keyDownMonitor == nil {
-            print("OptClicker: Unable to install global modifier monitor. Accessibility may need to be granted.")
+            OptClickerDiagnosticLog.shared.log("global flagsChanged monitor registration returned nil")
         }
+        OptClickerDiagnosticLog.shared.log(
+            "monitor registration. global=\(keyDownMonitor != nil) local=\(keyUpMonitor != nil)"
+        )
     }
 
     private func stopMonitoring() {
@@ -569,6 +582,10 @@ class InputManager: ObservableObject {
     private func handleFlagsChanged(event: NSEvent) {
         let optionPressed = event.modifierFlags.contains(.option)
 
+        OptClickerDiagnosticLog.shared.log(
+            "flagsChanged. option=\(optionPressed) previousOption=\(isOptionDown) modifierRaw=\(event.modifierFlags.rawValue)"
+        )
+
         if optionPressed && !isOptionDown {
             // Key just pressed
             isOptionDown = true
@@ -587,6 +604,9 @@ class InputManager: ObservableObject {
                             mouseType: .rightMouseDown,
                             mouseCursorPosition: location,
                             mouseButton: .right)
+        OptClickerDiagnosticLog.shared.log(
+            "rightMouseDown. eventCreated=\(event != nil) location=(\(location.x),\(location.y))"
+        )
         event?.post(tap: .cghidEventTap)
     }
 
@@ -596,6 +616,9 @@ class InputManager: ObservableObject {
                             mouseType: .rightMouseUp,
                             mouseCursorPosition: location,
                             mouseButton: .right)
+        OptClickerDiagnosticLog.shared.log(
+            "rightMouseUp. eventCreated=\(event != nil) location=(\(location.x),\(location.y))"
+        )
         event?.post(tap: .cghidEventTap)
     }
     

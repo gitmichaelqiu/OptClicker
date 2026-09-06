@@ -3,6 +3,44 @@ import AppKit
 import Foundation
 import Combine
 
+final class OptClickerDiagnosticLog {
+    static let shared = OptClickerDiagnosticLog()
+
+    let fileURL: URL
+    private let queue = DispatchQueue(label: "dev.mqiu.OptClicker.diagnostics")
+
+    private init() {
+        let logsDirectory = FileManager.default.urls(
+            for: .libraryDirectory,
+            in: .userDomainMask
+        )[0].appendingPathComponent("Logs", isDirectory: true)
+        try? FileManager.default.createDirectory(
+            at: logsDirectory,
+            withIntermediateDirectories: true
+        )
+        fileURL = logsDirectory.appendingPathComponent("OptClicker.log")
+        if !FileManager.default.fileExists(atPath: fileURL.path) {
+            FileManager.default.createFile(atPath: fileURL.path, contents: nil)
+        }
+
+        log("=== OptClicker diagnostic session started ===")
+        log("bundle=\(Bundle.main.bundleIdentifier ?? "<nil>") pid=\(ProcessInfo.processInfo.processIdentifier)")
+        log("executable=\(Bundle.main.executablePath ?? "<nil>")")
+    }
+
+    func log(_ message: String) {
+        let line = "[\(ISO8601DateFormatter().string(from: Date()))] \(message)\n"
+        print("OptClicker: \(message)")
+        queue.async { [fileURL] in
+            guard let data = line.data(using: .utf8),
+                  let handle = try? FileHandle(forWritingTo: fileURL) else { return }
+            handle.seekToEndOfFile()
+            handle.write(data)
+            handle.closeFile()
+        }
+    }
+}
+
 class PermissionManager: ObservableObject {
     static let shared = PermissionManager()
 
@@ -25,7 +63,9 @@ class PermissionManager: ObservableObject {
         let savedAuthorized = UserDefaults.standard.stringArray(forKey: authorizedBrowsersKey) ?? []
         self.authorizedBrowsers = Set(savedAuthorized)
         
-        print("OptClicker: PermissionManager init. Known: \(savedKnown.count), Authorized: \(savedAuthorized.count)")
+        OptClickerDiagnosticLog.shared.log(
+            "PermissionManager init. Known: \(savedKnown.count), Authorized: \(savedAuthorized.count)"
+        )
 
         // Match the mature manager's startup behavior. Accessibility is a
         // local check and should be available as soon as the manager exists.
@@ -56,6 +96,9 @@ class PermissionManager: ObservableObject {
             kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: false
         ]
         self.isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
+        OptClickerDiagnosticLog.shared.log(
+            "Accessibility check: granted=\(self.isAccessibilityGranted)"
+        )
     }
 
     func refreshAutomationPermissions() {
@@ -166,6 +209,9 @@ class PermissionManager: ObservableObject {
             kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
         ]
         isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
+        OptClickerDiagnosticLog.shared.log(
+            "Accessibility permission requested. granted=\(isAccessibilityGranted)"
+        )
         openSystemSettings(type: "Privacy_Accessibility")
     }
 
