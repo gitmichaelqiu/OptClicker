@@ -220,6 +220,14 @@ class InputManager: ObservableObject {
         isAutoToggleEnabled.toggle()
     }
 
+    /// Re-register input monitors after NSApplication has finished launching.
+    /// InputManager is created while AppDelegate is being initialized, which
+    /// is too early for a reliable global event-monitor registration.
+    func applicationDidFinishLaunching() {
+        guard isEnabled else { return }
+        startMonitoring()
+    }
+
     private func startFrontmostAppMonitor() {
         // Auto-toggle
         NSWorkspace.shared.notificationCenter.addObserver(
