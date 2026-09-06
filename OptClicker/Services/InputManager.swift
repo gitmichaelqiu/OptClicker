@@ -492,7 +492,6 @@ class InputManager: ObservableObject {
     private func startMonitoring() {
         stopMonitoring() // ensure no duplicate monitors
         PermissionManager.shared.checkPermissions()
-        guard PermissionManager.shared.isAccessibilityGranted else { return }
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleFlagsChanged(event: event)
@@ -501,6 +500,13 @@ class InputManager: ObservableObject {
         keyUpMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleFlagsChanged(event: event)
             return event
+        }
+
+        if keyDownMonitor == nil {
+            print("OptClicker: Unable to install global modifier monitor. Accessibility may need to be granted.")
+        }
+        if keyUpMonitor == nil {
+            print("OptClicker: Unable to install local modifier monitor.")
         }
     }
 
