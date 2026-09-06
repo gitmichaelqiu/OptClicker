@@ -119,8 +119,6 @@ class InputManager: ObservableObject {
     public var isAutoToggling = false
     private var keyDownMonitor: Any?
     private var keyUpMonitor: Any?
-    private var eventTap: CFMachPort?
-    private var eventTapRunLoopSource: CFRunLoopSource?
     static let launchBehaviorKey = "LaunchBehavior"
     static let lastStateKey = "LastState"
     
@@ -495,50 +493,6 @@ class InputManager: ObservableObject {
         stopMonitoring() // ensure no duplicate monitors
         PermissionManager.shared.checkPermissions()
 
-        let eventMask = CGEventMask(1 << CGEventType.flagsChanged.rawValue)
-        let context = Unmanaged.passUnretained(self).toOpaque()
-        eventTap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .listenOnly,
-            eventsOfInterest: eventMask,
-            callback: { _, type, event, userInfo in
-                guard let userInfo else {
-                    return Unmanaged.passUnretained(event)
-                }
-
-                let inputManager = Unmanaged<InputManager>
-                    .fromOpaque(userInfo)
-                    .takeUnretainedValue()
-
-                if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-                    if let eventTap = inputManager.eventTap {
-                        CGEvent.tapEnable(tap: eventTap, enable: true)
-                    }
-                } else if type == .flagsChanged {
-                    inputManager.handleFlagsChanged(event: event)
-                }
-
-                return Unmanaged.passUnretained(event)
-            },
-            userInfo: context
-        )
-
-        if let eventTap {
-            eventTapRunLoopSource = CFMachPortCreateRunLoopSource(
-                kCFAllocatorDefault,
-                eventTap,
-                0
-            )
-            if let eventTapRunLoopSource {
-                CFRunLoopAddSource(CFRunLoopGetMain(), eventTapRunLoopSource, .commonModes)
-            }
-            CGEvent.tapEnable(tap: eventTap, enable: true)
-            return
-        }
-
-        // Keep the AppKit path as a fallback for environments where a session
-        // event tap cannot be created even though the app is foregrounded.
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleFlagsChanged(event: event)
         }
@@ -548,18 +502,12 @@ class InputManager: ObservableObject {
             return event
         }
 
-        print("OptClicker: Unable to install the session event tap; using AppKit modifier monitors.")
+        if keyDownMonitor == nil {
+            print("OptClicker: Unable to install global modifier monitor. Accessibility may need to be granted.")
+        }
     }
 
     private func stopMonitoring() {
-        if let eventTapRunLoopSource {
-            CFRunLoopRemoveSource(CFRunLoopGetMain(), eventTapRunLoopSource, .commonModes)
-            self.eventTapRunLoopSource = nil
-        }
-        if let eventTap {
-            CGEvent.tapEnable(tap: eventTap, enable: false)
-            self.eventTap = nil
-        }
         if let monitor = keyDownMonitor {
             NSEvent.removeMonitor(monitor)
             keyDownMonitor = nil
@@ -574,14 +522,7 @@ class InputManager: ObservableObject {
     private var isOptionDown = false
 
     private func handleFlagsChanged(event: NSEvent) {
-        handleOptionState(isPressed: event.modifierFlags.contains(.option))
-    }
-
-    private func handleFlagsChanged(event: CGEvent) {
-        handleOptionState(isPressed: event.flags.contains(.maskAlternate))
-    }
-
-    private func handleOptionState(isPressed optionPressed: Bool) {
+        let optionPressed = event.modifierFlags.contains(.option)
 
         if optionPressed && !isOptionDown {
             // Key just pressed
