@@ -11,11 +11,16 @@ struct PermissionsSettingsView: View {
                 ModularSettingsSection("Permissions", helperText: "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant.") {
                     VStack(alignment: .leading, spacing: 0) {
                         // Accessibility
-                        ModularSettingsRow("Accessibility", helperText: "Required for reading window information.") {
+                        ModularSettingsRow("Accessibility & input events", helperText: "Required to detect Option and send the corresponding right-click.") {
                             HStack(spacing: 12) {
-                                PermissionStatusIcon(isGranted: permissionManager.isAccessibilityGranted)
+                                PermissionStatusIcon(
+                                    isGranted: permissionManager.isAccessibilityGranted && permissionManager.isPostEventGranted
+                                )
                                 
-                                Button(permissionManager.isAccessibilityGranted ? "Settings" : "Grant") {
+                                Button(
+                                    permissionManager.isAccessibilityGranted && permissionManager.isPostEventGranted
+                                        ? "Settings" : "Grant"
+                                ) {
                                     permissionManager.requestAccessibilityPermission()
                                 }
                             }

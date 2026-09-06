@@ -272,6 +272,7 @@ class InputManager: ObservableObject {
 
     private var permissionCancellable: AnyCancellable?
     private var accessibilityPermissionCancellable: AnyCancellable?
+    private var postEventPermissionCancellable: AnyCancellable?
     private func startPermissionMonitor() {
         permissionCancellable = PermissionManager.shared.$authorizedBrowsers
             .receive(on: RunLoop.main)
@@ -290,6 +291,19 @@ class InputManager: ObservableObject {
                 } else {
                     self.isOptionDown = false
                     self.stopMonitoring()
+                }
+            }
+
+        postEventPermissionCancellable = PermissionManager.shared.$isPostEventGranted
+            .removeDuplicates()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] isGranted in
+                guard let self, self.isEnabled else { return }
+
+                if isGranted {
+                    self.startMonitoring()
+                } else {
+                    self.isOptionDown = false
                 }
             }
     }
@@ -544,7 +558,7 @@ class InputManager: ObservableObject {
         PermissionManager.shared.checkPermissions()
 
         OptClickerDiagnosticLog.shared.log(
-            "startMonitoring. accessibility=\(PermissionManager.shared.isAccessibilityGranted)"
+            "startMonitoring. accessibility=\(PermissionManager.shared.isAccessibilityGranted) postEvent=\(PermissionManager.shared.isPostEventGranted)"
         )
 
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
@@ -598,6 +612,13 @@ class InputManager: ObservableObject {
 
     // Mouse Simulation
     private func simulateRightMouseDown() {
+        guard PermissionManager.shared.isPostEventGranted else {
+            OptClickerDiagnosticLog.shared.log(
+                "rightMouseDown skipped: Post Event permission is not granted"
+            )
+            return
+        }
+
         let location = getCGMouseLocation()
         let event = CGEvent(mouseEventSource: nil,
                             mouseType: .rightMouseDown,
@@ -610,6 +631,13 @@ class InputManager: ObservableObject {
     }
 
     private func simulateRightMouseUp() {
+        guard PermissionManager.shared.isPostEventGranted else {
+            OptClickerDiagnosticLog.shared.log(
+                "rightMouseUp skipped: Post Event permission is not granted"
+            )
+            return
+        }
+
         let location = getCGMouseLocation()
         let event = CGEvent(mouseEventSource: nil,
                             mouseType: .rightMouseUp,

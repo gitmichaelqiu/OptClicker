@@ -23,8 +23,8 @@ struct GeneralSettingsView: View {
                 ModularSettingsSection("General") {
                     ModularSettingsRow(
                         "Enable option → right click",
-                        warningText: permissionManager.isAccessibilityGranted
-                            ? nil : "Requires Accessibility permission."
+                        warningText: permissionManager.isAccessibilityGranted && permissionManager.isPostEventGranted
+                            ? nil : "Requires Accessibility and input event permissions."
                     ) {
                         Toggle("", isOn: $inputManager.isEnabled)
                             .labelsHidden()

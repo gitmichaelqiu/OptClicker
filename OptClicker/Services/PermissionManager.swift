@@ -45,6 +45,7 @@ class PermissionManager: ObservableObject {
     static let shared = PermissionManager()
 
     @Published var isAccessibilityGranted: Bool = false
+    @Published var isPostEventGranted: Bool = false
     @Published var automationPermissions: [String: Bool] = [:] // bundleId: isGranted
     
     private let knownBrowsersKey = "PermissionManager.KnownBrowsers"
@@ -67,8 +68,9 @@ class PermissionManager: ObservableObject {
             "PermissionManager init. Known: \(savedKnown.count), Authorized: \(savedAuthorized.count)"
         )
 
-        // Match the mature manager's startup behavior. Accessibility is a
-        // local check and should be available as soon as the manager exists.
+        // Both checks are local and should be available as soon as the manager
+        // exists. Accessibility trust alone is not sufficient for OptClicker:
+        // synthetic mouse events use the separate Post Event TCC permission.
         checkPermissions()
         refreshAutomationPermissions()
 
@@ -88,16 +90,13 @@ class PermissionManager: ObservableObject {
     }
 
     func checkPermissions() {
-        // Keep this method consistent with DesktopRenamer: it performs the
-        // immediate Accessibility check only. Browser Automation checks can
-        // contact another process and are refreshed separately off the main
-        // thread.
         let axOptions: NSDictionary = [
             kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: false
         ]
         self.isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
+        self.isPostEventGranted = CGPreflightPostEventAccess()
         OptClickerDiagnosticLog.shared.log(
-            "Accessibility check: granted=\(self.isAccessibilityGranted)"
+            "Permission check: accessibility=\(self.isAccessibilityGranted) postEvent=\(self.isPostEventGranted)"
         )
     }
 
@@ -209,8 +208,9 @@ class PermissionManager: ObservableObject {
             kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
         ]
         isAccessibilityGranted = AXIsProcessTrustedWithOptions(axOptions)
+        isPostEventGranted = CGRequestPostEventAccess()
         OptClickerDiagnosticLog.shared.log(
-            "Accessibility permission requested. granted=\(isAccessibilityGranted)"
+            "Input permissions requested. accessibility=\(isAccessibilityGranted) postEvent=\(isPostEventGranted)"
         )
         openSystemSettings(type: "Privacy_Accessibility")
     }
