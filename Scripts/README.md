@@ -74,7 +74,7 @@ Scripts/verify-bridge-release.sh \
   --migration-package-version 9
 ```
 
-The final current-ID DMG should be published as `OptClicker.1.5.1.dmg`.
+The final current-ID DMG should be published as `OptClicker 1.5.1.dmg`.
 The bridge DMG should be published as `OptClicker-1.5.1-bridge.dmg`; the
 migration package should be published as `OptClicker-migration-9.pkg` in the
 `v1.5.1-bridge` release.
@@ -86,7 +86,7 @@ keychain; it must not be committed:
 
 ```sh
 sign_update -p tmp/OptClicker-bridge-release-1.5.1/OptClicker-1.5.1-bridge.dmg
-sign_update -p tmp/OptClicker.1.5.1.dmg
+sign_update -p "$HOME/Downloads/OptClick 2026-09-09 23-04-07/OptClicker 1.5.1.dmg"
 ```
 
 Do not commit generated apps, packages, DMGs, checksums, signing credentials,
