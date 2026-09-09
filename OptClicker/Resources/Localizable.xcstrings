@@ -640,6 +640,16 @@
         }
       }
     },
+    "Input event posting" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入事件"
+          }
+        }
+      }
+    },
     "Install DesktopRenamer" : {
       "localizations" : {
         "zh-Hans" : {
@@ -985,6 +995,16 @@
         }
       }
     },
+    "Migrate" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "迁移"
+          }
+        }
+      }
+    },
     "Minecraft (%@)" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1259,22 +1279,32 @@
         }
       }
     },
-    "Required for reading window information." : {
+    "Required to detect the Option key and read window information." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "用于获取窗口名称。"
+            "value" : "用于检测Option键以及阅读窗口信息。"
           }
         }
       }
     },
-    "Requires Accessibility permission." : {
+    "Required to send the right-click after Option is detected." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "需要辅助功能权限。"
+            "value" : "用于右键。"
+          }
+        }
+      }
+    },
+    "Requires Accessibility and input event permissions." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要辅助权限以及输入事件权限。"
           }
         }
       }
