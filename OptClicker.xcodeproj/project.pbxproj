@@ -261,28 +261,6 @@
 			};
 			name = Release;
 		};
-		9A6B92E2E7C16870037D562 /* Bridge */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = W94S87F4LJ;
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_NO_COMMON_BLOCKS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				SDKROOT = macosx;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Bridge;
-		};
 		46A6B92C2E7C16870037D562 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -292,7 +270,7 @@
 				CODE_SIGN_ENTITLEMENTS = OptClicker/OptClicker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = W94S87F4LJ;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -310,26 +288,26 @@
 				INFOPLIST_KEY_LSUIElement = NO;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "OptClicker needs to access browser URLs to automatically toggle based on your settings.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_SUFeedURL = "$(OPTCLICKER_UPDATE_FEED_URL)";
-				INFOPLIST_KEY_SUPublicEDKey = "e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=";
 				INFOPLIST_KEY_OptClickerMigrationAllowManualApproval = "$(OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL)";
 				INFOPLIST_KEY_OptClickerMigrationPackageSHA256 = "$(OPTCLICKER_MIGRATION_PACKAGE_SHA256)";
 				INFOPLIST_KEY_OptClickerMigrationPackageURL = "$(OPTCLICKER_MIGRATION_PACKAGE_URL)";
 				INFOPLIST_KEY_OptClickerMigrationPackageVersion = "$(OPTCLICKER_MIGRATION_PACKAGE_VERSION)";
 				INFOPLIST_KEY_OptClickerMigrationStagingPath = "$(OPTCLICKER_MIGRATION_STAGING_PATH)";
-				OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL = NO;
-				OPTCLICKER_MIGRATION_PACKAGE_SHA256 = "";
-				OPTCLICKER_MIGRATION_PACKAGE_URL = "";
-				OPTCLICKER_MIGRATION_PACKAGE_VERSION = "";
-				OPTCLICKER_MIGRATION_STAGING_PATH = "/Applications/OptClicker-Migration.app";
-				OPTCLICKER_UPDATE_FEED_URL = "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml";
-				OPTCLICKER_RELEASE_TAG = "";
+				INFOPLIST_KEY_SUFeedURL = "$(OPTCLICKER_UPDATE_FEED_URL)";
+				INFOPLIST_KEY_SUPublicEDKey = "e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.2;
+				OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL = NO;
+				OPTCLICKER_MIGRATION_PACKAGE_SHA256 = "";
+				OPTCLICKER_MIGRATION_PACKAGE_URL = "";
+				OPTCLICKER_MIGRATION_PACKAGE_VERSION = "";
+				OPTCLICKER_MIGRATION_STAGING_PATH = "/Applications/OptClicker-Migration.app";
+				OPTCLICKER_RELEASE_TAG = "";
+				OPTCLICKER_UPDATE_FEED_URL = "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml";
 				PRODUCT_BUNDLE_IDENTIFIER = dev.mqiu.OptClicker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -357,7 +335,7 @@
 				CODE_SIGN_ENTITLEMENTS = OptClicker/OptClicker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = W94S87F4LJ;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -375,26 +353,26 @@
 				INFOPLIST_KEY_LSUIElement = NO;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "OptClicker needs to access browser URLs to automatically toggle based on your settings.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_SUFeedURL = "$(OPTCLICKER_UPDATE_FEED_URL)";
-				INFOPLIST_KEY_SUPublicEDKey = "e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=";
 				INFOPLIST_KEY_OptClickerMigrationAllowManualApproval = "$(OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL)";
 				INFOPLIST_KEY_OptClickerMigrationPackageSHA256 = "$(OPTCLICKER_MIGRATION_PACKAGE_SHA256)";
 				INFOPLIST_KEY_OptClickerMigrationPackageURL = "$(OPTCLICKER_MIGRATION_PACKAGE_URL)";
 				INFOPLIST_KEY_OptClickerMigrationPackageVersion = "$(OPTCLICKER_MIGRATION_PACKAGE_VERSION)";
 				INFOPLIST_KEY_OptClickerMigrationStagingPath = "$(OPTCLICKER_MIGRATION_STAGING_PATH)";
-				OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL = NO;
-				OPTCLICKER_MIGRATION_PACKAGE_SHA256 = "";
-				OPTCLICKER_MIGRATION_PACKAGE_URL = "";
-				OPTCLICKER_MIGRATION_PACKAGE_VERSION = "";
-				OPTCLICKER_MIGRATION_STAGING_PATH = "/Applications/OptClicker-Migration.app";
-				OPTCLICKER_UPDATE_FEED_URL = "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml";
-				OPTCLICKER_RELEASE_TAG = "";
+				INFOPLIST_KEY_SUFeedURL = "$(OPTCLICKER_UPDATE_FEED_URL)";
+				INFOPLIST_KEY_SUPublicEDKey = "e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.2;
+				OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL = NO;
+				OPTCLICKER_MIGRATION_PACKAGE_SHA256 = "";
+				OPTCLICKER_MIGRATION_PACKAGE_URL = "";
+				OPTCLICKER_MIGRATION_PACKAGE_VERSION = "";
+				OPTCLICKER_MIGRATION_STAGING_PATH = "/Applications/OptClicker-Migration.app";
+				OPTCLICKER_RELEASE_TAG = "";
+				OPTCLICKER_UPDATE_FEED_URL = "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml";
 				PRODUCT_BUNDLE_IDENTIFIER = dev.mqiu.OptClicker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -413,6 +391,28 @@
 			};
 			name = Release;
 		};
+		9A6B92E2E7C16870037D562 /* Bridge */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W94S87F4LJ;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Bridge;
+		};
 		9A6B92F2E7C16870037D562 /* Bridge */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -422,7 +422,7 @@
 				CODE_SIGN_ENTITLEMENTS = OptClicker/OptClicker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = W94S87F4LJ;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -432,26 +432,26 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = NO;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "OptClicker needs to access browser URLs to automatically toggle based on your settings.";
-				INFOPLIST_KEY_SUFeedURL = "$(OPTCLICKER_UPDATE_FEED_URL)";
-				INFOPLIST_KEY_SUPublicEDKey = "e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=";
 				INFOPLIST_KEY_OptClickerMigrationAllowManualApproval = "$(OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL)";
 				INFOPLIST_KEY_OptClickerMigrationPackageSHA256 = "$(OPTCLICKER_MIGRATION_PACKAGE_SHA256)";
 				INFOPLIST_KEY_OptClickerMigrationPackageURL = "$(OPTCLICKER_MIGRATION_PACKAGE_URL)";
 				INFOPLIST_KEY_OptClickerMigrationPackageVersion = "$(OPTCLICKER_MIGRATION_PACKAGE_VERSION)";
 				INFOPLIST_KEY_OptClickerMigrationStagingPath = "$(OPTCLICKER_MIGRATION_STAGING_PATH)";
+				INFOPLIST_KEY_SUFeedURL = "$(OPTCLICKER_UPDATE_FEED_URL)";
+				INFOPLIST_KEY_SUPublicEDKey = "e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.2;
 				OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL = NO;
 				OPTCLICKER_MIGRATION_PACKAGE_SHA256 = "";
 				OPTCLICKER_MIGRATION_PACKAGE_URL = "";
 				OPTCLICKER_MIGRATION_PACKAGE_VERSION = "";
 				OPTCLICKER_MIGRATION_STAGING_PATH = "/Applications/OptClicker-Migration.app";
-				OPTCLICKER_UPDATE_FEED_URL = "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml";
 				OPTCLICKER_RELEASE_TAG = "";
+				OPTCLICKER_UPDATE_FEED_URL = "https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml";
 				PRODUCT_BUNDLE_IDENTIFIER = michaelqiu.OptClicker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
