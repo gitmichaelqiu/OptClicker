@@ -189,7 +189,9 @@ private struct SpaceAPIStatusView: View {
 
             switch spaceManager.apiAvailability {
             case .available:
-                EmptyView()
+                Button("Open DesktopRenamer") {
+                    spaceManager.openDesktopRenamer()
+                }
             case .disabled:
                 Button("Open DesktopRenamer") {
                     spaceManager.openDesktopRenamer()
