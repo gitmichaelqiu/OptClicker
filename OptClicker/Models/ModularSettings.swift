@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import AppKit
 
 /// Describes one destination in a modular settings sidebar.
 public struct ModularSettingsTab: Hashable, Identifiable {
@@ -187,6 +188,19 @@ public struct ModularSettingsRow<Content: View>: View {
     }
 }
 
+public enum ModularSettingsSectionStyle {
+    public static var backgroundColor: Color {
+        let nsColor = NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
+                return NSColor(calibratedWhite: 0.20, alpha: 1.0)
+            } else {
+                return NSColor(calibratedWhite: 1.00, alpha: 1.0)
+            }
+        }
+        return Color(nsColor: nsColor)
+    }
+}
+
 public struct ModularSettingsSection<Content: View>: View {
     private let title: LocalizedStringKey?
     private let helperText: LocalizedStringKey?
@@ -213,7 +227,14 @@ public struct ModularSettingsSection<Content: View>: View {
             }
             VStack(spacing: 0) { content }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(ModularSettingsSectionStyle.backgroundColor.opacity(0.6))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(.regularMaterial)
+                        )
+                )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, title == nil ? -10 : 0)
