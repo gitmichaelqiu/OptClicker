@@ -7,53 +7,89 @@ final class OptClickerMigrationFinalizer {
 
     private var manifest: OptClickerMigrationManifest?
     private var backupURL: URL?
+    private var targetURL: URL?
     private var temporaryTargetURL: URL?
     private var launchAttempts = 0
+    private var terminationRequested = false
 
     private init() {}
 
     static var isRequested: Bool {
-        if CommandLine.arguments.contains("--optclicker-migration") { return true }
+        if CommandLine.arguments.contains("--optclicker-migration") {
+            return true
+        }
+
         guard OptClickerIdentity.isCurrentApplication,
-              Bundle.main.bundleURL.standardizedFileURL == OptClickerMigrationConfiguration.stagingApplicationURL,
-              FileManager.default.fileExists(atPath: OptClickerMigrationStorage.manifestURL.path) else { return false }
+              Bundle.main.bundleURL.standardizedFileURL
+                == OptClickerMigrationConfiguration.stagingApplicationURL,
+              FileManager.default.fileExists(
+                atPath: OptClickerMigrationStorage.manifestURL.path
+              ) else {
+            return false
+        }
+
+        // The bridge may have exited while Installer was running, or macOS may
+        // have blocked its automatic launch. Opening the staged app directly
+        // should resume the pending handoff from its durable manifest.
         return true
     }
 
     func startIfRequested() -> Bool {
         guard Self.isRequested else { return false }
-        DispatchQueue.main.async { [weak self] in self?.start() }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.start()
+        }
         return true
     }
 
     private func start() {
         NSApp.setActivationPolicy(.accessory)
+
         do {
-            guard OptClickerIdentity.isCurrentApplication else { throw OptClickerMigrationError.stagingApplicationInvalid }
-            let manifest = try readManifestFromArguments()
+            guard OptClickerIdentity.isCurrentApplication else {
+                throw OptClickerMigrationError.stagingApplicationInvalid
+            }
+
+            let manifestURL = try manifestURLFromArguments()
+            let manifest = try OptClickerMigrationStorage.readManifest(from: manifestURL)
             guard manifest.schemaVersion == OptClickerMigrationManifest.currentSchemaVersion,
                   manifest.targetBundleIdentifier == OptClickerIdentity.currentBundleIdentifier,
                   manifest.stagingApplicationPath == Bundle.main.bundleURL.standardizedFileURL.path,
                   let stagedVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String,
-                  OptClickerMigrationVersion.isAtLeast(stagedVersion, manifest.expectedVersion) else {
+                  OptClickerMigrationVersion.isAtLeast(
+                      stagedVersion,
+                      manifest.expectedVersion
+                  ) else {
                 throw OptClickerMigrationError.manifestInvalid
             }
+
             self.manifest = manifest
-            OptClickerIdentityMigration.migrateLegacyDefaults(launchAtLoginEnabled: manifest.launchAtLoginEnabled)
+            OptClickerIdentityMigration.migrateLegacyDefaults(
+                launchAtLoginEnabled: manifest.launchAtLoginEnabled
+            )
             terminateLegacyApplicationIfNeeded()
         } catch {
             failMigration(error)
         }
     }
 
-    private func readManifestFromArguments() throws -> OptClickerMigrationManifest {
+    private func manifestURLFromArguments() throws -> URL {
         guard let index = CommandLine.arguments.firstIndex(of: "--optclicker-migration-manifest"),
-              index + 1 < CommandLine.arguments.count else { return try OptClickerMigrationStorage.readManifest() }
+              index + 1 < CommandLine.arguments.count else {
+            return OptClickerMigrationStorage.manifestURL
+        }
+
         let path = CommandLine.arguments[index + 1]
-        guard path.hasPrefix("/") else { throw OptClickerMigrationError.manifestInvalid }
-        let candidate = URL(fileURLWithPath: path).standardizedFileURL
-        guard candidate == OptClickerMigrationStorage.manifestURL.standardizedFileURL else { throw OptClickerMigrationError.manifestInvalid }
-        return try OptClickerMigrationStorage.readManifest()
+        guard path.hasPrefix("/") else {
+            throw OptClickerMigrationError.manifestInvalid
+        }
+
+        let candidateURL = URL(fileURLWithPath: path).standardizedFileURL
+        guard candidateURL == OptClickerMigrationStorage.manifestURL.standardizedFileURL else {
+            throw OptClickerMigrationError.manifestInvalid
+        }
+        return candidateURL
     }
 
     private func terminateLegacyApplicationIfNeeded() {
@@ -61,47 +97,147 @@ final class OptClickerMigrationFinalizer {
             failMigration(OptClickerMigrationError.manifestInvalid)
             return
         }
-        let sourceURL = URL(fileURLWithPath: manifest.sourceApplicationPath, isDirectory: true).standardizedFileURL
-        let applications = NSWorkspace.shared.runningApplications.filter { application in
-            guard application.bundleIdentifier == OptClickerIdentity.legacyBundleIdentifier else { return false }
+
+        let sourceURL = URL(fileURLWithPath: manifest.sourceApplicationPath, isDirectory: true)
+            .standardizedFileURL
+        let legacyApplications = NSWorkspace.shared.runningApplications.filter { application in
+            guard application.bundleIdentifier == OptClickerIdentity.legacyBundleIdentifier else {
+                return false
+            }
+
+            // The URL is the authoritative match. Keep the recorded PID as a
+            // fallback because LaunchServices can briefly report a nil bundle
+            // URL while Sparkle is relaunching the bridge.
             return application.bundleURL?.standardizedFileURL == sourceURL
                 || application.processIdentifier == manifest.sourceProcessIdentifier
-        }.filter(isRunning)
-
-        guard !applications.isEmpty else {
-            performApplicationSwap()
-            return
         }
-        applications.forEach { $0.terminate() }
-        waitForLegacyApplicationsToTerminate(applications, sourceURL: sourceURL, attemptsRemaining: 20, didForceTerminate: false)
-    }
 
-    private func waitForLegacyApplicationsToTerminate(_ applications: [NSRunningApplication], sourceURL: URL, attemptsRemaining: Int, didForceTerminate: Bool) {
-        let runningApplications = applications.filter(isRunning)
+        let runningApplications = legacyApplications.filter(isApplicationRunning)
         guard !runningApplications.isEmpty else {
             performApplicationSwap()
             return
         }
+
+        print(
+            "IdentityMigration: requesting termination for legacy process(es): "
+                + runningApplications.map { String($0.processIdentifier) }.joined(separator: ", ")
+        )
+        runningApplications.forEach { $0.terminate() }
+        waitForLegacyApplicationsToTerminate(
+            runningApplications,
+            sourceURL: sourceURL,
+            attemptsRemaining: 20,
+            didForceTerminate: false
+        )
+    }
+
+    private func waitForLegacyApplicationsToTerminate(
+        _ applications: [NSRunningApplication],
+        sourceURL: URL,
+        attemptsRemaining: Int,
+        didForceTerminate: Bool
+    ) {
+        let runningApplications = applications.filter(isApplicationRunning)
+        guard !runningApplications.isEmpty else {
+            performApplicationSwap()
+            return
+        }
+
         guard attemptsRemaining > 0 else {
             guard !didForceTerminate else {
                 failMigration(OptClickerMigrationError.legacyApplicationDidNotTerminate)
                 return
             }
-            let terminated = runningApplications.allSatisfy { application in
-                if application.forceTerminate() { return true }
-                let pid = application.processIdentifier
-                guard isVerifiedLegacyApplication(application, sourceURL: sourceURL) else { return false }
-                return Darwin.kill(pid, SIGKILL) == 0 || errno == ESRCH
+
+            let forceTerminationSucceeded = runningApplications.allSatisfy {
+                forciblyTerminate($0, sourceURL: sourceURL)
             }
-            guard terminated else {
+            guard forceTerminationSucceeded else {
                 failMigration(OptClickerMigrationError.legacyApplicationDidNotTerminate)
                 return
             }
-            waitForLegacyApplicationsToTerminate(applications, sourceURL: sourceURL, attemptsRemaining: 20, didForceTerminate: true)
+
+            waitForLegacyApplicationsToTerminate(
+                applications,
+                sourceURL: sourceURL,
+                attemptsRemaining: 20,
+                didForceTerminate: true
+            )
             return
         }
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
-            self?.waitForLegacyApplicationsToTerminate(applications, sourceURL: sourceURL, attemptsRemaining: attemptsRemaining - 1, didForceTerminate: didForceTerminate)
+            guard let self else { return }
+            self.waitForLegacyApplicationsToTerminate(
+                applications,
+                sourceURL: sourceURL,
+                attemptsRemaining: attemptsRemaining - 1,
+                didForceTerminate: didForceTerminate
+            )
+        }
+    }
+
+    private func isApplicationRunning(_ application: NSRunningApplication) -> Bool {
+        let processIdentifier = application.processIdentifier
+        guard processIdentifier > 0 else { return false }
+
+        if Darwin.kill(processIdentifier, 0) == 0 {
+            return true
+        }
+        return errno == EPERM
+    }
+
+    private func forciblyTerminate(
+        _ application: NSRunningApplication,
+        sourceURL: URL
+    ) -> Bool {
+        guard isApplicationRunning(application) else { return true }
+
+        if application.forceTerminate() && !isApplicationRunning(application) {
+            return true
+        }
+
+        guard isApplicationRunning(application) else {
+            return true
+        }
+
+        // forceTerminate() can fail while the bridge is presenting a modal
+        // alert or while LaunchServices is still relaunching it. The user has
+        // explicitly approved migration, so use a verified PID-level fallback
+        // rather than leaving two installed applications behind.
+        let processIdentifier = application.processIdentifier
+        guard isVerifiedLegacyApplication(application, sourceURL: sourceURL) else {
+            print(
+                "IdentityMigration: refusing to signal an unverified process "
+                    + "\(processIdentifier)"
+            )
+            return false
+        }
+        guard Darwin.kill(processIdentifier, SIGKILL) == 0 || errno == ESRCH else {
+            print(
+                "IdentityMigration: failed to force-terminate legacy process "
+                    + "\(processIdentifier): errno=\(errno)"
+            )
+            return false
+        }
+        return true
+    }
+
+    private func isVerifiedLegacyApplication(
+        _ application: NSRunningApplication,
+        sourceURL: URL
+    ) -> Bool {
+        NSWorkspace.shared.runningApplications.contains { runningApplication in
+            guard runningApplication.processIdentifier == application.processIdentifier,
+                  runningApplication.bundleIdentifier == OptClickerIdentity.legacyBundleIdentifier
+            else {
+                return false
+            }
+
+            // A nil URL is possible during a LaunchServices relaunch. The
+            // manifest PID still identifies the process in that short window.
+            return runningApplication.bundleURL?.standardizedFileURL == sourceURL
+                || runningApplication.bundleURL == nil
         }
     }
 
@@ -110,45 +246,77 @@ final class OptClickerMigrationFinalizer {
             failMigration(OptClickerMigrationError.manifestInvalid)
             return
         }
+
         let fileManager = FileManager.default
-        let sourceURL = URL(fileURLWithPath: manifest.sourceApplicationPath, isDirectory: true).standardizedFileURL
+        let sourceURL = URL(fileURLWithPath: manifest.sourceApplicationPath, isDirectory: true)
+            .standardizedFileURL
         let stagingURL = Bundle.main.bundleURL.standardizedFileURL
         let parentURL = sourceURL.deletingLastPathComponent()
-        let temporaryURL = parentURL.appendingPathComponent(".OptClicker-new-\(UUID().uuidString).app")
-        let backupURL = parentURL.appendingPathComponent(".OptClicker-legacy-\(UUID().uuidString).app")
+        let temporaryURL = parentURL.appendingPathComponent(
+            ".OptClicker-new-\(UUID().uuidString).app"
+        )
+        let backupURL = parentURL.appendingPathComponent(
+            ".OptClicker-legacy-\(UUID().uuidString).app"
+        )
 
         do {
-            guard sourceURL.pathExtension == "app", sourceURL != stagingURL else { throw OptClickerMigrationError.targetApplicationInvalid }
-            if fileManager.fileExists(atPath: sourceURL.path), bundleIdentifier(at: sourceURL) != OptClickerIdentity.legacyBundleIdentifier {
+            guard sourceURL.pathExtension == "app",
+                  sourceURL != stagingURL else {
                 throw OptClickerMigrationError.targetApplicationInvalid
             }
 
+            if fileManager.fileExists(atPath: sourceURL.path) {
+                guard bundleIdentifier(at: sourceURL)
+                    == OptClickerIdentity.legacyBundleIdentifier else {
+                    throw OptClickerMigrationError.targetApplicationInvalid
+                }
+            }
+
             try fileManager.copyItem(at: stagingURL, to: temporaryURL)
-            guard bundleIdentifier(at: temporaryURL) == OptClickerIdentity.currentBundleIdentifier else {
+            guard bundleIdentifier(at: temporaryURL)
+                == OptClickerIdentity.currentBundleIdentifier else {
                 throw OptClickerMigrationError.stagingApplicationInvalid
             }
+
             if fileManager.fileExists(atPath: sourceURL.path) {
                 try fileManager.moveItem(at: sourceURL, to: backupURL)
                 self.backupURL = backupURL
             }
+
             try fileManager.moveItem(at: temporaryURL, to: sourceURL)
-            temporaryTargetURL = temporaryURL
-            guard bundleIdentifier(at: sourceURL) == OptClickerIdentity.currentBundleIdentifier else {
+            self.temporaryTargetURL = temporaryURL
+            self.targetURL = sourceURL
+
+            guard bundleIdentifier(at: sourceURL)
+                == OptClickerIdentity.currentBundleIdentifier else {
                 throw OptClickerMigrationError.applicationSwapFailed
             }
         } catch {
-            restoreAfterFailedSwap(targetURL: sourceURL, temporaryURL: temporaryURL, backupURL: backupURL)
+            restoreAfterFailedSwap(
+                targetURL: sourceURL,
+                temporaryURL: temporaryURL,
+                backupURL: backupURL
+            )
             failMigration(error)
             return
         }
 
-        UserDefaults.standard.set(stagingURL.path, forKey: OptClickerIdentity.migrationCleanupStagedPathKey)
+        UserDefaults.standard.set(
+            stagingURL.path,
+            forKey: OptClickerIdentity.migrationCleanupStagedPathKey
+        )
         if let backupURL = self.backupURL {
-            UserDefaults.standard.set(backupURL.path, forKey: OptClickerIdentity.migrationCleanupBackupPathKey)
+            UserDefaults.standard.set(
+                backupURL.path,
+                forKey: OptClickerIdentity.migrationCleanupBackupPathKey
+            )
         } else {
-            UserDefaults.standard.removeObject(forKey: OptClickerIdentity.migrationCleanupBackupPathKey)
+            UserDefaults.standard.removeObject(
+                forKey: OptClickerIdentity.migrationCleanupBackupPathKey
+            )
         }
         UserDefaults.standard.synchronize()
+
         launchAttempts = 0
         launchCanonicalApplication(at: sourceURL)
     }
@@ -157,69 +325,176 @@ final class OptClickerMigrationFinalizer {
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = true
         configuration.createsNewApplicationInstance = true
-        UserDefaults.standard.removeObject(forKey: OptClickerIdentity.migrationLaunchAcknowledgedKey)
+
+        UserDefaults.standard.removeObject(
+            forKey: OptClickerIdentity.migrationLaunchAcknowledgedKey
+        )
         UserDefaults.standard.synchronize()
+
         NSWorkspace.shared.openApplication(at: url, configuration: configuration) { [weak self] _, error in
-            if let error { DispatchQueue.main.async { self?.failMigration(error) } }
-            else { DispatchQueue.main.async { self?.waitForCanonicalApplication(at: url) } }
+            guard let self else { return }
+            if let error {
+                DispatchQueue.main.async { self.failMigration(error) }
+                return
+            }
+            DispatchQueue.main.async { self.waitForCanonicalApplication(at: url) }
         }
     }
 
     private func waitForCanonicalApplication(at url: URL) {
-        let isRunning = NSWorkspace.shared.runningApplications.contains {
-            $0.bundleIdentifier == OptClickerIdentity.currentBundleIdentifier
-                && $0.bundleURL?.standardizedFileURL == url.standardizedFileURL
+        let isRunning = NSWorkspace.shared.runningApplications.contains { application in
+            application.bundleIdentifier == OptClickerIdentity.currentBundleIdentifier
+                && application.bundleURL?.standardizedFileURL == url.standardizedFileURL
         }
-        if isRunning && UserDefaults.standard.bool(forKey: OptClickerIdentity.migrationLaunchAcknowledgedKey) {
+        let hasAcknowledgedLaunch = UserDefaults.standard.bool(
+            forKey: OptClickerIdentity.migrationLaunchAcknowledgedKey
+        )
+
+        if isRunning && hasAcknowledgedLaunch {
             completeMigration()
             return
         }
+
         guard launchAttempts < 40 else {
             failMigration(OptClickerMigrationError.applicationLaunchFailed)
             return
         }
+
         launchAttempts += 1
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in self?.waitForCanonicalApplication(at: url) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.waitForCanonicalApplication(at: url)
+        }
     }
 
     private func completeMigration() {
-        print("OptClicker IdentityMigration: migration completed")
-        NSApp.terminate(nil)
-    }
+        if let backupURL,
+           FileManager.default.fileExists(atPath: backupURL.path) {
+            do {
+                try FileManager.default.removeItem(at: backupURL)
+            } catch {
+                print("IdentityMigration: legacy application cleanup deferred: \(error)")
+            }
+        }
 
-    private func failMigration(_ error: Error) {
-        let alert = NSAlert()
-        alert.alertStyle = .warning
-        alert.messageText = "OptClicker migration failed"
-        alert.informativeText = "\(error.localizedDescription) The legacy application was left available."
-        alert.addButton(withTitle: "Quit")
-        alert.runModal()
-        NSApp.terminate(nil)
+        UserDefaults.standard.set(
+            true,
+            forKey: OptClickerIdentity.migrationCompletedKey
+        )
+
+        UserDefaults.standard.removeObject(
+            forKey: OptClickerIdentity.migrationLaunchAcknowledgedKey
+        )
+        UserDefaults.standard.synchronize()
+        terminateMigrationApplication()
     }
 
     private func restoreAfterFailedSwap(targetURL: URL, temporaryURL: URL, backupURL: URL) {
         let fileManager = FileManager.default
-        if fileManager.fileExists(atPath: targetURL.path), bundleIdentifier(at: targetURL) == OptClickerIdentity.currentBundleIdentifier {
+        if fileManager.fileExists(atPath: temporaryURL.path) {
+            try? fileManager.removeItem(at: temporaryURL)
+        }
+
+        if bundleIdentifier(at: targetURL) == OptClickerIdentity.currentBundleIdentifier {
             try? fileManager.removeItem(at: targetURL)
         }
-        if fileManager.fileExists(atPath: backupURL.path) { try? fileManager.moveItem(at: backupURL, to: targetURL) }
-        if fileManager.fileExists(atPath: temporaryURL.path) { try? fileManager.removeItem(at: temporaryURL) }
-    }
 
-    private func bundleIdentifier(at url: URL) -> String? {
-        Bundle(url: url)?.bundleIdentifier
-    }
-
-    private func isRunning(_ application: NSRunningApplication) -> Bool {
-        let pid = application.processIdentifier
-        return pid > 0 && (Darwin.kill(pid, 0) == 0 || errno == EPERM)
-    }
-
-    private func isVerifiedLegacyApplication(_ application: NSRunningApplication, sourceURL: URL) -> Bool {
-        NSWorkspace.shared.runningApplications.contains { runningApplication in
-            guard runningApplication.processIdentifier == application.processIdentifier,
-                  runningApplication.bundleIdentifier == OptClickerIdentity.legacyBundleIdentifier else { return false }
-            return runningApplication.bundleURL?.standardizedFileURL == sourceURL || runningApplication.bundleURL == nil
+        if fileManager.fileExists(atPath: backupURL.path) {
+            try? fileManager.moveItem(at: backupURL, to: targetURL)
         }
+    }
+
+    private func failMigration(_ error: Error) {
+        if let targetURL,
+           bundleIdentifier(at: targetURL) == OptClickerIdentity.currentBundleIdentifier {
+            NSWorkspace.shared.runningApplications
+                .filter {
+                    $0.bundleIdentifier == OptClickerIdentity.currentBundleIdentifier
+                        && $0.bundleURL?.standardizedFileURL == targetURL.standardizedFileURL
+                }
+                .forEach { $0.terminate() }
+        }
+
+        if let targetURL,
+           let backupURL,
+           FileManager.default.fileExists(atPath: backupURL.path) {
+            restoreAfterFailedSwap(
+                targetURL: targetURL,
+                temporaryURL: temporaryTargetURL ?? targetURL,
+                backupURL: backupURL
+            )
+        }
+
+        relaunchLegacyApplicationIfNeeded()
+
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "OptClicker migration failed"
+        alert.informativeText = "\(error.localizedDescription) The previous application was preserved."
+        alert.addButton(withTitle: "Quit")
+        alert.runModal()
+        terminateMigrationApplication()
+    }
+
+    private func terminateMigrationApplication() {
+        guard !terminationRequested else { return }
+        terminationRequested = true
+
+        NSApp.terminate(nil)
+
+        // The finalizer is a one-shot helper, not the normal application. If
+        // AppKit leaves the process alive after requesting termination, the
+        // staged bundle remains locked and the canonical app cannot remove it.
+        // State has already been persisted before this method is called, so a
+        // direct process exit is safe after the short grace period.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            guard NSApp.isRunning else { return }
+            print("IdentityMigration: AppKit did not terminate the finalizer; exiting")
+            Darwin.exit(0)
+        }
+    }
+
+    private func relaunchLegacyApplicationIfNeeded() {
+        guard let manifest else { return }
+
+        let sourceURL = URL(fileURLWithPath: manifest.sourceApplicationPath, isDirectory: true)
+            .standardizedFileURL
+        guard FileManager.default.fileExists(atPath: sourceURL.path),
+              bundleIdentifier(at: sourceURL)
+                == OptClickerIdentity.legacyBundleIdentifier else {
+            return
+        }
+
+        let isRunning = NSWorkspace.shared.runningApplications.contains { application in
+            application.bundleIdentifier == OptClickerIdentity.legacyBundleIdentifier
+                && application.bundleURL?.standardizedFileURL == sourceURL
+        }
+        guard !isRunning else { return }
+
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = false
+
+        NSWorkspace.shared.openApplication(
+            at: sourceURL,
+            configuration: configuration
+        ) { _, error in
+            if let error {
+                print("IdentityMigration: failed to relaunch the legacy application: \(error)")
+            }
+        }
+    }
+
+    private func bundleIdentifier(at applicationURL: URL) -> String? {
+        let infoURL = applicationURL.appendingPathComponent("Contents/Info.plist")
+        guard let data = try? Data(contentsOf: infoURL),
+              let propertyList = try? PropertyListSerialization.propertyList(
+                  from: data,
+                  options: [],
+                  format: nil
+              ),
+              let infoDictionary = propertyList as? [String: Any] else {
+            return nil
+        }
+
+        return infoDictionary["CFBundleIdentifier"] as? String
     }
 }

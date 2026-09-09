@@ -61,10 +61,10 @@ enum OptClickerMigrationStorage {
         try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: manifestURL.path)
     }
 
-    static func readManifest() throws -> OptClickerMigrationManifest {
+    static func readManifest(from url: URL = manifestURL) throws -> OptClickerMigrationManifest {
         try JSONDecoder().decode(
             OptClickerMigrationManifest.self,
-            from: Data(contentsOf: manifestURL)
+            from: Data(contentsOf: url)
         )
     }
 
