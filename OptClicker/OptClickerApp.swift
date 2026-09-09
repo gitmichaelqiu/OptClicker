@@ -7,8 +7,8 @@ import AppKit
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     private var inputManagerCancellable: AnyCancellable?
     
-    let inputManager = InputManager()
-    let hotkeyManager = HotkeyManager()
+    private(set) var inputManager: InputManager!
+    private(set) var hotkeyManager: HotkeyManager!
     var statusBarManager: StatusBarManager?
 
     @objc func quitApp() {
@@ -28,7 +28,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if OptClickerMigrationFinalizer.shared.startIfRequested() {
+            return
+        }
+
+        if OptClickerBridgeMigrationManager.shared.beginIfNeeded(completion: { [weak self] in
+            self?.startNormalApplication()
+        }) {
+            return
+        }
+
+        startNormalApplication()
+    }
+
+    private func startNormalApplication() {
+        guard inputManager == nil else { return }
         NSApp.setActivationPolicy(.accessory)
+        OptClickerIdentityMigration.prepareNormalLaunch()
+
+        inputManager = InputManager()
+        hotkeyManager = HotkeyManager()
         
         // Status bar
         statusBarManager = StatusBarManager(inputManager: inputManager) {

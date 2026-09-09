@@ -3,9 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml</string>
+	<string>$(OPTCLICKER_UPDATE_FEED_URL)</string>
 	<key>SUPublicEDKey</key>
 	<string>e9YKamydRddgnYK6Kq41W0vPbwI4F9XJAhks/9rzT0w=</string>
+	<key>OptClickerMigrationPackageURL</key>
+	<string>$(OPTCLICKER_MIGRATION_PACKAGE_URL)</string>
+	<key>OptClickerMigrationPackageSHA256</key>
+	<string>$(OPTCLICKER_MIGRATION_PACKAGE_SHA256)</string>
+	<key>OptClickerMigrationPackageVersion</key>
+	<string>$(OPTCLICKER_MIGRATION_PACKAGE_VERSION)</string>
+	<key>OptClickerMigrationAllowManualApproval</key>
+	<string>$(OPTCLICKER_MIGRATION_ALLOW_MANUAL_APPROVAL)</string>
+	<key>OptClickerMigrationStagingPath</key>
+	<string>$(OPTCLICKER_MIGRATION_STAGING_PATH)</string>
+	<key>OptClickerReleaseTag</key>
+	<string>$(OPTCLICKER_RELEASE_TAG)</string>
 	<key>ATSApplicationFontsPath</key>
 	<string>Fonts</string>
 </dict>

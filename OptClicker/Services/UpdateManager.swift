@@ -19,7 +19,7 @@ extension NSApplication {
     }
 }
 
-class UpdateManager: NSObject, SPUUpdaterDelegate {
+class UpdateManager: NSObject, SPUStandardUserDriverDelegate, SPUUpdaterDelegate {
     static let shared = UpdateManager()
     
     // Using an implicitly unwrapped optional allows us to initialize the controller 
@@ -31,8 +31,36 @@ class UpdateManager: NSObject, SPUUpdaterDelegate {
         self.updaterController = SPUStandardUpdaterController(
             startingUpdater: true,
             updaterDelegate: self,
-            userDriverDelegate: nil
+            userDriverDelegate: self
         )
+    }
+
+    func allowedChannels(for updater: SPUUpdater) -> Set<String> {
+        guard OptClickerIdentity.isCurrentApplication else { return [] }
+        return [OptClickerIdentity.currentUpdateChannel]
+    }
+
+    func bestValidUpdate(in appcast: SUAppcast, for updater: SPUUpdater) -> SUAppcastItem? {
+        guard OptClickerIdentity.isCurrentApplication else { return nil }
+
+        let eligibleItems = appcast.items.filter { item in
+            guard let target = item.propertiesDictionary[OptClickerIdentity.appcastTargetBundleIdentifierKey] as? String else {
+                return true
+            }
+            return target == OptClickerIdentity.currentBundleIdentifier
+        }
+        guard !eligibleItems.isEmpty else { return SUAppcastItem.empty() }
+
+        let comparator = SUStandardVersionComparator.default
+        return eligibleItems.max { left, right in
+            comparator.compareVersion(left.versionString, toVersion: right.versionString) == .orderedAscending
+        }
+    }
+
+    var supportsGentleScheduledUpdateReminders: Bool { true }
+
+    func standardUserDriverShouldHandleShowingScheduledUpdate(_ update: SUAppcastItem, andInImmediateFocus immediateFocus: Bool) -> Bool {
+        true
     }
     
     // Programmatic feed URL to ensure Sparkle always knows where to look.
