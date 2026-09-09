@@ -3,25 +3,25 @@
     <channel>
         <title>OptClicker</title>
         <item>
-            <title>1.5.2</title>
+            <title>1.5.1</title>
             <pubDate>Wed, 09 Sep 2026 20:33:19 +0800</pubDate>
-            <sparkle:version>10</sparkle:version>
-            <sparkle:shortVersionString>1.5.2</sparkle:shortVersionString>
+            <sparkle:version>9</sparkle:version>
+            <sparkle:shortVersionString>1.5.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <optclicker:targetBundleIdentifier>michaelqiu.OptClicker</optclicker:targetBundleIdentifier>
-            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.2-bridge/OptClicker-1.5.2-bridge.dmg" length="22856080" type="application/octet-stream" sparkle:edSignature="4/m6IJwTTiftWsPri9F4nzmPyPVMJjJUx5BrH8NJ8M13Gzd3unsaKKZnTX8kAV7epaWoM9FbbOiJPXK/sJrFDQ=="/>
-            <sparkle:releaseNotesLink>https://github.com/gitmichaelqiu/OptClicker/releases/tag/v1.5.2-bridge</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.1-bridge/OptClicker-1.5.1-bridge.dmg" length="22855637" type="application/octet-stream" sparkle:edSignature="TVW9IgMZ+b+9zcr1id4nCO+nxCKaYSHbKBRsx7+5/TBzWgHa3mXSbOiGlwc+9C4ggzRsgpOqbfdhHbVHBUIXAA=="/>
+            <sparkle:releaseNotesLink>https://github.com/gitmichaelqiu/OptClicker/releases/tag/v1.5.1-bridge</sparkle:releaseNotesLink>
         </item>
         <item>
-            <title>1.5.2</title>
+            <title>1.5.1</title>
             <pubDate>Wed, 09 Sep 2026 20:33:19 +0800</pubDate>
-            <sparkle:version>10</sparkle:version>
-            <sparkle:shortVersionString>1.5.2</sparkle:shortVersionString>
+            <sparkle:version>9</sparkle:version>
+            <sparkle:shortVersionString>1.5.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <sparkle:channel>dev-mqiu</sparkle:channel>
             <optclicker:targetBundleIdentifier>dev.mqiu.OptClicker</optclicker:targetBundleIdentifier>
-            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.2/OptClicker.1.5.2.dmg" length="22983646" type="application/octet-stream" sparkle:edSignature="qHmeuqmD1lMls6ad49R6VI+i53UTqIeIWaCxCcdgB4+LMnv2sUmvtBwu0B3IDfEjS+IzgIEU8QMWJUsd5T12Dg=="/>
-            <sparkle:releaseNotesLink>https://github.com/gitmichaelqiu/OptClicker/releases/tag/v1.5.2</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.1/OptClicker.1.5.1.dmg" length="23352971" type="application/octet-stream" sparkle:edSignature="Yq5oWf1kbTthct3HhLl5+z1EO4U2NZlfEggJQp6NAA9AYABw4u/P8vkxavx13yHbWjlHEIYvQsNDodCeKn7MBg=="/>
+            <sparkle:releaseNotesLink>https://github.com/gitmichaelqiu/OptClicker/releases/tag/v1.5.1</sparkle:releaseNotesLink>
         </item>
         <item>
             <title>1.5.0</title>

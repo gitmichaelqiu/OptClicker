@@ -22,8 +22,8 @@ The package version is the app build number (`CFBundleVersion`), not the
 marketing version:
 
 ```sh
-CURRENT_APP="$HOME/Downloads/OptClick 2026-09-09 20-24-37/OptClicker.app"
-CURRENT_BUILD=10
+CURRENT_APP="$HOME/Library/Developer/Xcode/DerivedData/OptClicker-clfwnlajshttuufspoeojewbotyg/Build/Products/Debug/OptClicker.app"
+CURRENT_BUILD=9
 APPCAST_URL="https://raw.githubusercontent.com/gitmichaelqiu/OptClicker/main/appcast.xml"
 MIGRATION_PACKAGE="tmp/OptClicker-migration-${CURRENT_BUILD}.pkg"
 
@@ -40,44 +40,44 @@ the bridge. The URL and checksum must not change after the bridge is built.
 
 ## Build the legacy bridge
 
-For version `1.5.2`, build number `10`, and release tag `bridge`:
+For version `1.5.1`, build number `9`, and release tag `bridge`:
 
 ```sh
 MIGRATION_PACKAGE_SHA256="$(shasum -a 256 "$MIGRATION_PACKAGE" | awk '{print $1}')"
-MIGRATION_PACKAGE_URL="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.2-bridge/OptClicker-migration-10.pkg"
+MIGRATION_PACKAGE_URL="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.1-bridge/OptClicker-migration-9.pkg"
 
 Scripts/build-bridge-release.sh \
-  --version 1.5.2 \
-  --build-number 10 \
+  --version 1.5.1 \
+  --build-number 9 \
   --release-tag bridge \
   --feed-url "$APPCAST_URL" \
   --migration-package-url "$MIGRATION_PACKAGE_URL" \
   --migration-package-sha256 "$MIGRATION_PACKAGE_SHA256" \
-  --migration-package-version 10 \
-  --output-dir tmp/OptClicker-bridge-release \
+  --migration-package-version 9 \
+  --output-dir tmp/OptClicker-bridge-release-1.5.1 \
   --manual-approval
 ```
 
-The bridge output is `OptClicker-1.5.2-bridge.dmg`. Verify both artifacts
+The bridge output is `OptClicker-1.5.1-bridge.dmg`. Verify both artifacts
 before publishing:
 
 ```sh
 Scripts/verify-bridge-release.sh \
-  --bridge-dmg tmp/OptClicker-bridge-release/OptClicker-1.5.2-bridge.dmg \
+  --bridge-dmg tmp/OptClicker-bridge-release-1.5.1/OptClicker-1.5.1-bridge.dmg \
   --migration-package "$MIGRATION_PACKAGE" \
-  --version 1.5.2 \
-  --build-number 10 \
+  --version 1.5.1 \
+  --build-number 9 \
   --release-tag bridge \
   --feed-url "$APPCAST_URL" \
   --migration-package-url "$MIGRATION_PACKAGE_URL" \
   --migration-package-sha256 "$MIGRATION_PACKAGE_SHA256" \
-  --migration-package-version 10
+  --migration-package-version 9
 ```
 
-The final current-ID DMG is the supplied `OptClicker 1.5.2.dmg` and should be
-published as `OptClicker.1.5.2.dmg`. The bridge DMG should be published as
-`OptClicker-1.5.2-bridge.dmg`; the migration package should be published as
-`OptClicker-migration-10.pkg` in the `v1.5.2-bridge` release.
+The final current-ID DMG should be published as `OptClicker.1.5.1.dmg`.
+The bridge DMG should be published as `OptClicker-1.5.1-bridge.dmg`; the
+migration package should be published as `OptClicker-migration-9.pkg` in the
+`v1.5.1-bridge` release.
 
 Before publishing the appcast, sign both DMGs with the OptClicker Sparkle
 Ed25519 key and put the resulting `sparkle:edSignature` values on their
@@ -85,8 +85,8 @@ Ed25519 key and put the resulting `sparkle:edSignature` values on their
 keychain; it must not be committed:
 
 ```sh
-sign_update -p tmp/OptClicker-bridge-release/OptClicker-1.5.2-bridge.dmg
-sign_update -p "$HOME/Downloads/OptClick 2026-09-09 20-24-37/OptClicker 1.5.2.dmg"
+sign_update -p tmp/OptClicker-bridge-release-1.5.1/OptClicker-1.5.1-bridge.dmg
+sign_update -p tmp/OptClicker.1.5.1.dmg
 ```
 
 Do not commit generated apps, packages, DMGs, checksums, signing credentials,
