@@ -49,6 +49,25 @@ final class OptClickerBridgeMigrationManager: NSObject {
         return true
     }
 
+    /// Starts migration from the settings button after the user chose to
+    /// defer the one-time bridge prompt.
+    func startMigrationFromUserAction() {
+        guard OptClickerIdentity.isLegacyBridge,
+              OptClickerMigrationConfiguration.isConfigured,
+              downloadTask == nil,
+              stageMonitor == nil,
+              !stageLaunchStarted else {
+            return
+        }
+
+        stageLaunchStarted = false
+        if resumePendingMigrationIfNeeded() {
+            return
+        }
+
+        startMigration()
+    }
+
     private func presentMigrationPrompt() {
         let alert = NSAlert()
         alert.alertStyle = .informational

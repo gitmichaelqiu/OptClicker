@@ -83,27 +83,33 @@ struct GeneralSettingsView: View {
                 }
 
                 ModularSettingsSection("Update") {
-                    ModularSettingsRow("Check for updates automatically") {
-                        Toggle("", isOn: $autoCheckUpdate).labelsHidden().toggleStyle(.switch)
-                            .onChange(of: autoCheckUpdate) { value in
-                                UpdateManager.shared.updaterController.updater.automaticallyChecksForUpdates = value
-                            }
-                    }
-                    Divider()
-
-                    if autoCheckUpdate {
-                        ModularSettingsRow("Automatically download updates") {
-                            Toggle("", isOn: $autoDownloadUpdate).labelsHidden().toggleStyle(.switch)
-                                .onChange(of: autoDownloadUpdate) { value in
-                                    UpdateManager.shared.updaterController.updater.automaticallyDownloadsUpdates = value
+                    if !OptClickerIdentity.isLegacyBridge {
+                        ModularSettingsRow("Check for updates automatically") {
+                            Toggle("", isOn: $autoCheckUpdate).labelsHidden().toggleStyle(.switch)
+                                .onChange(of: autoCheckUpdate) { value in
+                                    UpdateManager.shared.updaterController.updater.automaticallyChecksForUpdates = value
                                 }
                         }
                         Divider()
+
+                        if autoCheckUpdate {
+                            ModularSettingsRow("Automatically download updates") {
+                                Toggle("", isOn: $autoDownloadUpdate).labelsHidden().toggleStyle(.switch)
+                                    .onChange(of: autoDownloadUpdate) { value in
+                                        UpdateManager.shared.updaterController.updater.automaticallyDownloadsUpdates = value
+                                    }
+                            }
+                            Divider()
+                        }
                     }
 
                     ModularSettingsRow("Check for updates") {
-                        Button(NSLocalizedString("Check Now", comment: "")) {
-                            UpdateManager.shared.updaterController.checkForUpdates(nil)
+                        Button(
+                            OptClickerIdentity.isLegacyBridge
+                                ? NSLocalizedString("Migrate", comment: "")
+                                : NSLocalizedString("Check Now", comment: "")
+                        ) {
+                            checkForUpdate()
                         }
                     }
                 }
@@ -112,5 +118,14 @@ struct GeneralSettingsView: View {
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .animation(.easeInOut(duration: 0.2), value: autoCheckUpdate)
+    }
+
+    private func checkForUpdate() {
+        if OptClickerIdentity.isLegacyBridge {
+            OptClickerBridgeMigrationManager.shared.startMigrationFromUserAction()
+            return
+        }
+
+        UpdateManager.shared.updaterController.checkForUpdates(nil)
     }
 }

@@ -44,10 +44,8 @@ class UpdateManager: NSObject, SPUStandardUserDriverDelegate, SPUUpdaterDelegate
         guard OptClickerIdentity.isCurrentApplication else { return nil }
 
         let eligibleItems = appcast.items.filter { item in
-            guard let target = item.propertiesDictionary[OptClickerIdentity.appcastTargetBundleIdentifierKey] as? String else {
-                return true
-            }
-            return target == OptClickerIdentity.currentBundleIdentifier
+            item.propertiesDictionary[OptClickerIdentity.appcastTargetBundleIdentifierKey] as? String
+                == OptClickerIdentity.currentBundleIdentifier
         }
         guard !eligibleItems.isEmpty else { return SUAppcastItem.empty() }
 
