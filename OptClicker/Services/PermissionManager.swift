@@ -9,6 +9,13 @@ class PermissionManager: ObservableObject {
     @Published var isAccessibilityGranted: Bool = false
     @Published var isPostEventGranted: Bool = false
     @Published var automationPermissions: [String: Bool] = [:] // bundleId: isGranted
+
+    /// Accessibility and event synthesis are separate TCC checks, but macOS
+    /// presents both through the same user-facing Accessibility settings.
+    /// Keep them combined for the permission requirement shown to users.
+    var hasAccessibilityPermission: Bool {
+        isAccessibilityGranted && isPostEventGranted
+    }
     
     private let knownBrowsersKey = "PermissionManager.KnownBrowsers"
     private let authorizedBrowsersKey = "PermissionManager.AuthorizedBrowsers"
