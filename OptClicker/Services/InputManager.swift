@@ -521,9 +521,12 @@ class InputManager: ObservableObject {
     }
     
     private func getCGMouseLocation() -> CGPoint {
-        let screenHeight = NSScreen.main?.frame.height ?? 0
         let loc = NSEvent.mouseLocation
-        return CGPoint(x: loc.x, y: screenHeight - loc.y)
+        // Core Graphics uses the primary display's top-left origin. `main`
+        // follows the focused window and may be an external display, so use
+        // the first screen, which is the display containing the menu bar.
+        let primaryDisplayHeight = NSScreen.screens.first?.frame.height ?? 0
+        return CGPoint(x: loc.x, y: primaryDisplayHeight - loc.y)
     }
 
     // Monitor Keyboard
