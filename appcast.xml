@@ -10,7 +10,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <sparkle:channel>dev-mqiu</sparkle:channel>
             <optclicker:targetBundleIdentifier>dev.mqiu.OptClicker</optclicker:targetBundleIdentifier>
-            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.2/OptClicker.1.5.2.dmg" length="28248449" type="application/octet-stream" sparkle:edSignature="jFO1VrfQho9wMhK7EKj/J0/349ERc+cOqu4BR2VHiqL7R5WtVGPOxzJXeqD7r+RBiYHdZKpQFEw4R3GQ0zLECw=="/>
+            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.2/OptClicker.1.5.2.dmg" length="28250538" type="application/octet-stream" sparkle:edSignature="qo49WjcMj12RvUgpSFz0+oxpg/a8eYVgbTy1xIVblHY9autx/lKxuim+OWOia/74scclgGW+d4n2jBddakVqAA=="/>
             <sparkle:releaseNotesLink>https://github.com/gitmichaelqiu/OptClicker/releases/tag/v1.5.2</sparkle:releaseNotesLink>
         </item>
         <item>
