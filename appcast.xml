@@ -3,6 +3,17 @@
     <channel>
         <title>OptClicker</title>
         <item>
+            <title>1.5.2</title>
+            <pubDate>Sun, 27 Sep 2026 15:46:48 +0800</pubDate>
+            <sparkle:version>10</sparkle:version>
+            <sparkle:shortVersionString>1.5.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <sparkle:channel>dev-mqiu</sparkle:channel>
+            <optclicker:targetBundleIdentifier>dev.mqiu.OptClicker</optclicker:targetBundleIdentifier>
+            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.5.2/OptClicker.1.5.2.dmg" length="28248449" type="application/octet-stream" sparkle:edSignature="jFO1VrfQho9wMhK7EKj/J0/349ERc+cOqu4BR2VHiqL7R5WtVGPOxzJXeqD7r+RBiYHdZKpQFEw4R3GQ0zLECw=="/>
+            <sparkle:releaseNotesLink>https://github.com/gitmichaelqiu/OptClicker/releases/tag/v1.5.2</sparkle:releaseNotesLink>
+        </item>
+        <item>
             <title>1.5.1</title>
             <pubDate>Wed, 09 Sep 2026 23:04:07 +0800</pubDate>
             <sparkle:version>9</sparkle:version>
