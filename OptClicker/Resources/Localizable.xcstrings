@@ -995,6 +995,16 @@
         }
       }
     },
+    "Media Suite" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒体套件"
+          }
+        }
+      }
+    },
     "Minecraft (%@)" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2956,6 +2966,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "当不在最前时"
+          }
+        }
+      }
+    },
+    "Workflow Suite" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "工作流套件"
           }
         }
       }
