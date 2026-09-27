@@ -10,25 +10,14 @@ struct PermissionsSettingsView: View {
         VStack(alignment: .leading, spacing: 20) {
                 ModularSettingsSection("Permissions", helperText: "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant.") {
                     VStack(alignment: .leading, spacing: 0) {
-                        // Accessibility
-                        ModularSettingsRow("Accessibility", helperText: "Required to detect the Option key and read window information.") {
+                        // Accessibility and event synthesis are configured in the
+                        // same System Settings privacy pane, so present them as
+                        // one permission to avoid duplicate actions.
+                        ModularSettingsRow("Accessibility", helperText: "Required to detect the Option key, read window information, and send the right-click event.") {
                             HStack(spacing: 12) {
-                                PermissionStatusIcon(isGranted: permissionManager.isAccessibilityGranted)
+                                PermissionStatusIcon(isGranted: permissionManager.hasAccessibilityPermission)
                                 
-                                Button(permissionManager.isAccessibilityGranted ? "Settings" : "Grant") {
-                                    permissionManager.requestAccessibilityPermission()
-                                }
-                            }
-                        }
-
-                        Divider()
-
-                        // Synthetic mouse event posting
-                        ModularSettingsRow("Input event posting", helperText: "Required to send the right-click after Option is detected.") {
-                            HStack(spacing: 12) {
-                                PermissionStatusIcon(isGranted: permissionManager.isPostEventGranted)
-
-                                Button(permissionManager.isPostEventGranted ? "Settings" : "Grant") {
+                                Button(permissionManager.hasAccessibilityPermission ? "Settings" : "Grant") {
                                     permissionManager.requestAccessibilityPermission()
                                 }
                             }
