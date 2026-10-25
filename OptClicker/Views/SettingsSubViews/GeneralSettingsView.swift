@@ -60,8 +60,7 @@ struct GeneralSettingsView: View {
                 
                 ModularSettingsSection("Menubar") {
                     ModularSettingsRow(
-                        "Show menu bar icon",
-                        helperText: "If hidden, reopen Settings from the Dock to restore the icon."
+                        "Show menu bar icon"
                     ) {
                         Toggle("", isOn: $inputManager.isMenuBarIconVisible)
                             .labelsHidden()

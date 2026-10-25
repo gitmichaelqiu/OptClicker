@@ -694,16 +694,6 @@
         }
       }
     },
-    "If hidden, reopen Settings from the Dock to restore the icon." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "若图标已隐藏，可从 Dock 重新打开设置以恢复图标。"
-          }
-        }
-      }
-    },
     "If the Settings show that the permission is granted but the app still does not have it, remove the app row in Settings and re-grant." : {
       "localizations" : {
         "zh-Hans" : {

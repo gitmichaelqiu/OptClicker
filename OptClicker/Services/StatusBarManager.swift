@@ -154,15 +154,7 @@ class StatusBarManager: ObservableObject {
         autoToggleItem.state = inputManager.isAutoToggleEnabled ? .on : .off
         menu.addItem(autoToggleItem)
 
-        let menuBarIconItem = NSMenuItem(
-            title: NSLocalizedString("Show menu bar icon", comment: ""),
-            action: #selector(handleMenuBarIconItemClick),
-            keyEquivalent: ""
-        )
-        menuBarIconItem.image = NSImage(systemSymbolName: "menubar.rectangle", accessibilityDescription: nil)
-        menuBarIconItem.target = self
-        menuBarIconItem.state = inputManager.isMenuBarIconVisible ? .on : .off
-        menu.addItem(menuBarIconItem)
+        menu.addItem(.separator())
 
         let hudModeItem = NSMenuItem(
             title: NSLocalizedString("Show HUD toasts", comment: ""),
@@ -180,7 +172,7 @@ class StatusBarManager: ObservableObject {
             item.isEnabled = false
             menu.addItem(item)
         }
-        
+
         let showProc = UserDefaults.standard.bool(forKey: InputManager.showFrontmostProcKey)
         if showProc {
             if let procName = inputManager.getFrontmostProcessNameExcludingSelf() {
@@ -227,10 +219,6 @@ class StatusBarManager: ObservableObject {
 
     @objc private func handleAutoToggleItemClick() {
         inputManager.toggleAutoToggle()
-    }
-
-    @objc private func handleMenuBarIconItemClick() {
-        inputManager.isMenuBarIconVisible.toggle()
     }
 
     @objc private func handleHUDToastModeItemClick() {
