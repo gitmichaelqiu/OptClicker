@@ -433,6 +433,26 @@
         }
       }
     },
+    "Disabled manually" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手动停用"
+          }
+        }
+      }
+    },
+    "Dismiss" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
+        }
+      }
+    },
     "Duplicated Process" : {
       "localizations" : {
         "zh-Hans" : {
@@ -537,6 +557,16 @@
         }
       }
     },
+    "Enabled manually" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手动启用"
+          }
+        }
+      }
+    },
     "Enter a domain or URL (e.g., google.com):" : {
       "localizations" : {
         "zh-Hans" : {
@@ -586,6 +616,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "跟随上一次设置"
+          }
+        }
+      }
+    },
+    "Following last setting (disabled)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沿用上次设置（停用）"
+          }
+        }
+      }
+    },
+    "Following last setting (enabled)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沿用上次设置（启用）"
           }
         }
       }
@@ -975,6 +1025,26 @@
         }
       }
     },
+    "HUD toasts mode" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HUD 通知模式"
+          }
+        }
+      }
+    },
+    "Hide the menu bar item and show a HUD when OptClicker status changes. Open Settings from the Dock to switch back." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用后会隐藏菜单栏图标，并在 OptClicker 状态改变时显示 HUD。可从 Dock 打开设置以切换回来。"
+          }
+        }
+      }
+    },
     "Menubar" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1112,6 +1182,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OptClicker无法找到%@的文件夹"
+          }
+        }
+      }
+    },
+    "OptClicker disabled" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OptClicker 已停用"
+          }
+        }
+      }
+    },
+    "OptClicker enabled" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OptClicker 已启用"
           }
         }
       }

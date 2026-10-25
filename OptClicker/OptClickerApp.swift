@@ -43,16 +43,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     private func startNormalApplication() {
         guard inputManager == nil else { return }
-        NSApp.setActivationPolicy(.accessory)
         OptClickerIdentityMigration.prepareNormalLaunch()
 
         inputManager = InputManager()
         hotkeyManager = HotkeyManager()
         
         // Status bar
-        statusBarManager = StatusBarManager(inputManager: inputManager) {
-            self.inputManager.isEnabled.toggle()
-        }
+        statusBarManager = StatusBarManager(
+            inputManager: inputManager,
+            onToggle: { [weak self] in
+                self?.inputManager.isEnabled.toggle()
+            },
+            onHUDToastModeChanged: { isEnabled in
+                NSApp.setActivationPolicy(isEnabled ? .regular : .accessory)
+            }
+        )
         statusBarManager?.install()
 
         // Observers
@@ -116,7 +121,12 @@ struct OptClickerApp: App {
                     UserDefaults.standard.set(SettingsTab.about.rawValue, forKey: "selectedSettingsTab")
                 }
             }
-            CommandGroup(replacing: .appSettings) { }
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings...") {
+                    NotificationCenter.default.post(name: .openSettingsWindow, object: nil)
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
         }
     }
 }

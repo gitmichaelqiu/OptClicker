@@ -55,6 +55,14 @@ class InputManager: ObservableObject {
     static let autoToggleEnabledKey = "isAutoToggleEnabled"
     static let showStatusReasonKey = "showStatusReason"
     static let showFrontmostProcKey = "showFrontmostProcessName"
+    static let hudToastModeEnabledKey = "isHUDToastModeEnabled"
+
+    @Published var isHUDToastModeEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(isHUDToastModeEnabled, forKey: Self.hudToastModeEnabledKey)
+        }
+    }
+
     @Published var isAutoToggleEnabled: Bool {
         didSet {
             UserDefaults.standard.set(isAutoToggleEnabled, forKey: Self.autoToggleEnabledKey)
@@ -109,6 +117,10 @@ class InputManager: ObservableObject {
         didSet {
             if !isAutoToggling {
                 lastManualState = isEnabled
+                statusReason = NSLocalizedString(
+                    isEnabled ? "Enabled manually" : "Disabled manually",
+                    comment: "Reason shown when the user manually changes OptClicker state"
+                )
             }
             if isEnabled {
                 startMonitoring()
@@ -143,6 +155,7 @@ class InputManager: ObservableObject {
             isEnabled = UserDefaults.standard.bool(forKey: Self.lastStateKey)
         }
         
+        isHUDToastModeEnabled = UserDefaults.standard.bool(forKey: Self.hudToastModeEnabledKey)
         isAutoToggleEnabled = UserDefaults.standard.bool(forKey: Self.autoToggleEnabledKey)
         isBasedOnApps = UserDefaults.standard.object(forKey: Self.isBasedOnAppsKey) == nil ? true : UserDefaults.standard.bool(forKey: Self.isBasedOnAppsKey)
         isBasedOnSpaces = UserDefaults.standard.bool(forKey: Self.isBasedOnSpacesKey)
@@ -190,6 +203,7 @@ class InputManager: ObservableObject {
 
         let legacyDefaults = UserDefaults(suiteName: legacyBundleIdentifier)
         let keys = [
+            hudToastModeEnabledKey,
             autoToggleEnabledKey,
             showStatusReasonKey,
             showFrontmostProcKey,
@@ -485,18 +499,23 @@ class InputManager: ObservableObject {
         }
 
         let (isMatch, reason) = getIsMatch()
-        self.statusReason = reason
 
         isAutoToggling = true
         defer { isAutoToggling = false }
 
         if isMatch {
+            statusReason = reason
             if !isEnabled { isEnabled = true }
         } else {
             switch autoToggleBehavior {
             case .disable:
+                statusReason = reason
                 if isEnabled { isEnabled = false }
             case .followLast:
+                statusReason = NSLocalizedString(
+                    lastManualState ? "Following last setting (enabled)" : "Following last setting (disabled)",
+                    comment: "Reason shown when auto toggle follows the user's last manual state"
+                )
                 if isEnabled != lastManualState {
                     isEnabled = lastManualState
                 }
