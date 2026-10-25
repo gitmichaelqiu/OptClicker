@@ -154,8 +154,6 @@ class StatusBarManager: ObservableObject {
         autoToggleItem.state = inputManager.isAutoToggleEnabled ? .on : .off
         menu.addItem(autoToggleItem)
 
-        menu.addItem(.separator())
-
         let hudModeItem = NSMenuItem(
             title: NSLocalizedString("Show HUD toasts", comment: ""),
             action: #selector(handleHUDToastModeItemClick),
@@ -165,6 +163,8 @@ class StatusBarManager: ObservableObject {
         hudModeItem.target = self
         hudModeItem.state = inputManager.isHUDToastModeEnabled ? .on : .off
         menu.addItem(hudModeItem)
+
+        menu.addItem(.separator())
 
         // Status reason (non-clickable)
         if let statusReason = getStatusReason() {
