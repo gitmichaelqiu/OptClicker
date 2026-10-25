@@ -54,8 +54,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             onToggle: { [weak self] in
                 self?.inputManager.isEnabled.toggle()
             },
-            onHUDToastModeChanged: { isEnabled in
-                NSApp.setActivationPolicy(isEnabled ? .regular : .accessory)
+            onMenuBarIconVisibilityChanged: { isVisible in
+                NSApp.setActivationPolicy(isVisible ? .accessory : .regular)
             }
         )
         statusBarManager?.install()

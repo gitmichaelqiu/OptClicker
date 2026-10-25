@@ -55,7 +55,14 @@ class InputManager: ObservableObject {
     static let autoToggleEnabledKey = "isAutoToggleEnabled"
     static let showStatusReasonKey = "showStatusReason"
     static let showFrontmostProcKey = "showFrontmostProcessName"
+    static let menuBarIconVisibleKey = "isMenuBarIconVisible"
     static let hudToastModeEnabledKey = "isHUDToastModeEnabled"
+
+    @Published var isMenuBarIconVisible: Bool {
+        didSet {
+            UserDefaults.standard.set(isMenuBarIconVisible, forKey: Self.menuBarIconVisibleKey)
+        }
+    }
 
     @Published var isHUDToastModeEnabled: Bool {
         didSet {
@@ -117,10 +124,17 @@ class InputManager: ObservableObject {
         didSet {
             if !isAutoToggling {
                 lastManualState = isEnabled
-                statusReason = NSLocalizedString(
-                    isEnabled ? "Enabled manually" : "Disabled manually",
-                    comment: "Reason shown when the user manually changes OptClicker state"
-                )
+                if isEnabled {
+                    statusReason = NSLocalizedString(
+                        "Enabled manually",
+                        comment: "Reason shown when the user manually enables OptClicker"
+                    )
+                } else {
+                    statusReason = NSLocalizedString(
+                        "Disabled manually",
+                        comment: "Reason shown when the user manually disables OptClicker"
+                    )
+                }
             }
             if isEnabled {
                 startMonitoring()
@@ -155,6 +169,7 @@ class InputManager: ObservableObject {
             isEnabled = UserDefaults.standard.bool(forKey: Self.lastStateKey)
         }
         
+        isMenuBarIconVisible = UserDefaults.standard.object(forKey: Self.menuBarIconVisibleKey) as? Bool ?? true
         isHUDToastModeEnabled = UserDefaults.standard.bool(forKey: Self.hudToastModeEnabledKey)
         isAutoToggleEnabled = UserDefaults.standard.bool(forKey: Self.autoToggleEnabledKey)
         isBasedOnApps = UserDefaults.standard.object(forKey: Self.isBasedOnAppsKey) == nil ? true : UserDefaults.standard.bool(forKey: Self.isBasedOnAppsKey)
@@ -203,6 +218,7 @@ class InputManager: ObservableObject {
 
         let legacyDefaults = UserDefaults(suiteName: legacyBundleIdentifier)
         let keys = [
+            menuBarIconVisibleKey,
             hudToastModeEnabledKey,
             autoToggleEnabledKey,
             showStatusReasonKey,
@@ -512,10 +528,17 @@ class InputManager: ObservableObject {
                 statusReason = reason
                 if isEnabled { isEnabled = false }
             case .followLast:
-                statusReason = NSLocalizedString(
-                    lastManualState ? "Following last setting (enabled)" : "Following last setting (disabled)",
-                    comment: "Reason shown when auto toggle follows the user's last manual state"
-                )
+                if lastManualState {
+                    statusReason = NSLocalizedString(
+                        "Following last setting (enabled)",
+                        comment: "Reason shown when auto toggle restores the last enabled state"
+                    )
+                } else {
+                    statusReason = NSLocalizedString(
+                        "Following last setting (disabled)",
+                        comment: "Reason shown when auto toggle restores the last disabled state"
+                    )
+                }
                 if isEnabled != lastManualState {
                     isEnabled = lastManualState
                 }

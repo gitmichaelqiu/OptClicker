@@ -60,8 +60,19 @@ struct GeneralSettingsView: View {
                 
                 ModularSettingsSection("Menubar") {
                     ModularSettingsRow(
-                        "HUD toasts mode",
-                        helperText: "Hide the menu bar item and show a HUD when OptClicker status changes. Open Settings from the Dock to switch back."
+                        "Show menu bar icon",
+                        helperText: "If hidden, reopen Settings from the Dock to restore the icon."
+                    ) {
+                        Toggle("", isOn: $inputManager.isMenuBarIconVisible)
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                    }
+
+                    Divider()
+
+                    ModularSettingsRow(
+                        "Show HUD toasts",
+                        helperText: "Toasts include the reason for each status change."
                     ) {
                         Toggle("", isOn: $inputManager.isHUDToastModeEnabled)
                             .labelsHidden()
