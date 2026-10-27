@@ -181,7 +181,7 @@ private struct SpaceAPIStatusView: View {
                 Button("Open DesktopRenamer") {
                     spaceManager.openDesktopRenamer()
                 }
-            case .disabled:
+            case .disabled, .permissionDenied:
                 Button("Open DesktopRenamer") {
                     spaceManager.openDesktopRenamer()
                 }

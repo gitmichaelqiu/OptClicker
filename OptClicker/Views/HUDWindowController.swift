@@ -11,7 +11,12 @@ struct HUDView: View {
     let onDismiss: () -> Void
     let onHoverChanged: (Bool) -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isHovered = false
+
+    private var foregroundColor: Color {
+        colorScheme == .light ? .black : .white
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -20,9 +25,9 @@ struct HUDView: View {
                     Button(action: onDismiss) {
                         Image(systemName: "xmark")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(foregroundColor)
                             .frame(width: 28, height: 28)
-                            .background(.white.opacity(0.14), in: Circle())
+                            .background(foregroundColor.opacity(0.14), in: Circle())
                     }
                     .buttonStyle(.plain)
                     .help(String(localized: "Dismiss"))
@@ -44,7 +49,7 @@ struct HUDView: View {
 
             Text(message)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(foregroundColor)
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .frame(maxWidth: 420, alignment: .leading)
@@ -93,8 +98,12 @@ final class HUDWindowController: NSWindowController {
 
     private var hideTimer: Timer?
     private var hostingView: NSHostingView<HUDView>?
+    private var glassEffectView: NSView?
+    private var legacyVisualEffectView: NSVisualEffectView?
     private var hideDuration: TimeInterval?
     private var isHoveringHUD = false
+    private var presentationID = UUID()
+    private var hideAnimationID: UUID?
 
     private init() {
         let panel = HUDPanel(
@@ -124,6 +133,8 @@ final class HUDWindowController: NSWindowController {
     func show(message: String, style: HUDPresentationStyle, systemImage: String? = nil) {
         guard let panel = window as? HUDPanel else { return }
 
+        presentationID = UUID()
+        hideAnimationID = nil
         panel.appearance = NSApp.effectiveAppearance
         hideTimer?.invalidate()
         hideTimer = nil
@@ -158,51 +169,71 @@ final class HUDWindowController: NSWindowController {
                 hostingView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
             ])
 
-            let surfaceView: NSView
+            let surfaceRoot = NSView()
+            surfaceRoot.translatesAutoresizingMaskIntoConstraints = false
+            let surfaceInset: CGFloat = 2
+
             if #available(macOS 26.0, *) {
                 let glassView = NSGlassEffectView(frame: .zero)
+                glassView.translatesAutoresizingMaskIntoConstraints = false
                 glassView.cornerRadius = 26
-                glassView.tintColor = NSColor.white.withAlphaComponent(0.06)
+                glassView.tintColor = NSColor.white.withAlphaComponent(0.03)
                 glassView.contentView = container
-                surfaceView = glassView
+                surfaceRoot.addSubview(glassView)
+                NSLayoutConstraint.activate([
+                    glassView.leadingAnchor.constraint(equalTo: surfaceRoot.leadingAnchor, constant: surfaceInset),
+                    glassView.trailingAnchor.constraint(equalTo: surfaceRoot.trailingAnchor, constant: -surfaceInset),
+                    glassView.topAnchor.constraint(equalTo: surfaceRoot.topAnchor, constant: surfaceInset),
+                    glassView.bottomAnchor.constraint(equalTo: surfaceRoot.bottomAnchor, constant: -surfaceInset)
+                ])
+                self.glassEffectView = glassView
             } else {
                 let visualEffectView = NSVisualEffectView(frame: .zero)
+                visualEffectView.translatesAutoresizingMaskIntoConstraints = false
                 visualEffectView.material = .hudWindow
                 visualEffectView.blendingMode = .withinWindow
                 visualEffectView.state = .active
                 visualEffectView.wantsLayer = true
                 visualEffectView.layer?.cornerRadius = 26
                 visualEffectView.layer?.masksToBounds = true
+                surfaceRoot.addSubview(visualEffectView)
                 visualEffectView.addSubview(container)
                 NSLayoutConstraint.activate([
+                    visualEffectView.leadingAnchor.constraint(equalTo: surfaceRoot.leadingAnchor, constant: surfaceInset),
+                    visualEffectView.trailingAnchor.constraint(equalTo: surfaceRoot.trailingAnchor, constant: -surfaceInset),
+                    visualEffectView.topAnchor.constraint(equalTo: surfaceRoot.topAnchor, constant: surfaceInset),
+                    visualEffectView.bottomAnchor.constraint(equalTo: surfaceRoot.bottomAnchor, constant: -surfaceInset),
                     container.leadingAnchor.constraint(equalTo: visualEffectView.leadingAnchor),
                     container.trailingAnchor.constraint(equalTo: visualEffectView.trailingAnchor),
                     container.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
                     container.bottomAnchor.constraint(equalTo: visualEffectView.bottomAnchor)
                 ])
-                surfaceView = visualEffectView
+                self.legacyVisualEffectView = visualEffectView
             }
 
-            panel.contentView = surfaceView
+            panel.contentView = surfaceRoot
             self.hostingView = hostingView
         }
 
         hostingView?.layout()
         let idealSize = hostingView?.intrinsicContentSize ?? NSSize(width: 300, height: 44)
-        let size = idealSize.width > 0 && idealSize.height > 0
+        let contentSize = idealSize.width > 0 && idealSize.height > 0
             ? idealSize
             : NSSize(width: 300, height: 44)
-        panel.setContentSize(size)
+        let surfaceInset: CGFloat = 2
+        panel.setContentSize(NSSize(
+            width: contentSize.width + surfaceInset * 2,
+            height: contentSize.height + surfaceInset * 2
+        ))
 
-        if #available(macOS 26.0, *), let glassView = panel.contentView as? NSGlassEffectView {
-            glassView.cornerRadius = size.height / 2
-        } else if let visualEffectView = panel.contentView as? NSVisualEffectView {
-            visualEffectView.layer?.cornerRadius = size.height / 2
+        if #available(macOS 26.0, *) {
+            (glassEffectView as? NSGlassEffectView)?.cornerRadius = contentSize.height / 2
         }
+        legacyVisualEffectView?.layer?.cornerRadius = contentSize.height / 2
 
         positionPanel(panel)
-        panel.alphaValue = 1
         panel.orderFrontRegardless()
+        animateAlpha(1, on: panel, duration: 0.08)
 
         hideDuration = 1.8
         scheduleHide(after: 1.8)
@@ -249,12 +280,27 @@ final class HUDWindowController: NSWindowController {
         hideTimer = nil
         hideDuration = nil
 
+        let currentPresentationID = presentationID
+        let currentHideAnimationID = UUID()
+        hideAnimationID = currentHideAnimationID
+
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.2
+            context.duration = 0.32
             context.allowsImplicitAnimation = true
             panel.animator().alphaValue = 0
         } completionHandler: {
+            guard self.presentationID == currentPresentationID,
+                  self.hideAnimationID == currentHideAnimationID else { return }
+            self.hideAnimationID = nil
             panel.orderOut(nil)
+        }
+    }
+
+    private func animateAlpha(_ alpha: CGFloat, on panel: NSWindow, duration: TimeInterval) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = duration
+            context.allowsImplicitAnimation = true
+            panel.animator().alphaValue = alpha
         }
     }
 }
