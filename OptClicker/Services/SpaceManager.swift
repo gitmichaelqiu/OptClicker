@@ -148,6 +148,11 @@ class SpaceManager: ObservableObject {
         }
     }
 
+    func requestSpaceAPIAccess() {
+        guard apiAvailability == .permissionDenied else { return }
+        refreshSpaceList()
+    }
+
     var desktopRenamerApplicationURL: URL? {
         Self.desktopRenamerBundleIdentifiers
             .compactMap { NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) }
