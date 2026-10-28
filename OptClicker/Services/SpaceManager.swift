@@ -214,7 +214,8 @@ class SpaceManager: ObservableObject {
         let request: [String: Any] = [
             "jsonrpc": jsonRPCVersion,
             "id": id,
-            "method": method
+            "method": method,
+            "requestedAccess": "read"
         ]
 
         guard let data = try? JSONSerialization.data(withJSONObject: request),
