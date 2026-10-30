@@ -8,6 +8,10 @@ class SettingsWindowController: NSObject {
     private var inputManager: InputManager?
     private var hotkeyManager: HotkeyManager?
 
+    var isSettingsWindowVisible: Bool {
+        window?.isVisible == true
+    }
+
     private override init() {
         super.init()
         NSSplitViewItem.swizzle()

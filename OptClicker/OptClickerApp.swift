@@ -78,17 +78,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     private func updateActivationPolicy(showMenuBarIcon: Bool) {
-        let windowToRestore = NSApp.isActive ? NSApp.keyWindow : nil
+        // Keep Settings frontmost; its close handler applies the saved policy.
+        guard !SettingsWindowController.shared.isSettingsWindowVisible else { return }
         NSApp.setActivationPolicy(showMenuBarIcon ? .accessory : .regular)
-
-        // Switching to accessory mode can make the app lose the frontmost state
-        // even though its Settings window remains open.
-        guard let windowToRestore else { return }
-        DispatchQueue.main.async {
-            guard windowToRestore.isVisible else { return }
-            NSApp.activate(ignoringOtherApps: true)
-            windowToRestore.makeKeyAndOrderFront(nil)
-        }
     }
 
     @objc private func handleHotkeyTriggered() {
