@@ -54,8 +54,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             onToggle: { [weak self] in
                 self?.inputManager.isEnabled.toggle()
             },
-            onMenuBarIconVisibilityChanged: { isVisible in
-                NSApp.setActivationPolicy(isVisible ? .accessory : .regular)
+            onMenuBarIconVisibilityChanged: { [weak self] isVisible in
+                self?.updateActivationPolicy(showMenuBarIcon: isVisible)
             }
         )
         statusBarManager?.install()
@@ -75,6 +75,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         )
 
         // Sparkle handles auto updates automatically.
+    }
+
+    private func updateActivationPolicy(showMenuBarIcon: Bool) {
+        let windowToRestore = NSApp.isActive ? NSApp.keyWindow : nil
+        NSApp.setActivationPolicy(showMenuBarIcon ? .accessory : .regular)
+
+        // Switching to accessory mode can make the app lose the frontmost state
+        // even though its Settings window remains open.
+        guard let windowToRestore else { return }
+        DispatchQueue.main.async {
+            guard windowToRestore.isVisible else { return }
+            NSApp.activate(ignoringOtherApps: true)
+            windowToRestore.makeKeyAndOrderFront(nil)
+        }
     }
 
     @objc private func handleHotkeyTriggered() {

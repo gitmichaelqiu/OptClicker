@@ -21,13 +21,13 @@ class SettingsWindowController: NSObject {
             createWindow()
         }
 
-        window?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
         NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        window?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func windowWillClose(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
+        NSApp.setActivationPolicy(inputManager?.isMenuBarIconVisible == true ? .accessory : .regular)
     }
 
     private func createWindow() {
