@@ -480,15 +480,25 @@ class InputManager: ObservableObject {
         let spaceMatch = isBasedOnSpaces ? getIsSpaceMatch() : nil
         
         if let am = appMatch, let sm = spaceMatch {
-            if matchCondition == .and {
-                let result = am && sm
-                let reason = result ? NSLocalizedString("Enabled by both apps and spaces", comment: "") : NSLocalizedString("Disabled (does not match both conditions)", comment: "")
-                return (result, reason)
-            } else {
-                let result = am || sm
-                let reason = result ? NSLocalizedString("Enabled by app or space match", comment: "") : NSLocalizedString("Disabled (no app or space match)", comment: "")
-                return (result, reason)
+            let isMatch = matchCondition == .and ? am && sm : am || sm
+            let reason: String
+
+            switch (am, sm) {
+            case (true, true):
+                reason = NSLocalizedString("Enabled by both apps and spaces", comment: "")
+            case (true, false):
+                reason = matchCondition == .and
+                    ? NSLocalizedString("Disabled (app rule matched, space rule did not)", comment: "")
+                    : NSLocalizedString("Enabled by app match", comment: "")
+            case (false, true):
+                reason = matchCondition == .and
+                    ? NSLocalizedString("Disabled (space rule matched, app rule did not)", comment: "")
+                    : NSLocalizedString("Enabled by space match", comment: "")
+            case (false, false):
+                reason = NSLocalizedString("Disabled (neither app nor space rule matched)", comment: "")
             }
+
+            return (isMatch, reason)
         } else if let am = appMatch {
             let reason = am ? NSLocalizedString("Enabled by app match", comment: "") : NSLocalizedString("Disabled by app mismatch", comment: "")
             return (am, reason)
