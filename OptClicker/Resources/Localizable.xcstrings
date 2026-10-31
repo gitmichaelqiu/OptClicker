@@ -401,22 +401,22 @@
         }
       }
     },
-    "Disabled (space rule matched, app rule did not)" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "禁用（桌面规则匹配，App规则不匹配）"
-          }
-        }
-      }
-    },
     "Disabled (no auto-toggle conditions enabled)" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "禁用（无自动切换条件）"
+          }
+        }
+      }
+    },
+    "Disabled (space rule matched, app rule did not)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禁用（桌面规则匹配，App规则不匹配）"
           }
         }
       }
@@ -515,6 +515,7 @@
       }
     },
     "Enabled (%@)" : {
+      "comment" : "Enabled because these app, website, or space targets matched",
       "localizations" : {
         "en" : {
           "stringUnit" : {
