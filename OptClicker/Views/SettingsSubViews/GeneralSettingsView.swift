@@ -58,7 +58,7 @@ struct GeneralSettingsView: View {
                     }
                 }
                 
-                ModularSettingsSection("Menubar") {
+                ModularSettingsSection("Menu Bar") {
                     ModularSettingsRow(
                         "Show menu bar icon"
                     ) {
