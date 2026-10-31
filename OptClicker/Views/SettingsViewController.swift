@@ -31,7 +31,16 @@ class SettingsWindowController: NSObject {
     }
 
     @objc private func windowWillClose(_ notification: Notification) {
-        NSApp.setActivationPolicy(inputManager?.isMenuBarIconVisible == true ? .accessory : .regular)
+        // Apply the background policy after AppKit finishes closing Settings.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, !self.isSettingsWindowVisible else { return }
+
+            let policy: NSApplication.ActivationPolicy = .accessory
+            guard NSApp.activationPolicy() == policy || NSApp.setActivationPolicy(policy) else {
+                NSLog("OptClicker: Could not apply accessory activation policy after Settings closed")
+                return
+            }
+        }
     }
 
     private func createWindow() {

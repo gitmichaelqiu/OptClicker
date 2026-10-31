@@ -3,6 +3,20 @@
     <channel>
         <title>OptClicker</title>
         <item>
+            <title>1.6.0</title>
+            <pubDate>Sat, 31 Oct 2026 11:51:15 +0800</pubDate>
+            <sparkle:version>11</sparkle:version>
+            <sparkle:shortVersionString>1.6.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <sparkle:channel>dev-mqiu</sparkle:channel>
+            <optclicker:targetBundleIdentifier>dev.mqiu.OptClicker</optclicker:targetBundleIdentifier>
+            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.6.0/OptClicker.1.6.0.dmg" length="28325155" type="application/octet-stream" sparkle:edSignature="4pAitrRHSLOmQXTlBz1/JtYYSfNuBqZy8T/lhMXFiWwgfsyPr55pLRwCdcVkit4KpnWxKrV68tB0JLdMDHkoCw=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.6.0/OptClicker11-10.delta" sparkle:deltaFrom="10" length="246118" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977824" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="WnKMcP+pBUgU5HagEjAsOXszqlaULmPG11u7UKPGWs4A0bRrqAAPzV4IGDCxrIQFopUqBmKKvYT+Kxp+1fluAA=="/>
+            </sparkle:deltas>
+            <sparkle:releaseNotesLink>https://github.com/gitmichaelqiu/OptClicker/releases/tag/v1.6.0</sparkle:releaseNotesLink>
+        </item>
+        <item>
             <title>1.5.2</title>
             <pubDate>Sun, 27 Sep 2026 15:46:48 +0800</pubDate>
             <sparkle:version>10</sparkle:version>
