@@ -484,16 +484,6 @@
         }
       }
     },
-    "Show HUD toasts" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示 HUD 通知"
-          }
-        }
-      }
-    },
     "Enable option → right click" : {
       "localizations" : {
         "zh-Hans" : {
@@ -784,6 +774,26 @@
         }
       }
     },
+    "Media Suite" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒体套件"
+          }
+        }
+      }
+    },
+    "Menu Bar" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "菜单栏"
+          }
+        }
+      }
+    },
     "Menu.About" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1039,32 +1049,12 @@
         }
       }
     },
-    "Menubar" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "菜单栏"
-          }
-        }
-      }
-    },
     "Migrate" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "迁移"
-          }
-        }
-      }
-    },
-    "Media Suite" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "媒体套件"
           }
         }
       }
@@ -1351,6 +1341,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "反馈"
+          }
+        }
+      }
+    },
+    "Request Access" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请求权限"
           }
         }
       }
@@ -2920,22 +2920,22 @@
         }
       }
     },
-    "Toasts include the reason for each status change." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "通知会说明每次状态变化的原因。"
-          }
-        }
-      }
-    },
     "Show frontmost process" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "显示活跃进程"
+          }
+        }
+      }
+    },
+    "Show HUD toasts" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示 HUD 通知"
           }
         }
       }
@@ -2996,6 +2996,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "终极桌面命名管理工具。"
+          }
+        }
+      }
+    },
+    "Toasts include the reason for each status change." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知会说明每次状态变化的原因。"
           }
         }
       }
