@@ -100,6 +100,16 @@
         }
       }
     },
+    "All spaces" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有桌面"
+          }
+        }
+      }
+    },
     "And" : {
       "localizations" : {
         "zh-Hans" : {
@@ -371,22 +381,22 @@
         }
       }
     },
-    "Disabled (does not match both conditions)" : {
+    "Disabled (app rule matched, space rule did not)" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "禁用（两组条件都不满足）"
+            "value" : "禁用（App规则匹配，桌面规则不匹配）"
           }
         }
       }
     },
-    "Disabled (no app or space match)" : {
+    "Disabled (neither app nor space rule matched)" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "禁用（无匹配App或桌面）"
+            "value" : "禁用（App和桌面规则均不匹配）"
           }
         }
       }
@@ -397,6 +407,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "禁用（无自动切换条件）"
+          }
+        }
+      }
+    },
+    "Disabled (space rule matched, app rule did not)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "禁用（桌面规则匹配，App规则不匹配）"
           }
         }
       }
@@ -429,6 +449,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "禁用（无匹配桌面）"
+          }
+        }
+      }
+    },
+    "Disabled manually" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手动停用"
+          }
+        }
+      }
+    },
+    "Dismiss" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
           }
         }
       }
@@ -473,66 +514,30 @@
         }
       }
     },
-    "Enabled by app match" : {
+    "Enabled (%@)" : {
+      "comment" : "Enabled because these app, website, or space targets matched",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enabled (app match)"
+            "value" : "Enabled (%@)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "启用（匹配App）"
+            "value" : "启用（%@）"
           }
         }
       }
     },
-    "Enabled by app or space match" : {
+    "Enabled manually" : {
+      "extractionState" : "manual",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enabled (app or space match)"
-          }
-        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "启用（匹配App或桌面）"
-          }
-        }
-      }
-    },
-    "Enabled by both apps and spaces" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enabled (app and space match)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "启用（匹配App和桌面）"
-          }
-        }
-      }
-    },
-    "Enabled by space match" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enabled (space match)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "启用（匹配桌面）"
+            "value" : "手动启用"
           }
         }
       }
@@ -586,6 +591,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "跟随上一次设置"
+          }
+        }
+      }
+    },
+    "Following last setting (disabled)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沿用上次设置（停用）"
+          }
+        }
+      }
+    },
+    "Following last setting (enabled)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沿用上次设置（启用）"
           }
         }
       }
@@ -716,6 +743,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "符合条件"
+          }
+        }
+      }
+    },
+    "Media Suite" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "媒体套件"
+          }
+        }
+      }
+    },
+    "Menu Bar" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "菜单栏"
           }
         }
       }
@@ -975,32 +1022,12 @@
         }
       }
     },
-    "Menubar" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "菜单栏"
-          }
-        }
-      }
-    },
     "Migrate" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "迁移"
-          }
-        }
-      }
-    },
-    "Media Suite" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "媒体套件"
           }
         }
       }
@@ -1112,6 +1139,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OptClicker无法找到%@的文件夹"
+          }
+        }
+      }
+    },
+    "OptClicker disabled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OptClicker 已停用"
+          }
+        }
+      }
+    },
+    "OptClicker enabled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OptClicker 已启用"
           }
         }
       }
@@ -1265,6 +1314,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "反馈"
+          }
+        }
+      }
+    },
+    "Request Access" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请求权限"
           }
         }
       }
@@ -2844,6 +2903,26 @@
         }
       }
     },
+    "Show HUD toasts" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示 HUD 通知"
+          }
+        }
+      }
+    },
+    "Show menu bar icon" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示菜单栏图标"
+          }
+        }
+      }
+    },
     "Show status reason" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2890,6 +2969,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "终极桌面命名管理工具。"
+          }
+        }
+      }
+    },
+    "Toasts include the reason for each status change." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知会说明每次状态变化的原因。"
           }
         }
       }

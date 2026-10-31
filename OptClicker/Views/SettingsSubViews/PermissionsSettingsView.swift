@@ -185,6 +185,14 @@ private struct SpaceAPIStatusView: View {
                 Button("Open DesktopRenamer") {
                     spaceManager.openDesktopRenamer()
                 }
+            case .permissionRequired, .permissionDenied:
+                Button("Request Access") {
+                    spaceManager.requestSpaceAPIAccess()
+                }
+
+                Button("Open DesktopRenamer") {
+                    spaceManager.openDesktopRenamer()
+                }
             case .unavailable:
                 Button("Launch DesktopRenamer") {
                     spaceManager.openDesktopRenamer()

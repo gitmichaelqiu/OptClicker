@@ -43,16 +43,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     private func startNormalApplication() {
         guard inputManager == nil else { return }
-        NSApp.setActivationPolicy(.accessory)
         OptClickerIdentityMigration.prepareNormalLaunch()
 
         inputManager = InputManager()
         hotkeyManager = HotkeyManager()
         
         // Status bar
-        statusBarManager = StatusBarManager(inputManager: inputManager) {
-            self.inputManager.isEnabled.toggle()
-        }
+        statusBarManager = StatusBarManager(
+            inputManager: inputManager,
+            onToggle: { [weak self] in
+                self?.inputManager.isEnabled.toggle()
+            },
+            onMenuBarIconVisibilityChanged: { [weak self] isVisible in
+                self?.updateActivationPolicy(showMenuBarIcon: isVisible)
+            }
+        )
         statusBarManager?.install()
 
         // Observers
@@ -70,6 +75,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         )
 
         // Sparkle handles auto updates automatically.
+    }
+
+    private func updateActivationPolicy(showMenuBarIcon: Bool) {
+        // Keep Settings frontmost; its close handler applies the saved policy.
+        guard !SettingsWindowController.shared.isSettingsWindowVisible else { return }
+        NSApp.setActivationPolicy(showMenuBarIcon ? .accessory : .regular)
     }
 
     @objc private func handleHotkeyTriggered() {
@@ -116,7 +127,12 @@ struct OptClickerApp: App {
                     UserDefaults.standard.set(SettingsTab.about.rawValue, forKey: "selectedSettingsTab")
                 }
             }
-            CommandGroup(replacing: .appSettings) { }
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings...") {
+                    NotificationCenter.default.post(name: .openSettingsWindow, object: nil)
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
         }
     }
 }

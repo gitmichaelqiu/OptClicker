@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import AppKit
+import Darwin
 
 struct SpaceInfo: Identifiable, Codable, Hashable {
     let id: String
@@ -14,6 +15,8 @@ struct SpaceInfo: Identifiable, Codable, Hashable {
 enum SpaceAPIAvailability: Equatable {
     case available
     case disabled
+    case permissionRequired
+    case permissionDenied
     case unavailable
 }
 
@@ -26,6 +29,20 @@ class SpaceManager: ObservableObject {
         "com.michaelqiu.DesktopRenamer"
     ]
     static let desktopRenamerDownloadURL = URL(string: "https://github.com/gitmichaelqiu/DesktopRenamer/releases/latest")!
+    private static var desktopRenamerSocketPath: String {
+        "/tmp/dev.mqiu.DesktopRenamer-\(getuid()).sock"
+    }
+
+    private enum APITransport: Equatable {
+        case distributedNotifications
+        case socket
+    }
+
+    private struct PendingRequest {
+        let method: String
+        let transport: APITransport
+        var allowsSocketAccessRequest = false
+    }
 
     private let apiPrefix = "com.michaelqiu.DesktopRenamer"
     private let jsonRPCVersion = "2.0"
@@ -54,7 +71,12 @@ class SpaceManager: ObservableObject {
     private var structuredAPIAvailable = false
     private var structuredProbeInFlight = false
     private var structuredProbeGeneration = 0
-    private var pendingRequests: [String: String] = [:]
+    private var pendingRequests: [String: PendingRequest] = [:]
+    private var activeTransport: APITransport?
+    private var socketConnection: SpaceAPISocketConnection?
+    private var socketConnectionGeneration = 0
+    private var socketConnectionInFlight = false
+    private var hasUserRequestedSpaceAPIAccess = false
     private var lastSnapshotRevision: UInt64?
 
     private init() {
@@ -62,6 +84,7 @@ class SpaceManager: ObservableObject {
     }
 
     deinit {
+        socketConnection?.close()
         let center = DistributedNotificationCenter.default()
         notificationObservers.forEach(center.removeObserver)
     }
@@ -118,8 +141,44 @@ class SpaceManager: ObservableObject {
     func refreshSpaceList() {
         if structuredAPIAvailable {
             requestStructuredSnapshot()
+        } else if socketConnection != nil {
+            guard !structuredProbeInFlight else { return }
+            structuredProbeInFlight = true
+            structuredProbeGeneration += 1
+            requestStructuredAPIInfo(over: .socket)
         } else {
             requestStructuredAPIInfo()
+        }
+    }
+
+    func requestSpaceAPIAccess() {
+        switch apiAvailability {
+        case .available:
+            refreshSpaceList()
+            return
+        case .disabled, .permissionRequired, .permissionDenied, .unavailable:
+            break
+        }
+
+        hasUserRequestedSpaceAPIAccess = true
+        guard !socketConnectionInFlight else { return }
+        if structuredProbeInFlight {
+            guard let requestID = pendingRequests.first(where: {
+                $0.value.method == "getAPIInfo" && $0.value.transport == .distributedNotifications
+            })?.key,
+            var pendingRequest = pendingRequests[requestID] else { return }
+
+            pendingRequest.allowsSocketAccessRequest = true
+            pendingRequests[requestID] = pendingRequest
+            return
+        }
+
+        if socketConnection != nil {
+            structuredProbeInFlight = true
+            structuredProbeGeneration += 1
+            _ = requestStructuredAPIInfo(over: .socket, allowsSocketAccessRequest: true)
+        } else {
+            requestStructuredAPIInfo(allowsSocketAccessRequest: true)
         }
     }
 
@@ -147,42 +206,68 @@ class SpaceManager: ObservableObject {
         NSWorkspace.shared.open(Self.desktopRenamerDownloadURL)
     }
 
-    private func requestStructuredAPIInfo() {
+    private func requestStructuredAPIInfo(allowsSocketAccessRequest: Bool? = nil) {
         guard !structuredAPIAvailable, !structuredProbeInFlight else { return }
 
         structuredProbeInFlight = true
         structuredProbeGeneration += 1
         let generation = structuredProbeGeneration
-        let requestID = UUID().uuidString
-        pendingRequests[requestID] = "getAPIInfo"
-
-        postStructuredRequest(id: requestID, method: "getAPIInfo")
+        let requestID = requestStructuredAPIInfo(
+            over: .distributedNotifications,
+            allowsSocketAccessRequest: allowsSocketAccessRequest ?? shouldRequestSocketAccess
+        )
 
         // A pre-1.0 DesktopRenamer does not know the RPC channel and will
-        // never respond. Preserve compatibility without delaying the legacy
-        // path indefinitely.
+        // never respond. Keep this background probe nonprompting; a socket
+        // access request is issued only after the user enables space matching
+        // or explicitly requests access.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { [weak self] in
             guard let self,
                   self.structuredProbeGeneration == generation,
-                  self.structuredProbeInFlight else { return }
+                  self.structuredProbeInFlight,
+                  let pendingRequest = self.pendingRequests[requestID] else { return }
 
             self.pendingRequests.removeValue(forKey: requestID)
             self.structuredProbeInFlight = false
-            self.refreshLegacySpaceList()
+            if pendingRequest.allowsSocketAccessRequest {
+                self.connectSocket(to: Self.desktopRenamerSocketPath, fallbackToNotifications: false)
+            } else {
+                self.refreshLegacySpaceList()
+                if self.isDesktopRenamerRunning {
+                    self.apiAvailability = .permissionRequired
+                }
+            }
         }
     }
 
     private func requestStructuredSnapshot() {
+        guard let transport = activeTransport else { return }
         let requestID = UUID().uuidString
-        pendingRequests[requestID] = "getSpaceSnapshot"
-        postStructuredRequest(id: requestID, method: "getSpaceSnapshot")
+        pendingRequests[requestID] = PendingRequest(method: "getSpaceSnapshot", transport: transport)
+        postStructuredRequest(id: requestID, method: "getSpaceSnapshot", over: transport)
     }
 
-    private func postStructuredRequest(id: String, method: String) {
+    @discardableResult
+    private func requestStructuredAPIInfo(
+        over transport: APITransport,
+        allowsSocketAccessRequest: Bool = false
+    ) -> String {
+        let requestID = UUID().uuidString
+        pendingRequests[requestID] = PendingRequest(
+            method: "getAPIInfo",
+            transport: transport,
+            allowsSocketAccessRequest: allowsSocketAccessRequest
+        )
+        postStructuredRequest(id: requestID, method: "getAPIInfo", over: transport)
+        return requestID
+    }
+
+    private func postStructuredRequest(id: String, method: String, over transport: APITransport) {
         let request: [String: Any] = [
             "jsonrpc": jsonRPCVersion,
             "id": id,
-            "method": method
+            "method": method,
+            "requestedAccess": "read"
         ]
 
         guard let data = try? JSONSerialization.data(withJSONObject: request),
@@ -191,20 +276,37 @@ class SpaceManager: ObservableObject {
             return
         }
 
-        DistributedNotificationCenter.default().postNotificationName(
-            rpcRequest,
-            object: nil,
-            userInfo: [payloadKey: payload],
-            deliverImmediately: true
-        )
+        switch transport {
+        case .distributedNotifications:
+            DistributedNotificationCenter.default().postNotificationName(
+                rpcRequest,
+                object: nil,
+                userInfo: [payloadKey: payload],
+                deliverImmediately: true
+            )
+        case .socket:
+            guard socketConnection?.send(payload) == true else {
+                pendingRequests.removeValue(forKey: id)
+                socketConnection?.close()
+                return
+            }
+        }
     }
 
     private func handleRPCResponse(_ notification: Notification) {
         guard let payload = notification.userInfo?[payloadKey] as? String,
               let data = payload.data(using: .utf8),
-              let response = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let response = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+        handleStructuredResponse(response, over: .distributedNotifications)
+    }
+
+    private func handleStructuredResponse(_ response: [String: Any], over transport: APITransport) {
+        guard
               let requestID = response["id"] as? String,
-              let requestType = pendingRequests.removeValue(forKey: requestID) else {
+              let pendingRequest = pendingRequests.removeValue(forKey: requestID),
+              pendingRequest.transport == transport else {
             return
         }
 
@@ -212,10 +314,16 @@ class SpaceManager: ObservableObject {
             let code = (error["code"] as? NSNumber)?.intValue
             if code == -32001 {
                 setDisconnected(as: .disabled)
-            } else if requestType == "getAPIInfo" {
+            } else if code == -32003 {
+                setDisconnected(as: .permissionDenied)
+            } else if pendingRequest.method == "getAPIInfo" {
                 structuredProbeInFlight = false
-                structuredAPIAvailable = false
-                refreshLegacySpaceList()
+                if transport == .socket {
+                    setDisconnected()
+                } else {
+                    structuredAPIAvailable = false
+                    refreshLegacySpaceList()
+                }
             } else {
                 structuredProbeInFlight = false
                 isAPIEnabled = false
@@ -229,30 +337,142 @@ class SpaceManager: ObservableObject {
 
         guard let result = response["result"] as? [String: Any] else { return }
 
-        switch requestType {
+        switch pendingRequest.method {
         case "getAPIInfo":
-            let supportsSnapshots = (result["supportedMethods"] as? [String])?.contains("getSpaceSnapshot") == true
-            let supportsJSONRPC = result["jsonRPCVersion"] as? String == jsonRPCVersion
-            let contractVersion = result["contractVersion"] as? String
-            guard supportsSnapshots && supportsJSONRPC,
-                  let contractVersion,
-                  isSupportedContractVersion(contractVersion) else {
+            guard isCompatibleAPIInfo(result) else {
                 structuredProbeInFlight = false
-                refreshLegacySpaceList()
+                if transport == .socket {
+                    setDisconnected()
+                } else {
+                    refreshLegacySpaceList()
+                }
                 return
             }
 
-            structuredProbeInFlight = false
-            structuredAPIAvailable = true
-            apiAvailability = .available
-            isAPIEnabled = true
-            requestStructuredSnapshot()
+            if transport == .distributedNotifications,
+               (result["transports"] as? [String])?.contains("unixDomainSocket") == true,
+               let endpointPath = result["socketEndpoint"] as? String {
+                let notificationsAvailable = result["legacyNotifications"] as? Bool ?? true
+                connectSocket(to: endpointPath, fallbackToNotifications: notificationsAvailable)
+            } else if transport == .distributedNotifications,
+                      result["legacyNotifications"] as? Bool == false {
+                setDisconnected()
+            } else {
+                activateStructuredAPI(over: transport)
+            }
 
         case "getSpaceSnapshot":
             applyStructuredSnapshot(result, isEvent: false)
 
         default:
             break
+        }
+    }
+
+    private func isCompatibleAPIInfo(_ info: [String: Any]) -> Bool {
+        let supportsSnapshots = (info["supportedMethods"] as? [String])?.contains("getSpaceSnapshot") == true
+        let supportsJSONRPC = info["jsonRPCVersion"] as? String == jsonRPCVersion
+        guard let contractVersion = info["contractVersion"] as? String else { return false }
+        return supportsSnapshots && supportsJSONRPC && isSupportedContractVersion(contractVersion)
+    }
+
+    private func activateStructuredAPI(over transport: APITransport) {
+        structuredProbeGeneration += 1
+        structuredProbeInFlight = false
+        structuredAPIAvailable = true
+        activeTransport = transport
+        apiAvailability = .available
+        isAPIEnabled = true
+        requestStructuredSnapshot()
+    }
+
+    private func connectSocket(to endpointPath: String, fallbackToNotifications: Bool) {
+        guard endpointPath == Self.desktopRenamerSocketPath else {
+            if fallbackToNotifications {
+                activateStructuredAPI(over: .distributedNotifications)
+            } else {
+                setDisconnected()
+            }
+            return
+        }
+
+        guard socketConnection == nil, !socketConnectionInFlight else { return }
+        socketConnectionGeneration += 1
+        let generation = socketConnectionGeneration
+        socketConnectionInFlight = true
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
+            let connection = try? SpaceAPISocketConnection(
+                endpointPath: endpointPath,
+                onMessage: { [weak self] message in
+                    DispatchQueue.main.async {
+                        self?.handleSocketMessage(message)
+                    }
+                },
+                onClose: { [weak self] in
+                    DispatchQueue.main.async {
+                        self?.handleSocketClosed(generation: generation)
+                    }
+                }
+            )
+
+            DispatchQueue.main.async {
+                guard generation == self.socketConnectionGeneration else {
+                    connection?.close()
+                    return
+                }
+                self.socketConnectionInFlight = false
+
+                guard let connection else {
+                    if fallbackToNotifications {
+                        self.activateStructuredAPI(over: .distributedNotifications)
+                    } else {
+                        self.setDisconnected()
+                        self.refreshLegacySpaceList()
+                    }
+                    return
+                }
+
+                self.socketConnection = connection
+                self.structuredProbeInFlight = true
+                self.structuredProbeGeneration += 1
+                _ = self.requestStructuredAPIInfo(over: .socket)
+            }
+        }
+    }
+
+    private func handleSocketMessage(_ payload: String) {
+        guard let data = payload.data(using: .utf8),
+              let message = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+
+        if message["id"] as? String != nil {
+            handleStructuredResponse(message, over: .socket)
+        } else if let error = message["error"] as? [String: Any],
+                  let code = (error["code"] as? NSNumber)?.intValue {
+            if code == -32001 {
+                setDisconnected(as: .disabled)
+            } else if code == -32003 {
+                setDisconnected(as: .permissionDenied)
+            }
+        } else {
+            handleRPCEventPayload(payload, over: .socket)
+        }
+    }
+
+    private func handleSocketClosed(generation: Int) {
+        guard generation == socketConnectionGeneration else { return }
+
+        socketConnection = nil
+        socketConnectionInFlight = false
+        pendingRequests = pendingRequests.filter { $0.value.transport != .socket }
+
+        guard activeTransport == .socket || structuredProbeInFlight else { return }
+        setDisconnected()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { [weak self] in
+            self?.requestStructuredAPIInfo()
         }
     }
 
@@ -268,9 +488,24 @@ class SpaceManager: ObservableObject {
         return major > 1 || (major == 1 && (minor > 0 || (minor == 0 && patch >= 0)))
     }
 
+    private var isDesktopRenamerRunning: Bool {
+        Self.desktopRenamerBundleIdentifiers.contains { bundleIdentifier in
+            !NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).isEmpty
+        }
+    }
+
+    private var shouldRequestSocketAccess: Bool {
+        hasUserRequestedSpaceAPIAccess
+            || UserDefaults.standard.bool(forKey: InputManager.isBasedOnSpacesKey)
+    }
+
     private func handleRPCEvent(_ notification: Notification) {
-        guard let payload = notification.userInfo?[payloadKey] as? String,
-              let data = payload.data(using: .utf8),
+        guard let payload = notification.userInfo?[payloadKey] as? String else { return }
+        handleRPCEventPayload(payload, over: .distributedNotifications)
+    }
+
+    private func handleRPCEventPayload(_ payload: String, over transport: APITransport) {
+        guard let data = payload.data(using: .utf8),
               let event = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               event["jsonrpc"] as? String == jsonRPCVersion,
               event["method"] as? String == "stateChanged",
@@ -281,6 +516,7 @@ class SpaceManager: ObservableObject {
 
         structuredAPIAvailable = true
         structuredProbeInFlight = false
+        activeTransport = activeTransport ?? transport
         apiAvailability = .available
         applyStructuredSnapshot(snapshot, isEvent: true)
     }
@@ -298,6 +534,8 @@ class SpaceManager: ObservableObject {
         }
 
         let spaces = rawSpaces.compactMap { rawSpace -> SpaceInfo? in
+            // Persist and compare the public SpaceAPI identity. managedSpaceID
+            // is the current macOS ID and can change independently.
             guard let id = rawSpace["id"] as? String,
                   let name = rawSpace["name"] as? String,
                   let number = (rawSpace["number"] as? NSNumber)?.intValue else {
@@ -378,14 +616,21 @@ class SpaceManager: ObservableObject {
     }
 
     private func setDisconnected(as availability: SpaceAPIAvailability = .unavailable) {
+        socketConnectionGeneration += 1
+        socketConnectionInFlight = false
+        let connection = socketConnection
+        socketConnection = nil
         structuredAPIAvailable = false
         structuredProbeInFlight = false
+        structuredProbeGeneration += 1
         pendingRequests.removeAll()
+        activeTransport = nil
         lastSnapshotRevision = nil
         apiAvailability = availability
         isAPIEnabled = false
         availableSpaces.removeAll()
         currentSpaceName = "Disconnected"
         currentSpaceID = nil
+        connection?.close()
     }
 }

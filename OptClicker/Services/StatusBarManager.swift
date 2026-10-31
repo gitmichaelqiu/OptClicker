@@ -7,15 +7,23 @@ class StatusBarManager: ObservableObject {
     
     private let inputManager: InputManager
     private let toggleHandler: () -> Void
+    private let onMenuBarIconVisibilityChanged: (Bool) -> Void
     
     private var statusItem: NSStatusItem?
     private var cachedEnabledIcon: NSImage?
     private var cachedDisabledIcon: NSImage?
+    private var isInstalled = false
+    private var lastMenuBarIconVisibility: Bool?
     private let iconSize = NSSize(width: 15, height: 15)
     
-    init(inputManager: InputManager, onToggle: @escaping () -> Void) {
+    init(
+        inputManager: InputManager,
+        onToggle: @escaping () -> Void,
+        onMenuBarIconVisibilityChanged: @escaping (Bool) -> Void
+    ) {
         self.inputManager = inputManager
         self.toggleHandler = onToggle
+        self.onMenuBarIconVisibilityChanged = onMenuBarIconVisibilityChanged
         
         // Observe InputManager to auto-refresh
         inputManager.objectWillChange
@@ -24,30 +32,80 @@ class StatusBarManager: ObservableObject {
                 self?.refresh()
             }
             .store(in: &cancellables)
+
+        inputManager.$isEnabled
+            .dropFirst()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isEnabled in
+                self?.showStatusToast(isEnabled: isEnabled)
+            }
+            .store(in: &cancellables)
     }
     
     func install() {
-        guard statusItem == nil else { return }
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        
-        if let button = statusItem?.button {
-            button.image = makeOptionIcon()
-            button.target = self
-            button.action = #selector(handleStatusItemClick)
-        }
-        
+        guard !isInstalled else { return }
+        isInstalled = true
         refresh()
     }
     
     func uninstall() {
+        if let statusItem {
+            NSStatusBar.system.removeStatusItem(statusItem)
+        }
         statusItem = nil
+        isInstalled = false
     }
     
     func refresh() {
+        guard isInstalled else { return }
+        updateStatusItemVisibility()
+
         cachedEnabledIcon = nil
         cachedDisabledIcon = nil
         updateIcon()
         updateMenu()
+    }
+
+    private func updateStatusItemVisibility() {
+        let isMenuBarIconVisible = inputManager.isMenuBarIconVisible
+
+        if !isMenuBarIconVisible {
+            if let statusItem {
+                NSStatusBar.system.removeStatusItem(statusItem)
+                self.statusItem = nil
+            }
+        } else if statusItem == nil {
+            let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+            statusItem.button?.image = makeOptionIcon()
+            statusItem.button?.target = self
+            statusItem.button?.action = #selector(handleStatusItemClick)
+            self.statusItem = statusItem
+        }
+
+        if lastMenuBarIconVisibility != isMenuBarIconVisible {
+            lastMenuBarIconVisibility = isMenuBarIconVisible
+            onMenuBarIconVisibilityChanged(isMenuBarIconVisible)
+        }
+    }
+
+    private func showStatusToast(isEnabled: Bool) {
+        guard inputManager.isHUDToastModeEnabled else { return }
+
+        let reason = inputManager.statusToastReason.trimmingCharacters(in: .whitespacesAndNewlines)
+        let message: String
+        if !reason.isEmpty {
+            message = reason
+        } else if isEnabled {
+            message = NSLocalizedString("OptClicker enabled", comment: "")
+        } else {
+            message = NSLocalizedString("OptClicker disabled", comment: "")
+        }
+
+        HUDWindowController.shared.show(
+            message: message,
+            style: isEnabled ? .success : .info
+        )
     }
     
     @objc private func handleStatusItemClick() {
@@ -78,8 +136,9 @@ class StatusBarManager: ObservableObject {
         let toggleItem = NSMenuItem(
             title: NSLocalizedString("Option → Right Click", comment: ""),
             action: #selector(handleToggleItemClick),
-            keyEquivalent: ""
+            keyEquivalent: "t"
         )
+        toggleItem.keyEquivalentModifierMask = [.command]
         toggleItem.image = NSImage(systemSymbolName: "pointer.arrow.rays", accessibilityDescription: nil)
         toggleItem.target = self
         toggleItem.state = inputManager.isEnabled ? .on : .off
@@ -89,12 +148,26 @@ class StatusBarManager: ObservableObject {
         let autoToggleItem = NSMenuItem(
             title: NSLocalizedString("Auto Toggle", comment: ""),
             action: #selector(handleAutoToggleItemClick),
-            keyEquivalent: ""
+            keyEquivalent: "a"
         )
+        autoToggleItem.keyEquivalentModifierMask = [.command]
         autoToggleItem.image = NSImage(systemSymbolName: "switch.2", accessibilityDescription: nil)
         autoToggleItem.target = self
         autoToggleItem.state = inputManager.isAutoToggleEnabled ? .on : .off
         menu.addItem(autoToggleItem)
+
+        let hudModeItem = NSMenuItem(
+            title: NSLocalizedString("Show HUD toasts", comment: ""),
+            action: #selector(handleHUDToastModeItemClick),
+            keyEquivalent: "h"
+        )
+        hudModeItem.keyEquivalentModifierMask = [.command, .shift]
+        hudModeItem.image = NSImage(systemSymbolName: "text.bubble", accessibilityDescription: nil)
+        hudModeItem.target = self
+        hudModeItem.state = inputManager.isHUDToastModeEnabled ? .on : .off
+        menu.addItem(hudModeItem)
+
+        menu.addItem(.separator())
 
         // Status reason (non-clickable)
         if let statusReason = getStatusReason() {
@@ -102,7 +175,7 @@ class StatusBarManager: ObservableObject {
             item.isEnabled = false
             menu.addItem(item)
         }
-        
+
         let showProc = UserDefaults.standard.bool(forKey: InputManager.showFrontmostProcKey)
         if showProc {
             if let procName = inputManager.getFrontmostProcessNameExcludingSelf() {
@@ -149,6 +222,10 @@ class StatusBarManager: ObservableObject {
 
     @objc private func handleAutoToggleItemClick() {
         inputManager.toggleAutoToggle()
+    }
+
+    @objc private func handleHUDToastModeItemClick() {
+        inputManager.isHUDToastModeEnabled.toggle()
     }
     
     @objc private func handleSettingsItemClick() {

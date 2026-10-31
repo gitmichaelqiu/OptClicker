@@ -58,7 +58,28 @@ struct GeneralSettingsView: View {
                     }
                 }
                 
-                ModularSettingsSection("Menubar") {
+                ModularSettingsSection("Menu Bar") {
+                    ModularSettingsRow(
+                        "Show menu bar icon"
+                    ) {
+                        Toggle("", isOn: $inputManager.isMenuBarIconVisible)
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                    }
+
+                    Divider()
+
+                    ModularSettingsRow(
+                        "Show HUD toasts",
+                        helperText: "Toasts include the reason for each status change."
+                    ) {
+                        Toggle("", isOn: $inputManager.isHUDToastModeEnabled)
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                    }
+
+                    Divider()
+
                     ModularSettingsRow("Show status reason") {
                         Toggle("", isOn: $showStatusReason)
                             .labelsHidden()
