@@ -15,6 +15,7 @@ struct SpaceInfo: Identifiable, Codable, Hashable {
 enum SpaceAPIAvailability: Equatable {
     case available
     case disabled
+    case permissionRequired
     case permissionDenied
     case unavailable
 }
@@ -40,6 +41,7 @@ class SpaceManager: ObservableObject {
     private struct PendingRequest {
         let method: String
         let transport: APITransport
+        var allowsSocketAccessRequest = false
     }
 
     private let apiPrefix = "com.michaelqiu.DesktopRenamer"
@@ -74,6 +76,7 @@ class SpaceManager: ObservableObject {
     private var socketConnection: SpaceAPISocketConnection?
     private var socketConnectionGeneration = 0
     private var socketConnectionInFlight = false
+    private var hasUserRequestedSpaceAPIAccess = false
     private var lastSnapshotRevision: UInt64?
 
     private init() {
@@ -149,8 +152,34 @@ class SpaceManager: ObservableObject {
     }
 
     func requestSpaceAPIAccess() {
-        guard apiAvailability == .permissionDenied else { return }
-        refreshSpaceList()
+        switch apiAvailability {
+        case .available:
+            refreshSpaceList()
+            return
+        case .disabled, .permissionRequired, .permissionDenied, .unavailable:
+            break
+        }
+
+        hasUserRequestedSpaceAPIAccess = true
+        guard !socketConnectionInFlight else { return }
+        if structuredProbeInFlight {
+            guard let requestID = pendingRequests.first(where: {
+                $0.value.method == "getAPIInfo" && $0.value.transport == .distributedNotifications
+            })?.key,
+            var pendingRequest = pendingRequests[requestID] else { return }
+
+            pendingRequest.allowsSocketAccessRequest = true
+            pendingRequests[requestID] = pendingRequest
+            return
+        }
+
+        if socketConnection != nil {
+            structuredProbeInFlight = true
+            structuredProbeGeneration += 1
+            _ = requestStructuredAPIInfo(over: .socket, allowsSocketAccessRequest: true)
+        } else {
+            requestStructuredAPIInfo(allowsSocketAccessRequest: true)
+        }
     }
 
     var desktopRenamerApplicationURL: URL? {
@@ -177,26 +206,37 @@ class SpaceManager: ObservableObject {
         NSWorkspace.shared.open(Self.desktopRenamerDownloadURL)
     }
 
-    private func requestStructuredAPIInfo() {
+    private func requestStructuredAPIInfo(allowsSocketAccessRequest: Bool? = nil) {
         guard !structuredAPIAvailable, !structuredProbeInFlight else { return }
 
         structuredProbeInFlight = true
         structuredProbeGeneration += 1
         let generation = structuredProbeGeneration
-        let requestID = requestStructuredAPIInfo(over: .distributedNotifications)
+        let requestID = requestStructuredAPIInfo(
+            over: .distributedNotifications,
+            allowsSocketAccessRequest: allowsSocketAccessRequest ?? shouldRequestSocketAccess
+        )
 
         // A pre-1.0 DesktopRenamer does not know the RPC channel and will
-        // never respond. Restricted 1.3+ installations also do not respond on
-        // notifications, so try the authenticated socket before using legacy.
+        // never respond. Keep this background probe nonprompting; a socket
+        // access request is issued only after the user enables space matching
+        // or explicitly requests access.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { [weak self] in
             guard let self,
                   self.structuredProbeGeneration == generation,
                   self.structuredProbeInFlight,
-                  self.pendingRequests[requestID] != nil else { return }
+                  let pendingRequest = self.pendingRequests[requestID] else { return }
 
             self.pendingRequests.removeValue(forKey: requestID)
             self.structuredProbeInFlight = false
-            self.connectSocket(to: Self.desktopRenamerSocketPath, fallbackToNotifications: false)
+            if pendingRequest.allowsSocketAccessRequest {
+                self.connectSocket(to: Self.desktopRenamerSocketPath, fallbackToNotifications: false)
+            } else {
+                self.refreshLegacySpaceList()
+                if self.isDesktopRenamerRunning {
+                    self.apiAvailability = .permissionRequired
+                }
+            }
         }
     }
 
@@ -208,9 +248,16 @@ class SpaceManager: ObservableObject {
     }
 
     @discardableResult
-    private func requestStructuredAPIInfo(over transport: APITransport) -> String {
+    private func requestStructuredAPIInfo(
+        over transport: APITransport,
+        allowsSocketAccessRequest: Bool = false
+    ) -> String {
         let requestID = UUID().uuidString
-        pendingRequests[requestID] = PendingRequest(method: "getAPIInfo", transport: transport)
+        pendingRequests[requestID] = PendingRequest(
+            method: "getAPIInfo",
+            transport: transport,
+            allowsSocketAccessRequest: allowsSocketAccessRequest
+        )
         postStructuredRequest(id: requestID, method: "getAPIInfo", over: transport)
         return requestID
     }
@@ -439,6 +486,17 @@ class SpaceManager: ObservableObject {
         }
 
         return major > 1 || (major == 1 && (minor > 0 || (minor == 0 && patch >= 0)))
+    }
+
+    private var isDesktopRenamerRunning: Bool {
+        Self.desktopRenamerBundleIdentifiers.contains { bundleIdentifier in
+            !NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).isEmpty
+        }
+    }
+
+    private var shouldRequestSocketAccess: Bool {
+        hasUserRequestedSpaceAPIAccess
+            || UserDefaults.standard.bool(forKey: InputManager.isBasedOnSpacesKey)
     }
 
     private func handleRPCEvent(_ notification: Notification) {

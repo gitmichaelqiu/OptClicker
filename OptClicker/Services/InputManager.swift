@@ -97,6 +97,9 @@ class InputManager: ObservableObject {
     @Published var isBasedOnSpaces: Bool {
         didSet {
             UserDefaults.standard.set(isBasedOnSpaces, forKey: Self.isBasedOnSpacesKey)
+            if isBasedOnSpaces && !oldValue {
+                SpaceManager.shared.requestSpaceAPIAccess()
+            }
             refreshAutoToggleState()
         }
     }
