@@ -7,23 +7,19 @@ class StatusBarManager: ObservableObject {
     
     private let inputManager: InputManager
     private let toggleHandler: () -> Void
-    private let onMenuBarIconVisibilityChanged: (Bool) -> Void
     
     private var statusItem: NSStatusItem?
     private var cachedEnabledIcon: NSImage?
     private var cachedDisabledIcon: NSImage?
     private var isInstalled = false
-    private var lastMenuBarIconVisibility: Bool?
     private let iconSize = NSSize(width: 15, height: 15)
     
     init(
         inputManager: InputManager,
-        onToggle: @escaping () -> Void,
-        onMenuBarIconVisibilityChanged: @escaping (Bool) -> Void
+        onToggle: @escaping () -> Void
     ) {
         self.inputManager = inputManager
         self.toggleHandler = onToggle
-        self.onMenuBarIconVisibilityChanged = onMenuBarIconVisibilityChanged
         
         // Observe InputManager to auto-refresh
         inputManager.objectWillChange
@@ -83,10 +79,6 @@ class StatusBarManager: ObservableObject {
             self.statusItem = statusItem
         }
 
-        if lastMenuBarIconVisibility != isMenuBarIconVisible {
-            lastMenuBarIconVisibility = isMenuBarIconVisible
-            onMenuBarIconVisibilityChanged(isMenuBarIconVisible)
-        }
     }
 
     private func showStatusToast(isEnabled: Bool) {

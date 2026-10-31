@@ -53,12 +53,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             inputManager: inputManager,
             onToggle: { [weak self] in
                 self?.inputManager.isEnabled.toggle()
-            },
-            onMenuBarIconVisibilityChanged: { [weak self] isVisible in
-                self?.updateActivationPolicy(showMenuBarIcon: isVisible)
             }
         )
         statusBarManager?.install()
+        applyBackgroundActivationPolicy()
 
         // Observers
         NotificationCenter.default.addObserver(
@@ -77,18 +75,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         // Sparkle handles auto updates automatically.
     }
 
-    private func updateActivationPolicy(showMenuBarIcon: Bool) {
-        // Keep Settings frontmost; its close handler applies the saved policy.
+    private func applyBackgroundActivationPolicy() {
         guard !SettingsWindowController.shared.isSettingsWindowVisible else { return }
 
-        // Apply after launch or the current event has finished so AppKit can
-        // update the Dock tile without racing window creation or dismissal.
+        // Apply after launch so AppKit can update the Dock tile after startup.
         DispatchQueue.main.async {
             guard !SettingsWindowController.shared.isSettingsWindowVisible else { return }
 
-            let policy: NSApplication.ActivationPolicy = showMenuBarIcon ? .accessory : .regular
+            let policy: NSApplication.ActivationPolicy = .accessory
             guard NSApp.activationPolicy() == policy || NSApp.setActivationPolicy(policy) else {
-                NSLog("OptClicker: Could not apply activation policy %@ from menu bar preference", String(describing: policy))
+                NSLog("OptClicker: Could not apply accessory activation policy after launch")
                 return
             }
         }

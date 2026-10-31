@@ -35,11 +35,11 @@ class SettingsWindowController: NSObject {
         DispatchQueue.main.async { [weak self] in
             guard let self, !self.isSettingsWindowVisible else { return }
 
-            let policy: NSApplication.ActivationPolicy =
-                self.inputManager?.isMenuBarIconVisible == true ? .accessory : .regular
-            guard !NSApp.setActivationPolicy(policy) else { return }
-
-            NSLog("OptClicker: Could not apply activation policy %@ after Settings closed", String(describing: policy))
+            let policy: NSApplication.ActivationPolicy = .accessory
+            guard NSApp.activationPolicy() == policy || NSApp.setActivationPolicy(policy) else {
+                NSLog("OptClicker: Could not apply accessory activation policy after Settings closed")
+                return
+            }
         }
     }
 
