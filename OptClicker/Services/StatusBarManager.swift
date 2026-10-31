@@ -136,8 +136,9 @@ class StatusBarManager: ObservableObject {
         let toggleItem = NSMenuItem(
             title: NSLocalizedString("Option → Right Click", comment: ""),
             action: #selector(handleToggleItemClick),
-            keyEquivalent: ""
+            keyEquivalent: "t"
         )
+        toggleItem.keyEquivalentModifierMask = [.command]
         toggleItem.image = NSImage(systemSymbolName: "pointer.arrow.rays", accessibilityDescription: nil)
         toggleItem.target = self
         toggleItem.state = inputManager.isEnabled ? .on : .off
@@ -147,8 +148,9 @@ class StatusBarManager: ObservableObject {
         let autoToggleItem = NSMenuItem(
             title: NSLocalizedString("Auto Toggle", comment: ""),
             action: #selector(handleAutoToggleItemClick),
-            keyEquivalent: ""
+            keyEquivalent: "a"
         )
+        autoToggleItem.keyEquivalentModifierMask = [.command]
         autoToggleItem.image = NSImage(systemSymbolName: "switch.2", accessibilityDescription: nil)
         autoToggleItem.target = self
         autoToggleItem.state = inputManager.isAutoToggleEnabled ? .on : .off
@@ -157,8 +159,9 @@ class StatusBarManager: ObservableObject {
         let hudModeItem = NSMenuItem(
             title: NSLocalizedString("Show HUD toasts", comment: ""),
             action: #selector(handleHUDToastModeItemClick),
-            keyEquivalent: ""
+            keyEquivalent: "h"
         )
+        hudModeItem.keyEquivalentModifierMask = [.command, .shift]
         hudModeItem.image = NSImage(systemSymbolName: "text.bubble", accessibilityDescription: nil)
         hudModeItem.target = self
         hudModeItem.state = inputManager.isHUDToastModeEnabled ? .on : .off
