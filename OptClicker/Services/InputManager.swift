@@ -109,6 +109,7 @@ class InputManager: ObservableObject {
     }
     
     @Published var statusReason: String = ""
+    var statusToastReason: String = ""
     
     private var refreshTimer: Timer?
     private var frontmostAppMonitor: Any?
@@ -129,11 +130,13 @@ class InputManager: ObservableObject {
                         "Enabled manually",
                         comment: "Reason shown when the user manually enables OptClicker"
                     )
+                    statusToastReason = statusReason
                 } else {
                     statusReason = NSLocalizedString(
                         "Disabled manually",
                         comment: "Reason shown when the user manually disables OptClicker"
                     )
+                    statusToastReason = statusReason
                 }
             }
             if isEnabled {
@@ -416,51 +419,69 @@ class InputManager: ObservableObject {
         return nil
     }
     
-    func getIsAppMatch() -> Bool {
-        guard let app = NSWorkspace.shared.frontmostApplication else { return false }
-        if app.bundleIdentifier == selfBundleID { return false }
+    private func matchingAppNames() -> [String] {
+        guard let app = NSWorkspace.shared.frontmostApplication else { return [] }
+        if app.bundleIdentifier == selfBundleID { return [] }
         
         let rules = autoToggleAppBundleIds
-        if rules.isEmpty { return false }
-        
-        if let bundleId = app.bundleIdentifier, rules.contains(bundleId) {
-            return true
-        }
+        if rules.isEmpty { return [] }
         
         let procName = getFrontmostProcessName()
         lazy var currentURL: String? = getFrontmostBrowserURL()
+        var matchedNames: [String] = []
+
+        func appendMatch(_ name: String?) {
+            guard let name = name?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !name.isEmpty,
+                  !matchedNames.contains(where: { $0.localizedCaseInsensitiveCompare(name) == .orderedSame }) else { return }
+            matchedNames.append(name)
+        }
+
+        if let bundleId = app.bundleIdentifier, rules.contains(bundleId) {
+            appendMatch(app.localizedName ?? procName ?? bundleId)
+        }
         
         for rule in rules {
             if rule.hasPrefix("proc:") {
                 let expected = String(rule.dropFirst(5))
                 if let procName = procName, !expected.isEmpty && procName.lowercased() == expected.lowercased() {
-                    return true
+                    appendMatch(expected)
                 }
             } else if rule.hasPrefix("proc~") {
                 let substring = String(rule.dropFirst(5))
                 if let procName = procName, !substring.isEmpty && procName.lowercased().contains(substring.lowercased()) {
-                    return true
+                    appendMatch(substring)
                 }
             } else if rule.hasPrefix("web:") {
-                let pattern = String(rule.dropFirst(4)).lowercased()
-                if let url = currentURL?.lowercased(), !pattern.isEmpty && url.contains(pattern) {
-                    return true
+                let pattern = String(rule.dropFirst(4))
+                if let url = currentURL?.lowercased(), !pattern.isEmpty && url.contains(pattern.lowercased()) {
+                    appendMatch(pattern)
                 }
             }
         }
-        return false
+        return matchedNames
     }
 
-    func getIsSpaceMatch() -> Bool {
+    private func matchingSpaceNames() -> [String]? {
         let rules = UserDefaults.standard.stringArray(forKey: "autoToggleSpaces") ?? []
-        if rules.isEmpty { return true } // Default to all spaces if list is empty
+        if rules.isEmpty {
+            let currentName = SpaceManager.shared.currentSpaceName
+            let name = currentName == "Unknown" || currentName == "Disconnected"
+                ? NSLocalizedString("All spaces", comment: "")
+                : currentName
+            return [name]
+        }
         
         guard SpaceManager.shared.isAPIEnabled, let currentSpaceID = SpaceManager.shared.currentSpaceID else {
             // If we don't know the space or API is off, we assume it's NOT a match unless rules are empty
-            return false
+            return nil
         }
         
-        if rules.contains(currentSpaceID) { return true }
+        if rules.contains(currentSpaceID) {
+            let name = SpaceManager.shared.availableSpaces.first { $0.id == currentSpaceID }?.name
+                ?? SpaceManager.shared.currentSpaceName
+            return [name == "Unknown" ? currentSpaceID : name]
+        }
         
         // Check Fullscreen
         if rules.contains("fullscreen") {
@@ -468,46 +489,69 @@ class InputManager: ObservableObject {
             // If currentSpaceID is NOT in availableSpaces, it's likely a fullscreen app space.
             let isKnownDesktop = SpaceManager.shared.availableSpaces.contains { $0.id == currentSpaceID }
             if !isKnownDesktop {
-                return true
+                return [NSLocalizedString("Fullscreen", comment: "")]
             }
         }
         
-        return false
+        return nil
     }
 
     func getIsMatch() -> (Bool, String) {
-        let appMatch = isBasedOnApps ? getIsAppMatch() : nil
-        let spaceMatch = isBasedOnSpaces ? getIsSpaceMatch() : nil
+        let appMatches = isBasedOnApps ? matchingAppNames() : nil
+        let spaceMatches = isBasedOnSpaces ? matchingSpaceNames() : nil
+        let appMatch = appMatches.map { !$0.isEmpty }
+        let spaceMatch: Bool? = isBasedOnSpaces ? (spaceMatches != nil) : nil
         
         if let am = appMatch, let sm = spaceMatch {
             let isMatch = matchCondition == .and ? am && sm : am || sm
-            let reason: String
+            if isMatch {
+                let matchedNames = (am ? appMatches ?? [] : []) + (sm ? spaceMatches ?? [] : [])
+                return (true, enabledReason(for: matchedNames))
+            }
 
+            let reason: String
             switch (am, sm) {
             case (true, true):
-                reason = NSLocalizedString("Enabled by both apps and spaces", comment: "")
+                reason = enabledReason(for: (appMatches ?? []) + (spaceMatches ?? []))
             case (true, false):
-                reason = matchCondition == .and
-                    ? NSLocalizedString("Disabled (app rule matched, space rule did not)", comment: "")
-                    : NSLocalizedString("Enabled by app match", comment: "")
+                reason = NSLocalizedString("Disabled (app rule matched, space rule did not)", comment: "")
             case (false, true):
-                reason = matchCondition == .and
-                    ? NSLocalizedString("Disabled (space rule matched, app rule did not)", comment: "")
-                    : NSLocalizedString("Enabled by space match", comment: "")
+                reason = NSLocalizedString("Disabled (space rule matched, app rule did not)", comment: "")
             case (false, false):
                 reason = NSLocalizedString("Disabled (neither app nor space rule matched)", comment: "")
             }
 
             return (isMatch, reason)
         } else if let am = appMatch {
-            let reason = am ? NSLocalizedString("Enabled by app match", comment: "") : NSLocalizedString("Disabled by app mismatch", comment: "")
+            let reason = am
+                ? enabledReason(for: appMatches ?? [])
+                : NSLocalizedString("Disabled by app mismatch", comment: "")
             return (am, reason)
         } else if let sm = spaceMatch {
-            let reason = sm ? NSLocalizedString("Enabled by space match", comment: "") : NSLocalizedString("Disabled by space mismatch", comment: "")
+            let reason = sm
+                ? enabledReason(for: spaceMatches ?? [])
+                : NSLocalizedString("Disabled by space mismatch", comment: "")
             return (sm, reason)
         }
         
         return (false, NSLocalizedString("Disabled (no auto-toggle conditions enabled)", comment: ""))
+    }
+
+    private func enabledReason(for matchedNames: [String]) -> String {
+        let uniqueNames = matchedNames.reduce(into: [String]()) { names, name in
+            if !name.isEmpty,
+               !names.contains(where: { $0.localizedCaseInsensitiveCompare(name) == .orderedSame }) {
+                names.append(name)
+            }
+        }
+        let targets = uniqueNames.isEmpty
+            ? NSLocalizedString("All spaces", comment: "")
+            : uniqueNames.joined(separator: ", ")
+        return String(
+            format: NSLocalizedString("Enabled (%@)", comment: "Enabled because these app, website, or space targets matched"),
+            locale: Locale.current,
+            arguments: [targets]
+        )
     }
 
     private func handleFrontmostAppChange(notification: Notification) {
@@ -531,11 +575,13 @@ class InputManager: ObservableObject {
 
         if isMatch {
             statusReason = reason
+            statusToastReason = reason
             if !isEnabled { isEnabled = true }
         } else {
             switch autoToggleBehavior {
             case .disable:
                 statusReason = reason
+                statusToastReason = NSLocalizedString("OptClicker disabled", comment: "")
                 if isEnabled { isEnabled = false }
             case .followLast:
                 if lastManualState {
@@ -543,11 +589,13 @@ class InputManager: ObservableObject {
                         "Following last setting (enabled)",
                         comment: "Reason shown when auto toggle restores the last enabled state"
                     )
+                    statusToastReason = statusReason
                 } else {
                     statusReason = NSLocalizedString(
                         "Following last setting (disabled)",
                         comment: "Reason shown when auto toggle restores the last disabled state"
                     )
+                    statusToastReason = NSLocalizedString("OptClicker disabled", comment: "")
                 }
                 if isEnabled != lastManualState {
                     isEnabled = lastManualState

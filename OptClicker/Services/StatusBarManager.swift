@@ -92,7 +92,7 @@ class StatusBarManager: ObservableObject {
     private func showStatusToast(isEnabled: Bool) {
         guard inputManager.isHUDToastModeEnabled else { return }
 
-        let reason = inputManager.statusReason.trimmingCharacters(in: .whitespacesAndNewlines)
+        let reason = inputManager.statusToastReason.trimmingCharacters(in: .whitespacesAndNewlines)
         let message: String
         if !reason.isEmpty {
             message = reason
