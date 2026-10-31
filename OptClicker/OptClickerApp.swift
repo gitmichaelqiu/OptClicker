@@ -80,7 +80,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     private func updateActivationPolicy(showMenuBarIcon: Bool) {
         // Keep Settings frontmost; its close handler applies the saved policy.
         guard !SettingsWindowController.shared.isSettingsWindowVisible else { return }
-        NSApp.setActivationPolicy(showMenuBarIcon ? .accessory : .regular)
+
+        // Apply after launch or the current event has finished so AppKit can
+        // update the Dock tile without racing window creation or dismissal.
+        DispatchQueue.main.async {
+            guard !SettingsWindowController.shared.isSettingsWindowVisible else { return }
+
+            let policy: NSApplication.ActivationPolicy = showMenuBarIcon ? .accessory : .regular
+            guard NSApp.activationPolicy() == policy || NSApp.setActivationPolicy(policy) else {
+                NSLog("OptClicker: Could not apply activation policy %@ from menu bar preference", String(describing: policy))
+                return
+            }
+        }
     }
 
     @objc private func handleHotkeyTriggered() {
