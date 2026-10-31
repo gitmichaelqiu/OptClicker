@@ -10,7 +10,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <sparkle:channel>dev-mqiu</sparkle:channel>
             <optclicker:targetBundleIdentifier>dev.mqiu.OptClicker</optclicker:targetBundleIdentifier>
-            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.6.0/OptClicker%201.6.0.dmg" length="28324029" type="application/octet-stream" sparkle:edSignature="kAobEsYNXJnQMoH/1TYPYU9VTBmDGc4/L06Z5T1Tk3QlJATUpnt21t1P5NBH+U2nvEqHrUmp9mTqgDmtZZB+BQ=="/>
+            <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.6.0/OptClicker.1.6.0.dmg" length="28324029" type="application/octet-stream" sparkle:edSignature="kAobEsYNXJnQMoH/1TYPYU9VTBmDGc4/L06Z5T1Tk3QlJATUpnt21t1P5NBH+U2nvEqHrUmp9mTqgDmtZZB+BQ=="/>
             <sparkle:deltas>
                 <enclosure url="https://github.com/gitmichaelqiu/OptClicker/releases/download/v1.6.0/OptClicker11-10.delta" sparkle:deltaFrom="10" length="246618" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977824" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="2Qwr4Euz8rP27671FjZBa7A2DQGL8waIx1ncGc6GjP+/X5A817fQOErCIvE3cIl0EoyWKryyOQ0BcvpTUYoQAw=="/>
             </sparkle:deltas>
